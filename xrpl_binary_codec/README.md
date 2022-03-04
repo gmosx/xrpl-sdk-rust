@@ -1,7 +1,6 @@
-# XRPL Protocol
+# XRP Ledger Binary Codec
 
-Types and functions for handling data and values associated with the Ripple
-protocol.
+Binary serialization for XRPL Protocol objects.
 
 ## Links
 
