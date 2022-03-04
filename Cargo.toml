@@ -1,0 +1,9 @@
+[workspace]
+
+members = [
+    "xrpl_types",
+    "xrpl_binary_codec",
+    "xrpl_cli",
+    "xrpl_sdk_jsonrpc",
+    "xrpl_sdk_ws",
+]
