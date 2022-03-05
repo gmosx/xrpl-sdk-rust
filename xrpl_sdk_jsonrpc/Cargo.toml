@@ -1,7 +1,11 @@
 [package]
 name = "xrpl_sdk_jsonrpc"
+description = "A JSONRPC client for the XRP Ledger."
 version = "0.6.0"
-authors = ["George Moschovitis <gmosx@reizu.com>"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/gmosx/xrpl_sdk_rust/tree/main/xrpl_sdk_jsonrpc"
+keywords = ["xrpl", "ledger", "client", "jsonrpc", "rest", "api", "protocol"]
+authors = ["George Moschovitis <gmosx@reizu.org>"]
 edition = "2021"
 
 [dependencies]
@@ -12,7 +16,7 @@ tokio = { version = "1", features = ["full"] }
 reqwest = { version = "0.11", features = ["json"] }
 sha2 = "0.9"
 libsecp256k1 = "0.5"
-hex = "0.4" # TODO: remove?
-bs58 = "0.4" # TODO: remove?
+# hex = "0.4" # TODO: remove?
+# bs58 = "0.4" # TODO: remove?
 xrpl_types = { path = "../xrpl_types", version = "0.2" }
 xrpl_binary_codec = { path = "../xrpl_binary_codec", version = "0.2" }

@@ -105,7 +105,8 @@ impl Client {
     {
         let body = serde_json::to_string(&request).unwrap();
 
-        let response = reqwest::Client::new()
+        let response = self
+            .http_client
             .post(&self.base_url)
             .body(body)
             .header(reqwest::header::USER_AGENT, &self.user_agent)
