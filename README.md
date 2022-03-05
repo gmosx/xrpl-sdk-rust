@@ -18,7 +18,13 @@ The SDK contains the following components:
 
 ## Status
 
-The software is under active development and the API is expected to change.
+The software is under active development (pre-alpha) and the API is expected to
+change. It's not considered ready for use in production.
+
+### Roadmap
+
+- Support for WebSocket API
+- Introduce XRPL command line client (CLI)
 
 ## Contributing
 
