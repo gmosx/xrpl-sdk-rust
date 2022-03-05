@@ -4,7 +4,7 @@ description = "Core types and related functions for the XRP Ledger"
 version = "0.2.0"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/gmosx/xrpl_sdk_rust/tree/main/xrpl_types"
-keywords = ["xrpl", "xrp ledger", "api"]
+keywords = ["xrpl", "ledger", "api"]
 authors = ["George Moschovitis <gmosx@reizu.org>"]
 edition = "2021"
 
