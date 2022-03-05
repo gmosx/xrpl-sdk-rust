@@ -1,6 +1,6 @@
 [package]
 name = "xrpl_sdk_jsonrpc"
-description = "A JSONRPC client for the XRP Ledger."
+description = "A strongly-typed client for the XRP Ledger JSONRPC API"
 version = "0.6.0"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/gmosx/xrpl_sdk_rust/tree/main/xrpl_sdk_jsonrpc"
