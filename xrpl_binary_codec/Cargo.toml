@@ -1,6 +1,11 @@
 [package]
 name = "xrpl_binary_codec"
 version = "0.2.0"
+description = "Binary serialization for XRPL Protocol objects"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/gmosx/xrpl_sdk_rust/tree/main/xrpl_binary_codec"
+keywords = ["xrpl", "ledger", "api", "protocol"]
+authors = ["George Moschovitis <gmosx@reizu.org>"]
 edition = "2021"
 
 [dependencies]
