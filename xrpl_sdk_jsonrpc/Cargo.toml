@@ -4,7 +4,7 @@ description = "A JSONRPC client for the XRP Ledger."
 version = "0.6.0"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/gmosx/xrpl_sdk_rust/tree/main/xrpl_sdk_jsonrpc"
-keywords = ["xrpl", "ledger", "client", "jsonrpc", "rest", "api", "protocol"]
+keywords = ["xrpl", "ledger", "client", "jsonrpc", "api"]
 authors = ["George Moschovitis <gmosx@reizu.org>"]
 edition = "2021"
 
