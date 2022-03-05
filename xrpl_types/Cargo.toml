@@ -1,14 +1,13 @@
 [package]
 name = "xrpl_types"
+description = "Core types and related functions for the XRP Ledger"
 version = "0.2.0"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/gmosx/xrpl_sdk_rust/tree/main/xrpl_types"
+keywords = ["xrpl", "xrp ledger", "api"]
+authors = ["George Moschovitis <gmosx@reizu.org>"]
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 serde = { version = "1", features = ["derive"]}
 serde_json = "1"
-# sha2 = "0.9"
-# libsecp256k1 = "0.5"
-# hex = "0.4"
-# bs58 = "0.4"

@@ -12,6 +12,10 @@ The SDK contains the following components:
 - [xrpl_binary_codec](xrpl_binary_codec/README.md)
 - [xrpl_sdk_jsonrpc](xrpl_sdk_jsonrpc/README.md)
 
+## Links
+
+- [Github Repository](https://github.com/gmosx/xrpl_sdk_rust)
+
 ## Status
 
 The software is under active development and the API is expected to change.

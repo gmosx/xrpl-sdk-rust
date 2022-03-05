@@ -233,7 +233,7 @@ impl Transaction {
 
 impl Transaction {
     pub fn with_memo(self, memo_type: &str, memo_data: &str) -> Self {
-        let mut memos = self.memos.unwrap_or_else(Vec::new);
+        let mut memos = self.memos.unwrap_or_default();
 
         memos.push(Memo {
             memo_type: memo_type.to_string().into_bytes(),
