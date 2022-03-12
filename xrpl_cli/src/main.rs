@@ -5,6 +5,8 @@ use clap::{Arg, Command};
 
 // TODO: introduce `xrpl_util` or `xrpl_fmt` crate.
 
+const VERSION: &str = env!("CARGO_PKG_VERSION");
+
 fn main() {
     let account_cmd = Command::new("account")
         .about("Account")
@@ -67,7 +69,7 @@ fn main() {
 
     let xrpl_cmd = Command::new("xrpl")
         .author("George Moschovitis, gmosx@reizu.org")
-        .version("0.1.0")
+        .version(VERSION)
         .about("A CLI for the XRP Ledger")
         .after_help(
             "The xrpl CLI provides access to ledger and account data on the XRP Ledger and allows for signing transactions.",
