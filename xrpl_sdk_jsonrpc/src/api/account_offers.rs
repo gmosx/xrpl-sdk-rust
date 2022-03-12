@@ -39,7 +39,7 @@ impl AccountOffersRequest {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct AccountOffer {
     pub flags: u32,
     pub quality: String,
@@ -48,7 +48,7 @@ pub struct AccountOffer {
     pub taker_pays: Amount,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct AccountOffersResponse {
     pub offers: Vec<AccountOffer>,
 }
