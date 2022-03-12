@@ -67,7 +67,7 @@ fn main() {
                 .takes_value(true),
         );
 
-    let xrpl_cmd = Command::new("xrpl")
+    let mut xrpl_cmd = Command::new("xrpl")
         .author("George Moschovitis, gmosx@reizu.org")
         .version(VERSION)
         .about("A CLI for the XRP Ledger")
@@ -77,7 +77,7 @@ fn main() {
         .subcommand(account_cmd)
         .subcommand(ledger_cmd);
 
-    let matches = xrpl_cmd.get_matches();
+    let matches = xrpl_cmd.clone().get_matches();
 
     if let Some(account_matches) = matches.subcommand_matches("account") {
         if let Some(offers_matches) = account_matches.subcommand_matches("offers") {
@@ -86,5 +86,7 @@ fn main() {
     } else if let Some(_ledger_matches) = matches.subcommand_matches("ledger") {
         // TODO: check hash or id
         todo!();
+    } else {
+        xrpl_cmd.print_long_help().unwrap();
     }
 }

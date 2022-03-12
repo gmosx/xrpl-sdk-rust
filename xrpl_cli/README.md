@@ -17,6 +17,7 @@ xrpl --help
 xrpl account ADDRESS offers
 xrpl account ADDRESS offers --pretty
 xrpl account ADDRESS offers --json --pretty
+xrpl account ADDRESS offers -jp
 ```
 
 ## Status
