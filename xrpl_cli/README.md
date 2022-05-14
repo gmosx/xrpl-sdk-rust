@@ -14,6 +14,11 @@ cargo install --path .
 
 ```sh
 xrpl --help
+
+xrpl account ADDRESS info
+xrpl account ADDRESS offers --json --pretty
+xrpl account ADDRESS offers -jp
+
 xrpl account ADDRESS offers
 xrpl account ADDRESS offers --pretty
 xrpl account ADDRESS offers --json --pretty

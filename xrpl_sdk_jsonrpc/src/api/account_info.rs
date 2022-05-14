@@ -38,7 +38,7 @@ impl AccountInfoRequest {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct AccountInfoResponsePayload {
     // TODO!
     #[serde(rename = "Account")]
@@ -51,7 +51,7 @@ pub struct AccountInfoResponsePayload {
     pub sequence: u32,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct AccountInfoResponse {
     pub account_data: AccountInfoResponsePayload,
 }

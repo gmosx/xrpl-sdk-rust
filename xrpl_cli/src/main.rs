@@ -1,6 +1,7 @@
 mod account;
 
 use crate::account::offers::account_offers;
+use account::info::account_info;
 use clap::{Arg, Command};
 
 // TODO: introduce `xrpl_util` or `xrpl_fmt` crate.
@@ -16,6 +17,24 @@ fn main() {
                 .help("The address of the account")
                 .required(true)
                 .index(1),
+        )
+        .subcommand(
+            Command::new("info")
+                .about("info")
+                .arg(
+                    Arg::new("json")
+                        .short('j')
+                        .long("json")
+                        .help("Format response as JSON")
+                        .takes_value(false),
+                )
+                .arg(
+                    Arg::new("pretty")
+                        .short('p')
+                        .long("pretty")
+                        .help("Pretty-print the response")
+                        .takes_value(false),
+                ),
         )
         .subcommand(
             Command::new("offers")
@@ -80,7 +99,9 @@ fn main() {
     let matches = xrpl_cmd.clone().get_matches();
 
     if let Some(account_matches) = matches.subcommand_matches("account") {
-        if let Some(offers_matches) = account_matches.subcommand_matches("offers") {
+        if let Some(info_matches) = account_matches.subcommand_matches("info") {
+            account_info(account_matches, info_matches);
+        } else if let Some(offers_matches) = account_matches.subcommand_matches("offers") {
             account_offers(account_matches, offers_matches);
         }
     } else if let Some(_ledger_matches) = matches.subcommand_matches("ledger") {
