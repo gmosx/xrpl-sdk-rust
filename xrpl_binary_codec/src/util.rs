@@ -1,6 +1,5 @@
-use xrpl_types::Transaction;
-
 use super::serializer::Serializer;
+use xrpl_types::Transaction;
 
 const MIN_IOU_EXPONENT: i64 = -96;
 const MAX_IOU_EXPONENT: i64 = 80;
