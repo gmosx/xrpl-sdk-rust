@@ -1,7 +1,7 @@
 [package]
 name = "xrpl_binary_codec"
 description = "Binary serialization for XRPL Protocol objects"
-version = "0.2.0"
+version = "0.2.1"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/gmosx/xrpl_sdk_rust/tree/main/xrpl_binary_codec"
 keywords = ["xrpl", "ledger", "api", "protocol"]
