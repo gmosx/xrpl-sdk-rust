@@ -9,6 +9,8 @@ use clap::{Arg, Command};
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 fn main() {
+    tracing_subscriber::fmt::init();
+
     let account_cmd = Command::new("account")
         .about("Account")
         .arg(

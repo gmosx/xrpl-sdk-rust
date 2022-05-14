@@ -31,6 +31,7 @@ impl AccountOffersRequest {
             method: "account_offers".to_string(),
             params: vec![self.params],
         };
+
         self.client.send::<AccountOffersParams, T>(request).await
     }
 

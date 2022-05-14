@@ -1,5 +1,6 @@
 use crate::error::Error;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use tracing::debug;
 use xrpl_types::Transaction;
 
 pub const GENERAL_PURPOSE_MAINNET_URL: &str = "https://s1.ripple.com:51234";
@@ -104,6 +105,8 @@ impl Client {
         Resp: DeserializeOwned,
     {
         let body = serde_json::to_string(&request).unwrap();
+
+        debug!("POST {}", body);
 
         let response = self
             .http_client

@@ -25,6 +25,12 @@ xrpl account ADDRESS offers --json --pretty
 xrpl account ADDRESS offers -jp
 ```
 
+The `RUST_LOG` env variable is used to configure tracing, e.g.
+
+```sh
+RUST_LOG=debug xrpl account ADDRESS info -jp
+```
+
 ## Status
 
 Under construction, not much to see here!
