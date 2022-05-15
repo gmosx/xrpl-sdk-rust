@@ -37,7 +37,7 @@ RUST_LOG=debug xrpl account ADDRESS info -jp
 
 ## Status
 
-Under construction, not much to see here!
+The software is under active development and the API is expected to change.
 
 ## Contributing
 
