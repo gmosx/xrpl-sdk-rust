@@ -27,6 +27,8 @@ xrpl account ADDRESS offers
 xrpl account ADDRESS offers --pretty
 xrpl account ADDRESS offers --json --pretty
 xrpl account ADDRESS offers -jp
+
+xrpl ledger --closed
 ```
 
 The `RUST_LOG` env variable is used to configure tracing, e.g.

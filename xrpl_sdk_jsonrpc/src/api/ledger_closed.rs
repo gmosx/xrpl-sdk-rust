@@ -25,7 +25,7 @@ impl LedgerClosedRequest {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct LedgerClosedResponse {
     /// The unique Hash of this ledger version, in hexadecimal.
     pub ledger_hash: String,

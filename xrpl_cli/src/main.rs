@@ -1,8 +1,10 @@
 mod account;
+mod ledger;
 
 use crate::account::offers::account_offers;
 use account::{balances::account_balances, info::account_info};
 use clap::{Arg, Command};
+use ledger::closed::ledger_closed;
 
 // TODO: introduce `xrpl_util` or `xrpl_fmt` crate.
 
@@ -101,12 +103,20 @@ fn main() {
         )
         .arg(
             Arg::new("hash")
-                .short('h')
+                .short('s') // #Note `-h` conflict with `--help`.
                 .long("hash")
                 .value_name("LEDGER_HASH")
                 .help("Selects the ledger by hash")
                 .required(false)
                 .takes_value(true),
+        )
+        .arg(
+            Arg::new("closed")
+                .short('c')
+                .long("closed")
+                .help("Selects the latest closed ledger")
+                .required(false)
+                .takes_value(false),
         );
 
     let mut xrpl_cmd = Command::new("xrpl")
@@ -129,9 +139,9 @@ fn main() {
         } else if let Some(offers_matches) = account_matches.subcommand_matches("offers") {
             account_offers(account_matches, offers_matches);
         }
-    } else if let Some(_ledger_matches) = matches.subcommand_matches("ledger") {
-        // TODO: check hash or id
-        todo!();
+    } else if let Some(ledger_matches) = matches.subcommand_matches("ledger") {
+        // #TODO properly handle this
+        ledger_closed(ledger_matches);
     } else {
         xrpl_cmd.print_long_help().unwrap();
     }
