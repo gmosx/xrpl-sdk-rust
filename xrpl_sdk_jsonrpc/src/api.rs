@@ -14,6 +14,9 @@ pub use account_tx::*;
 
 // Ledger methods
 
+pub mod ledger_closed;
+pub use ledger_closed::*;
+
 pub mod ledger_entry;
 pub use ledger_entry::*;
 

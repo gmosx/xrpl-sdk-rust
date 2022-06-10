@@ -11,6 +11,8 @@ const VERSION: &str = env!("CARGO_PKG_VERSION");
 fn main() {
     tracing_subscriber::fmt::init();
 
+    // `account` subcommand
+
     let account_cmd = Command::new("account")
         .about("Account")
         .arg(
@@ -84,7 +86,8 @@ fn main() {
                 ),
         );
 
-    // TODO: implement me!
+    // `ledger` subcommand.
+
     let ledger_cmd = Command::new("ledger")
         .about("Ledger")
         .arg(
