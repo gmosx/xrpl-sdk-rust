@@ -41,7 +41,7 @@ impl AccountLinesRequest {
 
 // TODO: consider extracting as a type.
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct AccountLine {
     pub account: String,
     pub balance: String,

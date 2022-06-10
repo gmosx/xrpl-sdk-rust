@@ -1,8 +1,10 @@
 mod account;
 mod ledger;
 
-use crate::account::offers::account_offers;
-use account::{balances::account_balances, info::account_info};
+use account::{
+    balances::account_balances, info::account_info, offers::account_offers,
+    trustlines::account_trustlines,
+};
 use clap::{Arg, Command};
 use ledger::closed::ledger_closed;
 
@@ -86,6 +88,33 @@ fn main() {
                         .help("Pretty-print the response")
                         .takes_value(false),
                 ),
+        )
+        .subcommand(
+            Command::new("trustlines")
+                .about("lines")
+                .arg(
+                    Arg::new("limit")
+                        .short('l')
+                        .long("limit")
+                        .value_name("LIMIT")
+                        .help("The maximum count of trustlines returned")
+                        .required(false)
+                        .takes_value(true),
+                )
+                .arg(
+                    Arg::new("json")
+                        .short('j')
+                        .long("json")
+                        .help("Format response as JSON")
+                        .takes_value(false),
+                )
+                .arg(
+                    Arg::new("pretty")
+                        .short('p')
+                        .long("pretty")
+                        .help("Pretty-print the response")
+                        .takes_value(false),
+                ),
         );
 
     // `ledger` subcommand.
@@ -138,6 +167,8 @@ fn main() {
             account_balances(account_matches, balance_matches);
         } else if let Some(offers_matches) = account_matches.subcommand_matches("offers") {
             account_offers(account_matches, offers_matches);
+        } else if let Some(offers_matches) = account_matches.subcommand_matches("trustlines") {
+            account_trustlines(account_matches, offers_matches);
         }
     } else if let Some(ledger_matches) = matches.subcommand_matches("ledger") {
         // #TODO properly handle this
