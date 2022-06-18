@@ -39,8 +39,10 @@ For questions, suggestions, etc, you can reach the maintainer on [Twitter](https
 Each component of the XRPL SDK is individually licensed. Please check the corresponding directories for more details.
 
 - xrpl_types: [LICENSE-MIT](xrpl_types/LICENSE-MIT), [LICENSE-APACHE](xrpl_types/LICENSE-APACHE)
+- xrpl_address_codec: [LICENSE-MIT](xrpl_address_codec/LICENSE-MIT), [LICENSE-APACHE](xrpl_address_codec/LICENSE-APACHE)
 - xrpl_binary_codec: [LICENSE-MIT](xrpl_binary_codec/LICENSE-MIT), [LICENSE-APACHE](xrpl_binary_codec/LICENSE-APACHE)
 - xrpl_sdk_jsonrpc: [LICENSE-MIT](xrpl_sdk_jsonrpc/LICENSE-MIT), [LICENSE-APACHE](xrpl_sdk_jspnrpc/LICENSE-APACHE)
+- xrpl_sdk_ws: [LICENSE-MIT](xrpl_sdk_ws/LICENSE-MIT), [LICENSE-APACHE](xrpl_sdk_ws/LICENSE-APACHE)
 
 ## Disclaimer
 
