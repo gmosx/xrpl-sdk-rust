@@ -9,8 +9,10 @@ This project is an *unofficial*, community-driven effort.
 The SDK contains the following components:
 
 - [xrpl_types](xrpl_types/)
+- [xrpl_address_codec](xrpl_address_codec/)
 - [xrpl_binary_codec](xrpl_binary_codec/)
 - [xrpl_sdk_jsonrpc](xrpl_sdk_jsonrpc/)
+- [xrpl_sdk_ws](xrpl_sdk_ws/)
 
 ## Links
 
