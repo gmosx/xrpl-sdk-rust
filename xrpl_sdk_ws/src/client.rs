@@ -25,25 +25,35 @@ impl Client {
         Ok(())
     }
 
-    // pub async fn publish(topic: String) {
-    //     todo!()
-    // }
-
-    pub async fn subscribe(topics: &[String]) {
-        todo!()
+    pub async fn subscribe_account(&mut self, account: &str) -> Result<()> {
+        let msg =
+            format!("{{\"id\": 1, \"command\": \"subscribe\", \"accounts\": [\"{account}\"]}}");
+        self.send(&msg).await?;
+        Ok(())
     }
 
-    pub async fn subscribe_accounts(accounts: &[String]) {
-        todo!()
+    pub async fn subscribe_accounts(&mut self, accounts: &[&str]) -> Result<()> {
+        let msg = format!(
+            "{{\"id\": 1, \"command\": \"subscribe\", \"accounts\": [{}]}}",
+            accounts
+                .iter()
+                .map(|s| format!("\"{}\"", s))
+                .collect::<Vec<String>>()
+                .join(",")
+        );
+        self.send(&msg).await?;
+        Ok(())
     }
 
+    // #TODO consider renaming to `subscribe_topic`
     pub async fn subscribe_stream(&mut self, stream: &str) -> Result<()> {
         let msg = format!("{{\"id\": 1, \"command\": \"subscribe\", \"streams\": [\"{stream}\"]}}");
         self.send(&msg).await?;
         Ok(())
     }
 
-    pub async fn subscribe_streams(&mut self, streams: &[String]) -> Result<()> {
+    // #TODO consider renaming to `subscribe_topics`
+    pub async fn subscribe_streams(&mut self, streams: &[&str]) -> Result<()> {
         let msg = format!(
             "{{\"id\": 1, \"command\": \"subscribe\", \"streams\": [{}]}}",
             streams
@@ -79,8 +89,7 @@ mod tests {
                 .expect("cannot connect");
 
             client
-                // .subscribe_streams(&["ledger".to_owned()])
-                .subscribe_stream("ledger")
+                .subscribe_streams(&["ledger"])
                 .await
                 .expect("cannot subscribe");
 
