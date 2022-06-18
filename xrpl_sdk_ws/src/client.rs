@@ -15,7 +15,6 @@ pub struct Client {
 }
 
 impl Client {
-    // #TODO return Result
     pub async fn connect(url: &str) -> Result<Self> {
         let (stream, _response) = connect_async(url).await?;
         Ok(Self { stream })
@@ -36,6 +35,25 @@ impl Client {
 
     pub async fn subscribe_accounts(accounts: &[String]) {
         todo!()
+    }
+
+    pub async fn subscribe_stream(&mut self, stream: &str) -> Result<()> {
+        let msg = format!("{{\"id\": 1, \"command\": \"subscribe\", \"streams\": [\"{stream}\"]}}");
+        self.send(&msg).await?;
+        Ok(())
+    }
+
+    pub async fn subscribe_streams(&mut self, streams: &[String]) -> Result<()> {
+        let msg = format!(
+            "{{\"id\": 1, \"command\": \"subscribe\", \"streams\": [{}]}}",
+            streams
+                .iter()
+                .map(|s| format!("\"{}\"", s))
+                .collect::<Vec<String>>()
+                .join(",")
+        );
+        self.send(&msg).await?;
+        Ok(())
     }
 
     // subscribe_accounts
@@ -59,8 +77,10 @@ mod tests {
             let mut client = Client::connect(DEFAULT_WS_URL)
                 .await
                 .expect("cannot connect");
+
             client
-                .send(r#"{"id": 1, "command": "subscribe", "streams": ["ledger"]}"#)
+                // .subscribe_streams(&["ledger".to_owned()])
+                .subscribe_stream("ledger")
                 .await
                 .expect("cannot subscribe");
 
