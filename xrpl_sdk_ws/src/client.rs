@@ -93,11 +93,11 @@ mod tests {
                 .await
                 .expect("cannot subscribe");
 
-            let stream = client.stream;
+            let (_, rx) = client.stream.split();
 
-            tokio::pin!(stream);
+            tokio::pin!(rx);
 
-            while let Some(msg) = stream.next().await {
+            while let Some(msg) = rx.next().await {
                 dbg!(&msg);
             }
         });
