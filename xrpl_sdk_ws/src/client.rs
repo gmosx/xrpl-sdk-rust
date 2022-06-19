@@ -1,4 +1,4 @@
-use crate::Result;
+use crate::util::Result;
 use futures_util::SinkExt;
 use tokio::net::TcpStream;
 use tokio_tungstenite::{

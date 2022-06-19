@@ -1,6 +1,6 @@
 //! https://xrpl.org/subscribe.html
 
-use crate::{client::Client, util::format_joined_keys, Result};
+use crate::{client::Client, util::format_joined_keys, util::Result};
 
 // #TODO consider a 'Builder' api.
 

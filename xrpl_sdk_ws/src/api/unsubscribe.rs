@@ -1,6 +1,6 @@
 //! https://xrpl.org/unsubscribe.html
 
-use crate::{client::Client, util::format_joined_keys, Result};
+use crate::{client::Client, util::format_joined_keys, util::Result};
 
 impl Client {
     pub async fn unsubscribe_accounts(&mut self, accounts: &[&str]) -> Result<()> {
