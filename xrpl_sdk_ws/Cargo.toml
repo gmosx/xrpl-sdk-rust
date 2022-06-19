@@ -18,5 +18,6 @@ tokio-stream = "0"
 tokio-tungstenite = { version = "0", features = ["rustls-tls-webpki-roots"] }
 async-stream = "0.3"
 tracing = "0.1"
+uuid = { version = "1", features = ["v4", "fast-rng"] }
 xrpl_types = { path = "../xrpl_types", version = "0.2" }
 xrpl_binary_codec = { path = "../xrpl_binary_codec", version = "0.2" }

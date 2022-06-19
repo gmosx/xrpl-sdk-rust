@@ -4,10 +4,17 @@ use tokio::net::TcpStream;
 use tokio_tungstenite::{
     connect_async, tungstenite::protocol::Message, MaybeTlsStream, WebSocketStream,
 };
+use uuid::Uuid;
 
-pub const XRPL_CLUSTER_WS_URL: &str = "wss://xrplcluster.com";
+// https://xrpl.org/public-servers.html
 
-pub const DEFAULT_WS_URL: &str = XRPL_CLUSTER_WS_URL;
+pub const XRPL_CLUSTER_MAINNET_WS_URL: &str = "wss://xrplcluster.com";
+pub const S1_MAINNET_WS_URL: &str = "wss://s1.ripple.com";
+pub const S2_MAINNET_WS_URL: &str = "wss://s2.ripple.com";
+pub const TESTNET_WS_URL: &str = "wss://s.altnet.rippletest.net/";
+pub const DEVNET_WS_URL: &str = "wss://s.devnet.rippletest.net/";
+
+pub const DEFAULT_WS_URL: &str = XRPL_CLUSTER_MAINNET_WS_URL;
 
 // #TODO extract Connection
 // #TODO split into multiple `api` files
@@ -26,5 +33,10 @@ impl Client {
     pub async fn send(&mut self, msg: &str) -> Result<()> {
         self.stream.send(Message::Text(msg.to_string())).await?;
         Ok(())
+    }
+
+    // #TODO make this customizable.
+    pub fn next_id(&self) -> String {
+        Uuid::new_v4().to_string()
     }
 }

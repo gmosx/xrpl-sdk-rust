@@ -8,7 +8,8 @@ use account::{
 use clap::{Arg, Command};
 use ledger::closed::ledger_closed;
 
-// TODO: introduce `xrpl_util` or `xrpl_fmt` crate.
+// #TODO also used WebSocket
+// #TODO introduce `xrpl_util` or `xrpl_fmt` crate.
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
