@@ -1,7 +1,7 @@
 [package]
 name = "xrpl_sdk_ws"
 description = "A strongly-typed client for the XRP Ledger WebSocket API"
-version = "0.1.1"
+version = "0.2.0"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/gmosx/xrpl_sdk_rust/tree/main/xrpl_sdk_jsonrpc"
 keywords = ["xrpl", "ledger", "client", "websocket", "api"]
