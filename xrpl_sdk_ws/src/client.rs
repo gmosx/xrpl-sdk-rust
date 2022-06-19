@@ -1,4 +1,4 @@
-use crate::Result;
+use crate::{util::format_joined_keys, Result};
 use futures_util::{SinkExt, StreamExt};
 use tokio::net::TcpStream;
 use tokio_tungstenite::{
@@ -8,6 +8,9 @@ use tokio_tungstenite::{
 pub const XRPL_CLUSTER_WS_URL: &str = "wss://xrplcluster.com";
 
 pub const DEFAULT_WS_URL: &str = XRPL_CLUSTER_WS_URL;
+
+// #TODO extract Connection
+// #TODO split into multiple `api` files
 
 /// A WebSocket client for the XRP Ledger.
 pub struct Client {
@@ -33,14 +36,8 @@ impl Client {
     }
 
     pub async fn subscribe_accounts(&mut self, accounts: &[&str]) -> Result<()> {
-        let msg = format!(
-            "{{\"id\": 1, \"command\": \"subscribe\", \"accounts\": [{}]}}",
-            accounts
-                .iter()
-                .map(|s| format!("\"{}\"", s))
-                .collect::<Vec<String>>()
-                .join(",")
-        );
+        let accounts = format_joined_keys(accounts);
+        let msg = format!("{{\"id\": 1, \"command\": \"subscribe\", \"accounts\": [{accounts}]}}");
         self.send(&msg).await?;
         Ok(())
     }
@@ -54,25 +51,26 @@ impl Client {
 
     // #TODO consider renaming to `subscribe_topics`
     pub async fn subscribe_streams(&mut self, streams: &[&str]) -> Result<()> {
-        let msg = format!(
-            "{{\"id\": 1, \"command\": \"subscribe\", \"streams\": [{}]}}",
-            streams
-                .iter()
-                .map(|s| format!("\"{}\"", s))
-                .collect::<Vec<String>>()
-                .join(",")
-        );
+        let streams = format_joined_keys(streams);
+        let msg = format!("{{\"id\": 1, \"command\": \"subscribe\", \"streams\": [{streams}]}}");
         self.send(&msg).await?;
         Ok(())
     }
 
-    // subscribe_accounts
-    // subscribe_books
-    // subscribe_streams
-    // unsubscribe
-    // unsubscribe_accounts
-    // unsubscribe_books
-    // unsubscribe_streams
+    pub async fn unsubscribe_accounts(&mut self, accounts: &[&str]) -> Result<()> {
+        let accounts = format_joined_keys(accounts);
+        let msg =
+            format!("{{\"id\": 1, \"command\": \"unsubscribe\", \"accounts\": [{accounts}]}}");
+        self.send(&msg).await?;
+        Ok(())
+    }
+
+    pub async fn unsubscribe_streams(&mut self, streams: &[&str]) -> Result<()> {
+        let streams = format_joined_keys(streams);
+        let msg = format!("{{\"id\": 1, \"command\": \"unsubscribe\", \"streams\": [{streams}]}}");
+        self.send(&msg).await?;
+        Ok(())
+    }
 }
 
 #[cfg(test)]
