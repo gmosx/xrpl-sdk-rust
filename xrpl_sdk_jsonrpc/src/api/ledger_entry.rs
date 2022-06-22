@@ -75,19 +75,15 @@ impl Client {
 mod tests {
     use crate::client::Client;
 
-    #[test]
-    fn offer_ledger_entry_works() {
-        let rt = tokio::runtime::Runtime::new().unwrap();
+    #[tokio::test]
+    async fn offer_ledger_entry_works() {
+        let client = Client::default();
 
-        rt.block_on(async {
-            let client = Client::default();
+        let resp = client
+            .offer_ledger_entry("rf1BiGeXwwQoi8Z2ueFYTEXSwuJYfV2Jpn", 359)
+            .send()
+            .await;
 
-            let resp = client
-                .offer_ledger_entry("rf1BiGeXwwQoi8Z2ueFYTEXSwuJYfV2Jpn", 359)
-                .send()
-                .await;
-
-            dbg!(&resp);
-        });
+        dbg!(&resp);
     }
 }

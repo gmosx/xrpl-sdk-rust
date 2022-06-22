@@ -73,26 +73,22 @@ impl Client {
 mod tests {
     use crate::client::Client;
 
-    #[test]
-    fn account_lines_works() {
-        let rt = tokio::runtime::Runtime::new().unwrap();
+    #[tokio::test]
+    async fn account_lines_works() {
+        let client = Client::default();
 
-        rt.block_on(async {
-            let client = Client::default();
+        let resp = client
+            .account_lines("r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59")
+            .send()
+            .await;
 
-            let resp = client
-                .account_lines("r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59")
-                .send()
-                .await;
+        dbg!(&resp);
 
-            dbg!(&resp);
+        // if let Ok(resp) = resp {
+        //     let order_book = resp.order_book;
 
-            // if let Ok(resp) = resp {
-            //     let order_book = resp.order_book;
-
-            //     assert_eq!(order_book.bid_queue().len() as u32, depth);
-            //     assert_eq!(order_book.ask_queue().len() as u32, depth);
-            // }
-        });
+        //     assert_eq!(order_book.bid_queue().len() as u32, depth);
+        //     assert_eq!(order_book.ask_queue().len() as u32, depth);
+        // }
     }
 }

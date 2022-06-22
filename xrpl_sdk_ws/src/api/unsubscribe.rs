@@ -25,8 +25,8 @@ impl Client {
 
 #[cfg(test)]
 mod tests {
-    #[test]
-    fn client_should_unsubscribe() {
+    #[tokio::test]
+    async fn client_should_unsubscribe() {
         // #TODO
     }
 }

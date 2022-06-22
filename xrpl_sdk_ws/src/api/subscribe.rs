@@ -50,27 +50,23 @@ mod tests {
     use crate::client::DEFAULT_WS_URL;
     use futures_util::{SinkExt, StreamExt};
 
-    #[test]
-    fn client_should_subscribe() {
-        let rt = tokio::runtime::Runtime::new().unwrap();
+    #[tokio::test]
+    async fn client_should_subscribe() {
+        let mut client = Client::connect(DEFAULT_WS_URL)
+            .await
+            .expect("cannot connect");
 
-        rt.block_on(async {
-            let mut client = Client::connect(DEFAULT_WS_URL)
-                .await
-                .expect("cannot connect");
+        client
+            .subscribe_streams(&["ledger"])
+            .await
+            .expect("cannot subscribe");
 
-            client
-                .subscribe_streams(&["ledger"])
-                .await
-                .expect("cannot subscribe");
+        let (_, rx) = client.stream.split();
 
-            let (_, rx) = client.stream.split();
+        tokio::pin!(rx);
 
-            tokio::pin!(rx);
-
-            while let Some(msg) = rx.next().await {
-                dbg!(&msg);
-            }
-        });
+        while let Some(msg) = rx.next().await {
+            dbg!(&msg);
+        }
     }
 }

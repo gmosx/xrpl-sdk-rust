@@ -45,16 +45,12 @@ impl Client {
 mod tests {
     use crate::client::Client;
 
-    #[test]
-    fn should_implement_ledger_closed() {
-        let rt = tokio::runtime::Runtime::new().unwrap();
+    #[tokio::test]
+    async fn should_implement_ledger_closed() {
+        let client = Client::default();
 
-        rt.block_on(async {
-            let client = Client::default();
+        let resp = client.ledger_closed().send().await;
 
-            let resp = client.ledger_closed().send().await;
-
-            dbg!(&resp);
-        });
+        dbg!(&resp);
     }
 }

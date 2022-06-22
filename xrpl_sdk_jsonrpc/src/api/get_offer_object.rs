@@ -74,19 +74,15 @@ impl Client {
 mod tests {
     use crate::client::Client;
 
-    #[test]
-    fn get_offer_object_works() {
-        let rt = tokio::runtime::Runtime::new().unwrap();
+    #[tokio::test]
+    async fn get_offer_object_works() {
+        let client = Client::default();
 
-        rt.block_on(async {
-            let client = Client::default();
+        let resp = client
+            .get_offer_object("rf1BiGeXwwQoi8Z2ueFYTEXSwuJYfV2Jpn", 359)
+            .send()
+            .await;
 
-            let resp = client
-                .get_offer_object("rf1BiGeXwwQoi8Z2ueFYTEXSwuJYfV2Jpn", 359)
-                .send()
-                .await;
-
-            dbg!(&resp);
-        });
+        dbg!(&resp);
     }
 }

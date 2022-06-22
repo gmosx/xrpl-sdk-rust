@@ -117,22 +117,18 @@ mod tests {
     use crate::client::Client;
     use xrpl_types::Currency;
 
-    #[test]
-    fn book_offers_works() {
-        let rt = tokio::runtime::Runtime::new().unwrap();
+    #[tokio::test]
+    async fn book_offers_works() {
+        let client = Client::default();
 
-        rt.block_on(async {
-            let client = Client::default();
+        let resp = client
+            .book_offers(
+                &Currency::xrp(),
+                &Currency::issued("USD", "rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B"),
+            )
+            .send()
+            .await;
 
-            let resp = client
-                .book_offers(
-                    &Currency::xrp(),
-                    &Currency::issued("USD", "rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B"),
-                )
-                .send()
-                .await;
-
-            dbg!(&resp);
-        });
+        dbg!(&resp);
     }
 }
