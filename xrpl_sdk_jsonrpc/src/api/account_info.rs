@@ -53,6 +53,7 @@ pub struct AccountInfoResponsePayload {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AccountInfoResponse {
+    // #TODO add missing fields!
     pub account_data: AccountInfoResponsePayload,
 }
 
