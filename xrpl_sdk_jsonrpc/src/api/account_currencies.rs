@@ -26,7 +26,9 @@ impl AccountCurrenciesRequest {
             method: "account_currencies".to_string(),
             params: vec![self.params],
         };
-        self.client.send::<AccountCurrenciesParams, T>(request).await
+        self.client
+            .send::<AccountCurrenciesParams, T>(request)
+            .await
     }
 
     pub async fn send(self) -> Result<AccountCurrenciesResponse> {
@@ -78,7 +80,7 @@ mod tests {
     use crate::client::Client;
 
     #[tokio::test]
-    async fn should_return_receive_and_send_currencies() {
+    async fn account_currencies_should_return_receive_and_send_currencies() {
         let client = Client::default();
 
         let resp = client
@@ -87,12 +89,5 @@ mod tests {
             .await;
 
         dbg!(&resp);
-
-        // if let Ok(resp) = resp {
-        //     let order_book = resp.order_book;
-
-        //     assert_eq!(order_book.bid_queue().len() as u32, depth);
-        //     assert_eq!(order_book.ask_queue().len() as u32, depth);
-        // }
     }
 }
