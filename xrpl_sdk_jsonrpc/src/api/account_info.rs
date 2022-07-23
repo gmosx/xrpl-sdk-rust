@@ -1,27 +1,14 @@
+//! - https://xrpl.org/account_info.html
+
 use crate::{client::RpcRequest, Client, Result};
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use serde::de::DeserializeOwned;
+use xrpl_api::{AccountInfoRequestPayload, AccountInfoResponsePayload};
 
-#[derive(Default, Clone, Serialize)]
-pub struct AccountInfoParams {
-    account: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    queue: Option<bool>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    ledger_hash: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    ledger_index: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    signer_lists: Option<bool>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    strict: Option<bool>,
-}
-
-/// - https://xrpl.org/account_info.html
 #[must_use = "Does nothing until you send or execute it"]
 #[derive(Default, Clone)]
 pub struct AccountInfoRequest {
     client: Client,
-    params: AccountInfoParams,
+    params: AccountInfoRequestPayload,
 }
 
 impl AccountInfoRequest {
@@ -30,38 +17,21 @@ impl AccountInfoRequest {
             method: "account_info".to_string(),
             params: vec![self.params],
         };
-        self.client.send::<AccountInfoParams, T>(request).await
+        self.client
+            .send::<AccountInfoRequestPayload, T>(request)
+            .await
     }
 
-    pub async fn send(self) -> Result<AccountInfoResponse> {
+    pub async fn send(self) -> Result<AccountInfoResponsePayload> {
         self.execute().await
     }
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct AccountInfoResponsePayload {
-    // TODO!
-    #[serde(rename = "Account")]
-    pub account: String,
-
-    #[serde(rename = "Balance")]
-    pub balance: String,
-
-    #[serde(rename = "Sequence")]
-    pub sequence: u32,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct AccountInfoResponse {
-    // #TODO add missing fields!
-    pub account_data: AccountInfoResponsePayload,
 }
 
 impl Client {
     pub fn account_info(&self, account: &str) -> AccountInfoRequest {
         AccountInfoRequest {
             client: self.clone(),
-            params: AccountInfoParams {
+            params: AccountInfoRequestPayload {
                 account: account.to_string(),
                 queue: None,
                 ledger_hash: None,
@@ -70,5 +40,22 @@ impl Client {
                 strict: None,
             },
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::client::Client;
+
+    #[tokio::test]
+    async fn account_info_returns_info() {
+        let client = Client::default();
+
+        let resp = client
+            .account_info("r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59")
+            .send()
+            .await;
+
+        dbg!(&resp);
     }
 }
