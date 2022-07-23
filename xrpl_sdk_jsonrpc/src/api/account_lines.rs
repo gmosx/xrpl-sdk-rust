@@ -1,17 +1,6 @@
 use crate::{client::RpcRequest, Client, Result};
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
-
-#[derive(Default, Clone, Serialize)]
-pub struct AccountLinesParams {
-    account: String,
-    // #[serde(skip_serializing_if = "Option::is_none")]
-    // ledger_hash: Option<String>,
-    // #[serde(skip_serializing_if = "Option::is_none")]
-    // ledger_index: Option<String>,
-    // #[serde(skip_serializing_if = "Option::is_none")]
-    // strict: Option<bool>,
-    // TODO: add more parameters!
-}
+use serde::de::DeserializeOwned;
+use xrpl_api::{AccountLinesRequestPayload, AccountLinesResponsePayload};
 
 /// The account_lines method returns information about an account's trust lines,
 /// including balances in all non-XRP currencies and assets. All information
@@ -22,7 +11,7 @@ pub struct AccountLinesParams {
 #[derive(Default, Clone)]
 pub struct AccountLinesRequest {
     client: Client,
-    params: AccountLinesParams,
+    params: AccountLinesRequestPayload,
 }
 
 impl AccountLinesRequest {
@@ -31,38 +20,21 @@ impl AccountLinesRequest {
             method: "account_lines".to_string(),
             params: vec![self.params],
         };
-        self.client.send::<AccountLinesParams, T>(request).await
+        self.client
+            .send::<AccountLinesRequestPayload, T>(request)
+            .await
     }
 
-    pub async fn send(self) -> Result<AccountLinesResponse> {
+    pub async fn send(self) -> Result<AccountLinesResponsePayload> {
         self.execute().await
     }
-}
-
-// TODO: consider extracting as a type.
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct AccountLine {
-    pub account: String,
-    pub balance: String,
-    pub currency: String,
-    pub limit: String,
-    pub limit_peer: String,
-    pub no_ripple: bool,
-    pub quality_in: u64,
-    pub quality_out: u64,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct AccountLinesResponse {
-    pub lines: Vec<AccountLine>,
 }
 
 impl Client {
     pub fn account_lines(&self, account: &str) -> AccountLinesRequest {
         AccountLinesRequest {
             client: self.clone(),
-            params: AccountLinesParams {
+            params: AccountLinesRequestPayload {
                 account: account.to_string(),
             },
         }
@@ -83,12 +55,5 @@ mod tests {
             .await;
 
         dbg!(&resp);
-
-        // if let Ok(resp) = resp {
-        //     let order_book = resp.order_book;
-
-        //     assert_eq!(order_book.bid_queue().len() as u32, depth);
-        //     assert_eq!(order_book.ask_queue().len() as u32, depth);
-        // }
     }
 }
