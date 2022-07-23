@@ -11,7 +11,7 @@ The SDK contains the following high-level crates:
 - [xrpl_sdk_jsonrpc](xrpl_sdk_jsonrpc/)
 - [xrpl_sdk_ws](xrpl_sdk_ws/)
 
-Additional, low-level crates are provided:
+Additionally, low-level crates are provided:
 
 - [xrpl_types](xrpl_types/)
 - [xrpl_api](xrpl_api/)
