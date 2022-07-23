@@ -18,4 +18,5 @@ sha2 = "0.9"
 libsecp256k1 = "0.5"
 tracing = "0.1"
 xrpl_types = { path = "../xrpl_types", version = "0.2" }
+xrpl_api = { path = "../xrpl_api", version = "0.1" }
 xrpl_binary_codec = { path = "../xrpl_binary_codec", version = "0.2" }

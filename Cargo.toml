@@ -2,6 +2,7 @@
 
 members = [
     "xrpl_types",
+    "xrpl_api",
     "xrpl_address_codec",
     "xrpl_binary_codec",
     "xrpl_cli",
