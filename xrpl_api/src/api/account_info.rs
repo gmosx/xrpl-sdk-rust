@@ -15,6 +15,15 @@ pub struct AccountInfoRequestPayload {
     pub strict: Option<bool>,
 }
 
+impl AccountInfoRequestPayload {
+    pub fn new(account: &str) -> Self {
+        Self {
+            account: account.to_owned(),
+            ..Default::default()
+        }
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AccountData {
     // TODO!
