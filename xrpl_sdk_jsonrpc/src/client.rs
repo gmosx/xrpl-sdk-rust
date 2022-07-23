@@ -104,6 +104,7 @@ impl Client {
         Params: Serialize,
         Resp: DeserializeOwned,
     {
+        // #TODO: remove the unwrap!
         let body = serde_json::to_string(&request).unwrap();
 
         debug!("POST {}", body);

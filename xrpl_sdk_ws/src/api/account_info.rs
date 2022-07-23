@@ -5,6 +5,7 @@ use xrpl_api::AccountInfoRequestPayload;
 use crate::{client::Client, util::Result};
 
 impl Client {
+    // #TODO implement a builder, for the additional params, like in JSONRPC client.
     pub async fn account_info(&mut self, account: &str) -> Result<()> {
         let id = self.next_id();
 

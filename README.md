@@ -6,14 +6,22 @@ This project is an *unofficial*, community-driven effort.
 
 ## Components
 
-The SDK contains the following components:
+The SDK contains the following high-level crates:
+
+- [xrpl_sdk_jsonrpc](xrpl_sdk_jsonrpc/)
+- [xrpl_sdk_ws](xrpl_sdk_ws/)
+
+Additional, low-level crates are provided:
 
 - [xrpl_types](xrpl_types/)
 - [xrpl_api](xrpl_api/)
 - [xrpl_address_codec](xrpl_address_codec/)
 - [xrpl_binary_codec](xrpl_binary_codec/)
-- [xrpl_sdk_jsonrpc](xrpl_sdk_jsonrpc/)
-- [xrpl_sdk_ws](xrpl_sdk_ws/)
+
+Finally, a convenient CLI is provided to demonstrate example usage:
+
+- [xrpl_cli](xrpl_cli/)
+
 
 ## Links
 
@@ -41,12 +49,13 @@ For questions, suggestions, etc, you can reach the maintainer on [Twitter](https
 
 Each component of the XRPL SDK is individually licensed. Please check the corresponding directories for more details.
 
+- xrpl_sdk_jsonrpc: [LICENSE-MIT](xrpl_sdk_jsonrpc/LICENSE-MIT), [LICENSE-APACHE](xrpl_sdk_jspnrpc/LICENSE-APACHE)
+- xrpl_sdk_ws: [LICENSE-MIT](xrpl_sdk_ws/LICENSE-MIT), [LICENSE-APACHE](xrpl_sdk_ws/LICENSE-APACHE)
 - xrpl_types: [LICENSE-MIT](xrpl_types/LICENSE-MIT), [LICENSE-APACHE](xrpl_types/LICENSE-APACHE)
 - xrpl_api: [LICENSE-MIT](xrpl_types/LICENSE-MIT), [LICENSE-APACHE](xrpl_types/LICENSE-APACHE)
 - xrpl_address_codec: [LICENSE-MIT](xrpl_address_codec/LICENSE-MIT), [LICENSE-APACHE](xrpl_address_codec/LICENSE-APACHE)
 - xrpl_binary_codec: [LICENSE-MIT](xrpl_binary_codec/LICENSE-MIT), [LICENSE-APACHE](xrpl_binary_codec/LICENSE-APACHE)
-- xrpl_sdk_jsonrpc: [LICENSE-MIT](xrpl_sdk_jsonrpc/LICENSE-MIT), [LICENSE-APACHE](xrpl_sdk_jspnrpc/LICENSE-APACHE)
-- xrpl_sdk_ws: [LICENSE-MIT](xrpl_sdk_ws/LICENSE-MIT), [LICENSE-APACHE](xrpl_sdk_ws/LICENSE-APACHE)
+- xrpl_cli: [LICENSE-MIT](xrpl_cli/LICENSE-MIT), [LICENSE-APACHE](xrpl_cli/LICENSE-APACHE)
 
 ## Disclaimer
 
