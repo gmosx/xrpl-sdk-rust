@@ -3,7 +3,7 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Default, Clone, Serialize)]
-pub struct AccountCurrenciesRequest {
+pub struct AccountCurrenciesRequestPayload {
     pub account: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ledger_hash: Option<String>,
@@ -14,7 +14,7 @@ pub struct AccountCurrenciesRequest {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct AccountCurrenciesResponse {
+pub struct AccountCurrenciesResponsePayload {
     /// The ledger index of the ledger version used to retrieve this data.
     pub ledger_index: u32,
     /// Array of Currency Codes for currencies that this account can receive.
