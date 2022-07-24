@@ -1,8 +1,7 @@
 //! - https://xrpl.org/account_info.html
 
-use serde::{Deserialize, Serialize};
-
 use crate::Request;
+use serde::{Deserialize, Serialize};
 
 #[derive(Default, Clone, Serialize)]
 pub struct AccountInfoRequest {

@@ -192,7 +192,10 @@ impl Client {
 #[cfg(test)]
 mod tests {
     use crate::client::Client;
-    use xrpl_api::{AccountCurrenciesRequest, AccountInfoRequest, FeeRequest, ServerStateRequest};
+    use xrpl_api::{
+        AccountCurrenciesRequest, AccountInfoRequest, AccountLinesRequest, FeeRequest,
+        ServerStateRequest,
+    };
 
     #[tokio::test]
     async fn client_can_fetch_account_currencies() {
@@ -213,6 +216,19 @@ mod tests {
 
         let req = AccountInfoRequest::new("r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59").strict(true);
         let resp = client.send(req).await;
+
+        dbg!(&resp);
+    }
+
+    #[tokio::test]
+    async fn client_can_fetch_account_lines() {
+        let client = Client::default();
+
+        let resp = client
+            .send(AccountLinesRequest::new(
+                "r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59",
+            ))
+            .await;
 
         dbg!(&resp);
     }

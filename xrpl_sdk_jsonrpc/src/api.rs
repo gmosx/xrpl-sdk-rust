@@ -1,8 +1,5 @@
 // Account methods
 
-pub mod account_lines;
-pub use account_lines::*;
-
 pub mod account_offers;
 pub use account_offers::*;
 

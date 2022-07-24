@@ -2,8 +2,10 @@
 
 use serde::{Deserialize, Serialize};
 
+use crate::Request;
+
 #[derive(Default, Clone, Serialize)]
-pub struct AccountLinesRequestPayload {
+pub struct AccountLinesRequest {
     pub account: String,
     // #[serde(skip_serializing_if = "Option::is_none")]
     // ledger_hash: Option<String>,
@@ -12,6 +14,23 @@ pub struct AccountLinesRequestPayload {
     // #[serde(skip_serializing_if = "Option::is_none")]
     // strict: Option<bool>,
     // TODO: add more parameters!
+}
+
+impl Request for AccountLinesRequest {
+    type Response = AccountLinesResponse;
+
+    fn method(&self) -> String {
+        "account_lines".to_owned()
+    }
+}
+
+impl AccountLinesRequest {
+    pub fn new(account: &str) -> Self {
+        Self {
+            account: account.to_owned(),
+            ..Default::default()
+        }
+    }
 }
 
 // TODO: consider extracting as a type.
@@ -29,6 +48,6 @@ pub struct AccountLine {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct AccountLinesResponsePayload {
+pub struct AccountLinesResponse {
     pub lines: Vec<AccountLine>,
 }
