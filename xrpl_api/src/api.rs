@@ -9,3 +9,8 @@ pub use account_lines::*;
 
 pub mod fee;
 pub use fee::*;
+
+// Server Info methods
+
+pub mod server_state;
+pub use server_state::*;

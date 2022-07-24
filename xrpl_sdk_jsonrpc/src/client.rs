@@ -1,7 +1,7 @@
 use crate::error::Error;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use tracing::debug;
-use xrpl_api::{AccountInfoRequest, Request};
+use xrpl_api::{AccountInfoRequest, Request, ServerStateRequest};
 use xrpl_types::Transaction;
 
 pub const GENERAL_PURPOSE_MAINNET_URL: &str = "https://s1.ripple.com:51234";
@@ -170,14 +170,13 @@ impl Client {
         let mut tx = tx;
 
         if tx.sequence.is_none() {
-            let req = AccountInfoRequest::new(&tx.account);
-            let resp = self.send(req).await?;
+            let resp = self.send(AccountInfoRequest::new(&tx.account)).await?;
 
             tx.sequence = Some(resp.account_data.sequence);
         }
 
         if tx.last_ledger_sequence.is_none() || tx.fee.is_none() {
-            let resp = self.server_state().send().await?;
+            let resp = self.send(ServerStateRequest::new()).await?;
 
             // The recommendation for backend applications is to use (last validated ledger index + 4).
             tx.last_ledger_sequence = Some(resp.state.validated_ledger.seq + 4);
@@ -193,7 +192,7 @@ impl Client {
 #[cfg(test)]
 mod tests {
     use crate::client::Client;
-    use xrpl_api::{AccountCurrenciesRequest, AccountInfoRequest, FeeRequest};
+    use xrpl_api::{AccountCurrenciesRequest, AccountInfoRequest, FeeRequest, ServerStateRequest};
 
     #[tokio::test]
     async fn client_can_fetch_account_currencies() {
@@ -223,6 +222,15 @@ mod tests {
         let client = Client::default();
 
         let resp = client.send(FeeRequest::new()).await;
+
+        dbg!(&resp);
+    }
+
+    #[tokio::test]
+    async fn client_can_fetch_the_server_state() {
+        let client = Client::default();
+
+        let resp = client.send(ServerStateRequest::new()).await;
 
         dbg!(&resp);
     }

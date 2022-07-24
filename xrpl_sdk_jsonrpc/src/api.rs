@@ -29,11 +29,3 @@ pub use submit::*;
 
 pub mod book_offers;
 pub use book_offers::*;
-
-// Server Info methods
-
-pub mod fee;
-pub use fee::*;
-
-pub mod server_state;
-pub use server_state::*;
