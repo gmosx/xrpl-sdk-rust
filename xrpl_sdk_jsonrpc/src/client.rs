@@ -1,6 +1,7 @@
 use crate::error::Error;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use tracing::debug;
+use xrpl_api::{AccountInfoRequest, Request};
 use xrpl_types::Transaction;
 
 pub const GENERAL_PURPOSE_MAINNET_URL: &str = "https://s1.ripple.com:51234";
@@ -25,10 +26,6 @@ pub struct RpcRequest<P: Serialize> {
 #[derive(Debug, Deserialize)]
 pub struct RpcResponse<T> {
     pub result: T,
-}
-
-pub trait RpcResponsePayload {
-    // TODO!
 }
 
 // #[derive(Error, Debug)]
@@ -120,6 +117,32 @@ impl Client {
         self.unwrap_response(response).await
     }
 
+    pub async fn send2<Req>(&self, request: Req) -> Result<Req::Response>
+    where
+        Req: Request + Serialize,
+        Req::Response: DeserializeOwned,
+    {
+        let request = RpcRequest {
+            method: request.method(),
+            params: vec![request],
+        };
+
+        // #TODO: remove the unwrap!
+        let body = serde_json::to_string(&request).unwrap();
+
+        debug!("POST {}", body);
+
+        let response = self
+            .http_client
+            .post(&self.base_url)
+            .body(body)
+            .header(reqwest::header::USER_AGENT, &self.user_agent)
+            .send()
+            .await?;
+
+        self.unwrap_response(response).await
+    }
+
     async fn unwrap_response<Resp>(&self, response: reqwest::Response) -> Result<Resp>
     where
         Resp: DeserializeOwned,
@@ -146,7 +169,8 @@ impl Client {
         let mut tx = tx;
 
         if tx.sequence.is_none() {
-            let resp = self.account_info(&tx.account).send().await?;
+            let req = AccountInfoRequest::new(&tx.account);
+            let resp = self.send2(req).await?;
 
             tx.sequence = Some(resp.account_data.sequence);
         }
@@ -163,4 +187,21 @@ impl Client {
     }
 
     // TODO: local_sign in external package!
+}
+
+#[cfg(test)]
+mod tests {
+    use xrpl_api::AccountInfoRequest;
+
+    use crate::client::Client;
+
+    #[tokio::test]
+    async fn client_can_fetch_account_info() {
+        let client = Client::default();
+
+        let req = AccountInfoRequest::new("r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59").strict(true);
+        let resp = client.send2(req).await;
+
+        dbg!(&resp);
+    }
 }

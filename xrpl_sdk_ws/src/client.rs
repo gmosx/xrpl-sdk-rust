@@ -1,10 +1,12 @@
 use crate::util::Result;
 use futures_util::SinkExt;
+use serde::Serialize;
 use tokio::net::TcpStream;
 use tokio_tungstenite::{
     connect_async, tungstenite::protocol::Message, MaybeTlsStream, WebSocketStream,
 };
 use uuid::Uuid;
+use xrpl_api::Request;
 
 // https://xrpl.org/public-servers.html
 
@@ -35,8 +37,59 @@ impl Client {
         Ok(())
     }
 
+    pub async fn send2<Req>(&mut self, req: Req) -> Result<()>
+    where
+        Req: Request + Serialize,
+    {
+        let id = self.next_id();
+
+        let msg = serde_json::to_value(&req).unwrap(); // #TODO use `?`.
+
+        // #TODO, this is temp code, add error-handling!
+
+        if let serde_json::Value::Object(mut map) = msg {
+            map.insert("id".to_owned(), serde_json::Value::String(id));
+            map.insert(
+                "command".to_owned(),
+                serde_json::Value::String(req.method()),
+            );
+            let msg = serde_json::to_string(&map).unwrap();
+
+            self.send(&msg).await?;
+        }
+
+        Ok(())
+    }
+
     // #TODO make this customizable.
     pub fn next_id(&self) -> String {
         Uuid::new_v4().to_string()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::client::DEFAULT_WS_URL;
+    use futures_util::{SinkExt, StreamExt};
+    use xrpl_api::AccountInfoRequest;
+
+    #[tokio::test]
+    async fn client_can_request_account_info() {
+        let mut client = Client::connect(DEFAULT_WS_URL)
+            .await
+            .expect("cannot connect");
+
+        let req = AccountInfoRequest::new("r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59").strict(true);
+
+        client.send2(req).await.expect("cannot send request");
+
+        let (_, rx) = client.stream.split();
+
+        tokio::pin!(rx);
+
+        while let Some(msg) = rx.next().await {
+            dbg!(&msg);
+        }
     }
 }
