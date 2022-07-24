@@ -32,7 +32,9 @@ impl AccountOffersRequest {
             params: vec![self.params],
         };
 
-        self.client.send::<AccountOffersParams, T>(request).await
+        self.client
+            .send_old::<AccountOffersParams, T>(request)
+            .await
     }
 
     pub async fn send(self) -> Result<AccountOffersResponse> {

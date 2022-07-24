@@ -81,7 +81,7 @@ impl BookOffersRequest {
             method: "book_offers".to_string(),
             params: vec![self.params],
         };
-        self.client.send::<BookOffersParams, T>(request).await
+        self.client.send_old::<BookOffersParams, T>(request).await
     }
 
     pub async fn send(self) -> Result<BookOffersResponse> {

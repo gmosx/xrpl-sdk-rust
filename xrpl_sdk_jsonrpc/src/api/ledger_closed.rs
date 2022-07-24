@@ -17,7 +17,7 @@ impl LedgerClosedRequest {
             method: "ledger_closed".to_string(),
             params: vec![],
         };
-        self.client.send::<LedgerClosedParams, T>(request).await
+        self.client.send_old::<LedgerClosedParams, T>(request).await
     }
 
     pub async fn send(self) -> Result<LedgerClosedResponse> {

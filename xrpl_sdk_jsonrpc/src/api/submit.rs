@@ -21,7 +21,7 @@ impl SubmitRequest {
             method: "submit".to_string(),
             params: vec![self.params],
         };
-        self.client.send::<SubmitParams, T>(request).await
+        self.client.send_old::<SubmitParams, T>(request).await
     }
 
     pub async fn send(self) -> Result<SubmitResponse> {

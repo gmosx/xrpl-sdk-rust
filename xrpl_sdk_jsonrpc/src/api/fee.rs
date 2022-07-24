@@ -17,7 +17,7 @@ impl FeeRequest {
             method: "fee".to_string(),
             params: vec![],
         };
-        self.client.send::<FeeParams, T>(request).await
+        self.client.send_old::<FeeParams, T>(request).await
     }
 
     pub async fn send(self) -> Result<FeeResponse> {

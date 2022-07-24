@@ -95,8 +95,9 @@ impl Client {
         ClientBuilder::default()
     }
 
+    // #Deprecated Will be removed!
     /// Sends a JSON-RPC request to rippled.
-    pub async fn send<Params, Resp>(&self, request: RpcRequest<Params>) -> Result<Resp>
+    pub async fn send_old<Params, Resp>(&self, request: RpcRequest<Params>) -> Result<Resp>
     where
         Params: Serialize,
         Resp: DeserializeOwned,
@@ -117,7 +118,7 @@ impl Client {
         self.unwrap_response(response).await
     }
 
-    pub async fn send2<Req>(&self, request: Req) -> Result<Req::Response>
+    pub async fn send<Req>(&self, request: Req) -> Result<Req::Response>
     where
         Req: Request + Serialize,
         Req::Response: DeserializeOwned,
@@ -170,7 +171,7 @@ impl Client {
 
         if tx.sequence.is_none() {
             let req = AccountInfoRequest::new(&tx.account);
-            let resp = self.send2(req).await?;
+            let resp = self.send(req).await?;
 
             tx.sequence = Some(resp.account_data.sequence);
         }
@@ -199,7 +200,7 @@ mod tests {
         let client = Client::default();
 
         let resp = client
-            .send2(AccountCurrenciesRequest::new(
+            .send(AccountCurrenciesRequest::new(
                 "r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59",
             ))
             .await;
@@ -212,7 +213,7 @@ mod tests {
         let client = Client::default();
 
         let req = AccountInfoRequest::new("r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59").strict(true);
-        let resp = client.send2(req).await;
+        let resp = client.send(req).await;
 
         dbg!(&resp);
     }

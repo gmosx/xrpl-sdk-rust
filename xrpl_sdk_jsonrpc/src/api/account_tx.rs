@@ -43,7 +43,7 @@ impl AccountTxRequest {
             method: "account_tx".to_string(),
             params: vec![self.params],
         };
-        self.client.send::<AccountTxParams, T>(request).await
+        self.client.send_old::<AccountTxParams, T>(request).await
     }
 
     pub async fn send(self) -> Result<AccountTxResponse> {

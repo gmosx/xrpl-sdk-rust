@@ -10,7 +10,7 @@ impl Client {
         let msg = format!(
             "{{\"id\": \"{id}\", \"command\": \"subscribe\", \"accounts\": [\"{account}\"]}}"
         );
-        self.send(&msg).await?;
+        self.send_old(&msg).await?;
         Ok(())
     }
 
@@ -19,7 +19,7 @@ impl Client {
         let accounts = format_joined_keys(accounts);
         let msg =
             format!("{{\"id\": \"{id}\", \"command\": \"subscribe\", \"accounts\": [{accounts}]}}");
-        self.send(&msg).await?;
+        self.send_old(&msg).await?;
         Ok(())
     }
 
@@ -29,7 +29,7 @@ impl Client {
         let msg = format!(
             "{{\"id\": \"{id}\", \"command\": \"subscribe\", \"streams\": [\"{stream}\"]}}"
         );
-        self.send(&msg).await?;
+        self.send_old(&msg).await?;
         Ok(())
     }
 
@@ -39,7 +39,7 @@ impl Client {
         let streams = format_joined_keys(streams);
         let msg =
             format!("{{\"id\": \"{id}\", \"command\": \"subscribe\", \"streams\": [{streams}]}}");
-        self.send(&msg).await?;
+        self.send_old(&msg).await?;
         Ok(())
     }
 }

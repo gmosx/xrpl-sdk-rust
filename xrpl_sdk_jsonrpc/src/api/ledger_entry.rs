@@ -34,7 +34,7 @@ impl LedgerEntryRequest {
             method: "ledger_entry".to_string(),
             params: vec![self.params],
         };
-        self.client.send::<LedgerEntryParams, T>(request).await
+        self.client.send_old::<LedgerEntryParams, T>(request).await
     }
 
     pub async fn send(self) -> Result<LedgerEntryResponse> {

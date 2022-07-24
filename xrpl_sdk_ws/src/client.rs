@@ -19,7 +19,6 @@ pub const DEVNET_WS_URL: &str = "wss://s.devnet.rippletest.net/";
 pub const DEFAULT_WS_URL: &str = XRPL_CLUSTER_MAINNET_WS_URL;
 
 // #TODO extract Connection
-// #TODO split into multiple `api` files
 
 /// A WebSocket client for the XRP Ledger.
 pub struct Client {
@@ -32,12 +31,13 @@ impl Client {
         Ok(Self { stream })
     }
 
-    pub async fn send(&mut self, msg: &str) -> Result<()> {
+    // #Deprecated will be removed!
+    pub async fn send_old(&mut self, msg: &str) -> Result<()> {
         self.stream.send(Message::Text(msg.to_string())).await?;
         Ok(())
     }
 
-    pub async fn send2<Req>(&mut self, req: Req) -> Result<()>
+    pub async fn send<Req>(&mut self, req: Req) -> Result<()>
     where
         Req: Request + Serialize,
     {
@@ -55,7 +55,7 @@ impl Client {
             );
             let msg = serde_json::to_string(&map).unwrap();
 
-            self.send(&msg).await?;
+            self.send_old(&msg).await?;
         }
 
         Ok(())
@@ -82,7 +82,7 @@ mod tests {
 
         let req = AccountInfoRequest::new("r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59").strict(true);
 
-        client.send2(req).await.expect("cannot send request");
+        client.send(req).await.expect("cannot send request");
 
         let (_, rx) = client.stream.split();
 

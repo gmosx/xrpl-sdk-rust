@@ -21,7 +21,7 @@ impl AccountLinesRequest {
             params: vec![self.params],
         };
         self.client
-            .send::<AccountLinesRequestPayload, T>(request)
+            .send_old::<AccountLinesRequestPayload, T>(request)
             .await
     }
 

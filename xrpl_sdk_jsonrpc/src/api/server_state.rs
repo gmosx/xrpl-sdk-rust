@@ -17,7 +17,7 @@ impl ServerStateRequest {
             method: "server_state".to_string(),
             params: vec![],
         };
-        self.client.send::<ServerStateParams, T>(request).await
+        self.client.send_old::<ServerStateParams, T>(request).await
     }
 
     pub async fn send(self) -> Result<ServerStateResponse> {

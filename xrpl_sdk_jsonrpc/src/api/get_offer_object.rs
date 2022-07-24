@@ -33,7 +33,9 @@ impl GetOfferObjectRequest {
             method: "ledger_entry".to_string(),
             params: vec![self.params],
         };
-        self.client.send::<GetOfferObjectParams, T>(request).await
+        self.client
+            .send_old::<GetOfferObjectParams, T>(request)
+            .await
     }
 
     pub async fn send(self) -> Result<GetOfferObjectResponse> {

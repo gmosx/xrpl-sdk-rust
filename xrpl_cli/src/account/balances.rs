@@ -18,7 +18,7 @@ pub fn account_balances(account_matches: &ArgMatches, balances_matches: &ArgMatc
 
         let mut balances: HashMap<String, f64> = HashMap::new();
 
-        let account_info_resp = client.send2(AccountInfoRequest::new(account)).await;
+        let account_info_resp = client.send(AccountInfoRequest::new(account)).await;
         let account_lines_resp = client.account_lines(account).send().await;
 
         if let Ok(resp) = account_info_resp {
