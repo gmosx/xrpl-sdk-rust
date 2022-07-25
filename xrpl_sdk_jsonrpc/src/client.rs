@@ -186,15 +186,16 @@ impl Client {
         Ok(tx)
     }
 
-    // TODO: local_sign in external package!
+    // #TODO: add additional helpers, like .submit(), and other requests with standard params.
+    // #TODO: local_sign in external package!
 }
 
 #[cfg(test)]
 mod tests {
     use crate::client::Client;
     use xrpl_api::{
-        AccountCurrenciesRequest, AccountInfoRequest, AccountLinesRequest, FeeRequest,
-        ServerStateRequest,
+        AccountCurrenciesRequest, AccountInfoRequest, AccountLinesRequest, AccountOffersRequest,
+        FeeRequest, ServerStateRequest,
     };
 
     #[tokio::test]
@@ -231,6 +232,26 @@ mod tests {
             .await;
 
         dbg!(&resp);
+    }
+
+    #[tokio::test]
+    async fn client_can_fetch_account_offers() {
+        let client = Client::default();
+
+        let resp = client
+            .send(AccountOffersRequest::new(
+                "r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59",
+            ))
+            .await;
+
+        dbg!(&resp);
+
+        // if let Ok(resp) = resp {
+        //     let order_book = resp.order_book;
+
+        //     assert_eq!(order_book.bid_queue().len() as u32, depth);
+        //     assert_eq!(order_book.ask_queue().len() as u32, depth);
+        // }
     }
 
     #[tokio::test]

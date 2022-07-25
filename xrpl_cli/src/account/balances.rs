@@ -1,6 +1,6 @@
 use clap::ArgMatches;
 use std::collections::HashMap;
-use xrpl_sdk_jsonrpc::{AccountInfoRequest, Client};
+use xrpl_sdk_jsonrpc::{AccountInfoRequest, AccountLinesRequest, Client};
 
 // #TODO should be `balance` or `balances`?
 // #TODO add error handling
@@ -19,7 +19,7 @@ pub fn account_balances(account_matches: &ArgMatches, balances_matches: &ArgMatc
         let mut balances: HashMap<String, f64> = HashMap::new();
 
         let account_info_resp = client.send(AccountInfoRequest::new(account)).await;
-        let account_lines_resp = client.account_lines(account).send().await;
+        let account_lines_resp = client.send(AccountLinesRequest::new(account)).await;
 
         if let Ok(resp) = account_info_resp {
             let account_data = &resp.account_data;
