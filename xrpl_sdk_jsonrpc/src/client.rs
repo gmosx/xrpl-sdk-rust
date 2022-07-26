@@ -118,6 +118,7 @@ impl Client {
         self.unwrap_response(response).await
     }
 
+    // #TODO consider calling this call, like Tower!
     pub async fn send<Req>(&self, request: Req) -> Result<Req::Response>
     where
         Req: Request + Serialize,
@@ -195,8 +196,10 @@ mod tests {
     use crate::client::Client;
     use xrpl_api::{
         AccountCurrenciesRequest, AccountInfoRequest, AccountLinesRequest, AccountOffersRequest,
-        FeeRequest, ServerStateRequest,
+        AccountTxRequest, BookOffersRequest, FeeRequest, GetOfferObjectRequest,
+        LedgerClosedRequest, LedgerEntryRequest, ServerStateRequest,
     };
+    use xrpl_types::Currency;
 
     #[tokio::test]
     async fn client_can_fetch_account_currencies() {
@@ -245,13 +248,67 @@ mod tests {
             .await;
 
         dbg!(&resp);
+    }
 
-        // if let Ok(resp) = resp {
-        //     let order_book = resp.order_book;
+    #[tokio::test]
+    async fn client_can_fetch_account_transactions() {
+        let client = Client::default();
 
-        //     assert_eq!(order_book.bid_queue().len() as u32, depth);
-        //     assert_eq!(order_book.ask_queue().len() as u32, depth);
-        // }
+        let req = AccountTxRequest::new("r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59").limit(5);
+        let resp = client.send(req).await;
+
+        dbg!(&resp);
+    }
+
+    #[tokio::test]
+    async fn client_can_fetch_info_about_the_last_closed_ledger() {
+        let client = Client::default();
+
+        let resp = client.send(LedgerClosedRequest::new()).await;
+
+        dbg!(&resp);
+    }
+
+    #[tokio::test]
+    async fn client_can_fetch_a_ledger_entry() {
+        let client = Client::default();
+
+        let resp = client
+            .send(LedgerEntryRequest::new(
+                "rf1BiGeXwwQoi8Z2ueFYTEXSwuJYfV2Jpn",
+                359,
+            ))
+            .await;
+
+        dbg!(&resp);
+    }
+
+    #[tokio::test]
+    async fn client_can_get_an_offer_object() {
+        let client = Client::default();
+
+        let resp = client
+            .send(GetOfferObjectRequest::new(
+                "rf1BiGeXwwQoi8Z2ueFYTEXSwuJYfV2Jpn",
+                359,
+            ))
+            .await;
+
+        dbg!(&resp);
+    }
+
+    #[tokio::test]
+    async fn client_can_fetch_book_offers() {
+        let client = Client::default();
+
+        let resp = client
+            .send(BookOffersRequest::new(
+                &Currency::xrp(),
+                &Currency::issued("USD", "rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B"),
+            ))
+            .await;
+
+        dbg!(&resp);
     }
 
     #[tokio::test]

@@ -1,9 +1,10 @@
-use crate::{client::RpcRequest, Client, Result};
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use crate::Request;
+use serde::{Deserialize, Serialize};
 use xrpl_types::{Amount, TransactionType};
 
+/// - https://xrpl.org/account_tx.html
 #[derive(Default, Clone, Serialize)]
-pub struct AccountTxParams {
+pub struct AccountTxRequest {
     account: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     ledger_hash: Option<String>,
@@ -18,36 +19,28 @@ pub struct AccountTxParams {
     // TODO: add more parameters!
 }
 
-/// - https://xrpl.org/account_tx.html
-#[must_use = "Does nothing until you send or execute it"]
-#[derive(Default, Clone)]
-pub struct AccountTxRequest {
-    client: Client,
-    params: AccountTxParams,
+impl Request for AccountTxRequest {
+    type Response = AccountTxResponse;
+
+    fn method(&self) -> String {
+        "account_tx".to_owned()
+    }
 }
 
 impl AccountTxRequest {
-    // TODO: add more builders.
-    pub fn limit(self, limit: u32) -> Self {
+    pub fn new(account: &str) -> Self {
         Self {
-            params: AccountTxParams {
-                limit: Some(limit),
-                ..self.params
-            },
-            ..self
+            account: account.to_owned(),
+            ..Default::default()
         }
     }
 
-    pub async fn execute<T: DeserializeOwned>(self) -> Result<T> {
-        let request = RpcRequest {
-            method: "account_tx".to_string(),
-            params: vec![self.params],
-        };
-        self.client.send_old::<AccountTxParams, T>(request).await
-    }
-
-    pub async fn send(self) -> Result<AccountTxResponse> {
-        self.execute().await
+    // #TODO add more builders.
+    pub fn limit(self, limit: u32) -> Self {
+        Self {
+            limit: Some(limit),
+            ..self
+        }
     }
 }
 
@@ -202,20 +195,4 @@ pub struct AccountTxResponse {
     pub account: String,
     pub limit: u32,
     pub transactions: Vec<AccountTransaction>,
-}
-
-impl Client {
-    pub fn account_tx(&self, account: &str) -> AccountTxRequest {
-        AccountTxRequest {
-            client: self.clone(),
-            params: AccountTxParams {
-                account: account.to_string(),
-                ledger_hash: None,
-                ledger_index: None,
-                ledger_index_min: None,
-                ledger_index_max: None,
-                limit: None,
-            },
-        }
-    }
 }
