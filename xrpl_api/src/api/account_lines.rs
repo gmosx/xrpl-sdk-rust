@@ -1,9 +1,7 @@
-//! https://xrpl.org/account_lines.html
-
+use crate::Request;
 use serde::{Deserialize, Serialize};
 
-use crate::Request;
-
+/// https://xrpl.org/account_lines.html
 #[derive(Default, Clone, Serialize)]
 pub struct AccountLinesRequest {
     pub account: String,

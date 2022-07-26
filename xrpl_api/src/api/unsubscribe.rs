@@ -1,30 +1,24 @@
 use crate::Request;
 use serde::{Deserialize, Serialize};
 
-/// https://xrpl.org/subscribe.html
+/// https://xrpl.org/unsubscribe.html
 #[derive(Default, Clone, Serialize)]
-pub struct SubscribeRequest {
+pub struct UnsubscribeRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     streams: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     accounts: Option<Vec<String>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    url: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    url_username: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    url_password: Option<String>,
 }
 
-impl Request for SubscribeRequest {
-    type Response = SubscribeResponse;
+impl Request for UnsubscribeRequest {
+    type Response = UnsubscribeResponse;
 
     fn method(&self) -> String {
-        "subscribe".to_owned()
+        "unsubscribe".to_owned()
     }
 }
 
-impl SubscribeRequest {
+impl UnsubscribeRequest {
     pub fn new() -> Self {
         Self::default()
     }
@@ -47,4 +41,4 @@ impl SubscribeRequest {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct SubscribeResponse {}
+pub struct UnsubscribeResponse {}

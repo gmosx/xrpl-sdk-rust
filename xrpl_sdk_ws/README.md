@@ -4,6 +4,25 @@ A strongly-typed client for the XRP Ledger WebSocket API.
 
 This crate is an *unofficial*, community-driven effort.
 
+## Usage
+
+```rust
+    let mut client = Client::connect(DEFAULT_WS_URL)
+        .await
+        .expect("cannot connect");
+
+    let req = SubscribeRequest::streams(&["ledger"]);
+    client.send(req).await.expect("cannot subscribe");
+
+    let (_, rx) = client.stream.split();
+
+    tokio::pin!(rx);
+
+    while let Some(msg) = rx.next().await {
+        dbg!(&msg);
+    }
+```
+
 ## Status
 
 Under construction, nothing to see here.

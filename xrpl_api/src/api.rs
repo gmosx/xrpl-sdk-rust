@@ -43,3 +43,11 @@ pub use fee::*;
 
 pub mod server_state;
 pub use server_state::*;
+
+// WebSocket methods
+
+pub mod subscribe;
+pub use subscribe::*;
+
+pub mod unsubscribe;
+pub use unsubscribe::*;
