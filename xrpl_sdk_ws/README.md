@@ -7,20 +7,20 @@ This crate is an *unofficial*, community-driven effort.
 ## Usage
 
 ```rust
-    let mut client = Client::connect(DEFAULT_WS_URL)
-        .await
-        .expect("cannot connect");
+let mut client = Client::connect(DEFAULT_WS_URL)
+    .await
+    .expect("cannot connect");
 
-    let req = SubscribeRequest::streams(&["ledger"]);
-    client.send(req).await.expect("cannot subscribe");
+let req = SubscribeRequest::streams(&["ledger"]);
+client.send(req).await.expect("cannot subscribe");
 
-    let (_, rx) = client.stream.split();
+let (_, rx) = client.stream.split();
 
-    tokio::pin!(rx);
+tokio::pin!(rx);
 
-    while let Some(msg) = rx.next().await {
-        dbg!(&msg);
-    }
+while let Some(msg) = rx.next().await {
+    dbg!(&msg);
+}
 ```
 
 ## Status

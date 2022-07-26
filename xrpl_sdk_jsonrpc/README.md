@@ -14,14 +14,14 @@ xrpl_sdk_jsonrpc = "0.6"
 ## Usage
 
 ```rust
-    let client = Client::new();
+let client = Client::new();
 
-    let account = env::var("XRPL_ACCOUNT_ADDRESS").expect("account not defined");
+let account = env::var("XRPL_ACCOUNT_ADDRESS").expect("account not defined");
 
-    let req = AccountTxRequest::new(&account).limit(5);
-    let resp = client.send(req).await;
+let req = AccountTxRequest::new(&account).limit(5);
+let resp = client.send(req).await;
 
-    dbg!(&resp);
+dbg!(&resp);
 ```
 
 ## Links
