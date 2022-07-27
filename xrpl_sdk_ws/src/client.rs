@@ -31,11 +31,11 @@ impl Client {
         Ok(Self { stream })
     }
 
-    // #Deprecated will be removed!
-    pub async fn send_old(&mut self, msg: &str) -> Result<()> {
-        self.stream.send(Message::Text(msg.to_string())).await?;
-        Ok(())
-    }
+    // // #Deprecated will be removed!
+    // pub async fn send_old(&mut self, msg: &str) -> Result<()> {
+    //     self.stream.send(Message::Text(msg.to_string())).await?;
+    //     Ok(())
+    // }
 
     pub async fn send<Req>(&mut self, req: Req) -> Result<()>
     where
@@ -55,7 +55,7 @@ impl Client {
             );
             let msg = serde_json::to_string(&map).unwrap();
 
-            self.send_old(&msg).await?;
+            self.stream.send(Message::Text(msg.to_string())).await?;
         }
 
         Ok(())

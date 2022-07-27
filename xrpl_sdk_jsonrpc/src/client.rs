@@ -95,29 +95,6 @@ impl Client {
         ClientBuilder::default()
     }
 
-    // #Deprecated Will be removed!
-    /// Sends a JSON-RPC request to rippled.
-    pub async fn send_old<Params, Resp>(&self, request: RpcRequest<Params>) -> Result<Resp>
-    where
-        Params: Serialize,
-        Resp: DeserializeOwned,
-    {
-        // #TODO: remove the unwrap!
-        let body = serde_json::to_string(&request).unwrap();
-
-        debug!("POST {}", body);
-
-        let response = self
-            .http_client
-            .post(&self.base_url)
-            .body(body)
-            .header(reqwest::header::USER_AGENT, &self.user_agent)
-            .send()
-            .await?;
-
-        self.unwrap_response(response).await
-    }
-
     // #TODO consider calling this call, like Tower!
     pub async fn send<Req>(&self, request: Req) -> Result<Req::Response>
     where
@@ -132,6 +109,7 @@ impl Client {
         // #TODO: remove the unwrap!
         let body = serde_json::to_string(&request).unwrap();
 
+        dbg!(&body);
         debug!("POST {}", body);
 
         let response = self
@@ -197,7 +175,7 @@ mod tests {
     use xrpl_api::{
         AccountCurrenciesRequest, AccountInfoRequest, AccountLinesRequest, AccountOffersRequest,
         AccountTxRequest, BookOffersRequest, FeeRequest, GetOfferObjectRequest,
-        LedgerClosedRequest, LedgerEntryRequest, ServerStateRequest,
+        LedgerClosedRequest, LedgerEntryRequest, ManifestRequest, ServerStateRequest,
     };
     use xrpl_types::Currency;
 
@@ -305,6 +283,19 @@ mod tests {
             .send(BookOffersRequest::new(
                 &Currency::xrp(),
                 &Currency::issued("USD", "rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B"),
+            ))
+            .await;
+
+        dbg!(&resp);
+    }
+
+    #[tokio::test]
+    async fn client_can_fetch_manifests() {
+        let client = Client::default();
+
+        let resp = client
+            .send(ManifestRequest::new(
+                "nHUE7npJuqdYxFL93tGZS7CW9DuWNLAxBVjzc2rEbu65eL4iiA6s",
             ))
             .await;
 
