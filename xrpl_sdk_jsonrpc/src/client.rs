@@ -134,6 +134,8 @@ impl Client {
             let body: RpcResponse<Resp> = response.json().await?;
             Ok(body.result)
         } else {
+            dbg!(&response.status());
+            dbg!(&response.text().await?);
             // TODO: Add proper error handling!
             panic!()
         }
@@ -174,8 +176,9 @@ mod tests {
     use crate::client::Client;
     use xrpl_api::{
         AccountCurrenciesRequest, AccountInfoRequest, AccountLinesRequest, AccountOffersRequest,
-        AccountTxRequest, BookOffersRequest, FeeRequest, GetOfferObjectRequest,
-        LedgerClosedRequest, LedgerEntryRequest, ManifestRequest, ServerStateRequest,
+        AccountTxRequest, BookOffersRequest, FeeRequest, GatewayBalancesRequest,
+        GetOfferObjectRequest, LedgerClosedRequest, LedgerEntryRequest, ManifestRequest,
+        RandomRequest, ServerStateRequest,
     };
     use xrpl_types::Currency;
 
@@ -234,6 +237,19 @@ mod tests {
 
         let req = AccountTxRequest::new("r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59").limit(5);
         let resp = client.send(req).await;
+
+        dbg!(&resp);
+    }
+
+    #[tokio::test]
+    async fn client_can_fetch_gateway_balances() {
+        let client = Client::default();
+
+        let resp = client
+            .send(GatewayBalancesRequest::new(
+                "rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq",
+            ))
+            .await;
 
         dbg!(&resp);
     }
@@ -316,6 +332,15 @@ mod tests {
         let client = Client::default();
 
         let resp = client.send(ServerStateRequest::new()).await;
+
+        dbg!(&resp);
+    }
+
+    #[tokio::test]
+    async fn client_can_fetch_a_random_seed() {
+        let client = Client::default();
+
+        let resp = client.send(RandomRequest::new()).await;
 
         dbg!(&resp);
     }

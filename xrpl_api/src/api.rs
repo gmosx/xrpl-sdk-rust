@@ -15,6 +15,9 @@ pub use account_offers::*;
 pub mod account_tx;
 pub use account_tx::*;
 
+pub mod gateway_balances;
+pub use gateway_balances::*;
+
 // Ledger methods
 
 pub mod ledger_closed;
@@ -54,3 +57,8 @@ pub use subscribe::*;
 
 pub mod unsubscribe;
 pub use unsubscribe::*;
+
+// Utility methods
+
+pub mod random;
+pub use random::*;
