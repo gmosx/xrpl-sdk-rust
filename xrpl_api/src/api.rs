@@ -39,6 +39,9 @@ pub use submit::*;
 pub mod book_offers;
 pub use book_offers::*;
 
+pub mod deposit_authorized;
+pub use deposit_authorized::*;
+
 // Server Info methods
 
 pub mod fee;

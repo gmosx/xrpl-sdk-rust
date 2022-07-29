@@ -109,7 +109,6 @@ impl Client {
         // #TODO: remove the unwrap!
         let body = serde_json::to_string(&request).unwrap();
 
-        dbg!(&body);
         debug!("POST {}", body);
 
         let response = self
@@ -176,9 +175,9 @@ mod tests {
     use crate::client::Client;
     use xrpl_api::{
         AccountCurrenciesRequest, AccountInfoRequest, AccountLinesRequest, AccountOffersRequest,
-        AccountTxRequest, BookOffersRequest, FeeRequest, GatewayBalancesRequest,
-        GetOfferObjectRequest, LedgerClosedRequest, LedgerEntryRequest, ManifestRequest,
-        RandomRequest, ServerStateRequest,
+        AccountTxRequest, BookOffersRequest, DepositAuthorizedRequest, FeeRequest,
+        GatewayBalancesRequest, GetOfferObjectRequest, LedgerClosedRequest, LedgerEntryRequest,
+        ManifestRequest, RandomRequest, ServerStateRequest,
     };
     use xrpl_types::Currency;
 
@@ -299,6 +298,20 @@ mod tests {
             .send(BookOffersRequest::new(
                 &Currency::xrp(),
                 &Currency::issued("USD", "rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B"),
+            ))
+            .await;
+
+        dbg!(&resp);
+    }
+
+    #[tokio::test]
+    async fn client_can_check_if_deposit_is_authorized() {
+        let client = Client::default();
+
+        let resp = client
+            .send(DepositAuthorizedRequest::new(
+                "r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59",
+                "ra5nK24KXen9AHvsdFTKHSANinZseWnPcX",
             ))
             .await;
 
