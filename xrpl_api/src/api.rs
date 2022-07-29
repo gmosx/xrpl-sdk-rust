@@ -23,6 +23,9 @@ pub use gateway_balances::*;
 pub mod ledger_closed;
 pub use ledger_closed::*;
 
+pub mod ledger_current;
+pub use ledger_current::*;
+
 pub mod ledger_entry;
 pub use ledger_entry::*;
 

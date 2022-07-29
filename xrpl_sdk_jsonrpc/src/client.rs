@@ -176,8 +176,8 @@ mod tests {
     use xrpl_api::{
         AccountCurrenciesRequest, AccountInfoRequest, AccountLinesRequest, AccountOffersRequest,
         AccountTxRequest, BookOffersRequest, DepositAuthorizedRequest, FeeRequest,
-        GatewayBalancesRequest, GetOfferObjectRequest, LedgerClosedRequest, LedgerEntryRequest,
-        ManifestRequest, RandomRequest, ServerStateRequest,
+        GatewayBalancesRequest, GetOfferObjectRequest, LedgerClosedRequest, LedgerCurrentRequest,
+        LedgerEntryRequest, ManifestRequest, RandomRequest, ServerStateRequest,
     };
     use xrpl_types::Currency;
 
@@ -258,6 +258,15 @@ mod tests {
         let client = Client::default();
 
         let resp = client.send(LedgerClosedRequest::new()).await;
+
+        dbg!(&resp);
+    }
+
+    #[tokio::test]
+    async fn client_can_fetch_info_about_the_current_ledger() {
+        let client = Client::default();
+
+        let resp = client.send(LedgerCurrentRequest::new()).await;
 
         dbg!(&resp);
     }
