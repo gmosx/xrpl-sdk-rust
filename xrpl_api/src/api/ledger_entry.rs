@@ -12,6 +12,7 @@ pub struct OfferParams {
 /// https://xrpl.org/ledger_entry.html
 #[derive(Default, Clone, Serialize)]
 pub struct LedgerEntryRequest {
+    #[serde(skip_serializing_if = "Option::is_none")]
     ledger_hash: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     ledger_index: Option<String>,

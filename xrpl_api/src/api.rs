@@ -37,6 +37,9 @@ pub use get_offer_object::*;
 pub mod submit;
 pub use submit::*;
 
+pub mod transaction_entry;
+pub use transaction_entry::*;
+
 // Path and Orderbook methods
 
 pub mod book_offers;

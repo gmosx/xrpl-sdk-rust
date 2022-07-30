@@ -6,6 +6,7 @@ mod tests {
         AccountTxRequest, BookOffersRequest, DepositAuthorizedRequest, FeeRequest,
         GatewayBalancesRequest, GetOfferObjectRequest, LedgerClosedRequest, LedgerCurrentRequest,
         LedgerEntryRequest, ManifestRequest, RandomRequest, ServerInfoRequest, ServerStateRequest,
+        TransactionEntryRequest,
     };
     use xrpl_types::Currency;
 
@@ -100,7 +101,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn client_can_fetch_a_ledger_entry() {
+    async fn client_can_fetch_ledger_entries() {
         let client = Client::default();
 
         let resp = client
@@ -150,6 +151,22 @@ mod tests {
                 "r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59",
                 "ra5nK24KXen9AHvsdFTKHSANinZseWnPcX",
             ))
+            .await;
+
+        dbg!(&resp);
+    }
+
+    #[tokio::test]
+    async fn client_can_fetch_transaction_entries() {
+        let client = Client::default();
+
+        let resp = client
+            .send(
+                TransactionEntryRequest::new(
+                    "DA86C7F1979A010BB5F54C49116697A44D8088F92C9AA3AAE419136FE8275A10",
+                )
+                .ledger_index("73355924"),
+            )
             .await;
 
         dbg!(&resp);

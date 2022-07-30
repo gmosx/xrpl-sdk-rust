@@ -100,6 +100,7 @@ impl Client {
 
         let body = serde_json::to_string(&request)?;
 
+        dbg!(&body);
         debug!("POST {}", body);
 
         let response = self
@@ -118,10 +119,22 @@ impl Client {
         Resp: DeserializeOwned,
     {
         if response.status() == 200 {
-            // eprintln!("==> {}", response.json::<serde_json::Value>().await?);
-            // panic!();
+            let body: serde_json::Value = response.json().await?;
 
-            match response.json::<RpcResponse<Resp>>().await {
+            let status = body["result"]["status"].as_str().unwrap_or("error");
+
+            if status == "error" {
+                debug!("{}", body);
+
+                return Err(Error::Api(
+                    body["result"]["error"]
+                        .as_str()
+                        .unwrap_or_default()
+                        .to_owned(),
+                ));
+            }
+
+            match serde_json::from_value::<RpcResponse<Resp>>(body) {
                 Ok(body) => Ok(body.result),
                 Err(err) => {
                     // #TODO add an option to show diagnostics?
