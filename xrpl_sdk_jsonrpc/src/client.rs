@@ -98,8 +98,7 @@ impl Client {
             params: vec![request],
         };
 
-        // #TODO: remove the unwrap!
-        let body = serde_json::to_string(&request).unwrap();
+        let body = serde_json::to_string(&request)?;
 
         debug!("POST {}", body);
 
@@ -111,10 +110,10 @@ impl Client {
             .send()
             .await?;
 
-        self.unwrap_response(response).await
+        self.parse_response(response).await
     }
 
-    async fn unwrap_response<Resp>(&self, response: reqwest::Response) -> Result<Resp>
+    async fn parse_response<Resp>(&self, response: reqwest::Response) -> Result<Resp>
     where
         Resp: DeserializeOwned,
     {
@@ -126,7 +125,7 @@ impl Client {
                 Ok(body) => Ok(body.result),
                 Err(err) => {
                     // #TODO add an option to show diagnostics?
-                    Err(Error::ParseError(err.to_string()))
+                    Err(Error::Format(err.to_string()))
                 }
             }
         } else {
