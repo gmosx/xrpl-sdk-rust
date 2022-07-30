@@ -9,8 +9,10 @@ pub enum Error {
     // FailedRequest { err: String, status: Option<u16> },
     // #[error("not authorized: missing api_credentials")]
     // Unauthorized,
-    // #[error("api error: {0}")]
-    // Api(String),
+    #[error("parsing error: {0}")]
+    ParseError(String),
+    #[error("api error: {0}")]
+    Api(String),
 }
 
 impl From<reqwest::Error> for Error {

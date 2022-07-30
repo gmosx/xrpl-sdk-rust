@@ -127,11 +127,16 @@ impl Client {
         Resp: DeserializeOwned,
     {
         if response.status() == 200 {
-            // TODO: add an option to show diagnostics?
-            // eprintln!("--> {}", response.text().await?);
+            // eprintln!("==> {}", response.json::<serde_json::Value>().await?);
             // panic!();
-            let body: RpcResponse<Resp> = response.json().await?;
-            Ok(body.result)
+
+            match response.json::<RpcResponse<Resp>>().await {
+                Ok(body) => Ok(body.result),
+                Err(err) => {
+                    // #TODO add an option to show diagnostics?
+                    Err(Error::ParseError(err.to_string()))
+                }
+            }
         } else {
             dbg!(&response.status());
             dbg!(&response.text().await?);
@@ -166,9 +171,11 @@ impl Client {
         Ok(tx)
     }
 
-    // #TODO: add additional helpers, like .submit(), and other requests with standard params.
-    // #TODO: local_sign in external package!
+    // #TODO add additional helpers, like .submit(), and other requests with standard params.
+    // #TODO local_sign in external package!
 }
+
+// #TODO extract tests to a separate file
 
 #[cfg(test)]
 mod tests {
@@ -177,7 +184,7 @@ mod tests {
         AccountCurrenciesRequest, AccountInfoRequest, AccountLinesRequest, AccountOffersRequest,
         AccountTxRequest, BookOffersRequest, DepositAuthorizedRequest, FeeRequest,
         GatewayBalancesRequest, GetOfferObjectRequest, LedgerClosedRequest, LedgerCurrentRequest,
-        LedgerEntryRequest, ManifestRequest, RandomRequest, ServerStateRequest,
+        LedgerEntryRequest, ManifestRequest, RandomRequest, ServerInfoRequest, ServerStateRequest,
     };
     use xrpl_types::Currency;
 
@@ -345,6 +352,15 @@ mod tests {
         let client = Client::default();
 
         let resp = client.send(FeeRequest::new()).await;
+
+        dbg!(&resp);
+    }
+
+    #[tokio::test]
+    async fn client_can_fetch_information_about_the_server() {
+        let client = Client::default();
+
+        let resp = client.send(ServerInfoRequest::new()).await;
 
         dbg!(&resp);
     }

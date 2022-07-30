@@ -53,6 +53,9 @@ pub use fee::*;
 pub mod manifest;
 pub use manifest::*;
 
+pub mod server_info;
+pub use server_info::*;
+
 pub mod server_state;
 pub use server_state::*;
 
