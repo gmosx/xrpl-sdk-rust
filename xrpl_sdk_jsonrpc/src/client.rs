@@ -15,7 +15,7 @@ pub const DEFAULT_USER_AGENT: &str = "rust-xrpl-sdk-rippled-client/0.1.0";
 
 pub type Result<T> = std::result::Result<T, Error>;
 
-// TODO: add constructors for TESTNET and DEVNET.
+// #TODO add constructors for TESTNET and DEVNET.
 
 #[derive(Serialize)]
 pub struct RpcRequest<P: Serialize> {
@@ -27,14 +27,6 @@ pub struct RpcRequest<P: Serialize> {
 pub struct RpcResponse<T> {
     pub result: T,
 }
-
-// #[derive(Error, Debug)]
-// pub enum RpcError {
-//     #[error("network error")]
-//     NetworkError,
-//     #[error("api error")]
-//     ApiError(String, String),
-// }
 
 #[derive(Default)]
 pub struct ClientBuilder {
@@ -138,10 +130,11 @@ impl Client {
                 }
             }
         } else {
-            dbg!(&response.status());
-            dbg!(&response.text().await?);
-            // TODO: Add proper error handling!
-            panic!()
+            Err(Error::Api(format!(
+                "Status {}: {}",
+                response.status(),
+                response.text().await?
+            )))
         }
     }
 
