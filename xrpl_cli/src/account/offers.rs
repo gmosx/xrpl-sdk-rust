@@ -14,7 +14,7 @@ pub fn account_offers(account_matches: &ArgMatches, offers_matches: &ArgMatches)
         // TODO: use handlebars for formatting?
 
         let req = AccountOffersRequest::new(account);
-        let resp = client.send(req).await;
+        let resp = client.call(req).await;
 
         if let Ok(resp) = resp {
             if offers_matches.is_present("json") {

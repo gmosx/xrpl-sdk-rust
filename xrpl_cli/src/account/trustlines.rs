@@ -13,7 +13,7 @@ pub fn account_trustlines(account_matches: &ArgMatches, lines_matches: &ArgMatch
         // TODO: render as text/md, html and json.
         // TODO: use handlebars for formatting?
 
-        let resp = client.send(AccountLinesRequest::new(account)).await;
+        let resp = client.call(AccountLinesRequest::new(account)).await;
 
         if let Ok(resp) = resp {
             if lines_matches.is_present("json") {

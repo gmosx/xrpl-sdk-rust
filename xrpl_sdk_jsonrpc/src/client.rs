@@ -88,7 +88,7 @@ impl Client {
     }
 
     // #TODO consider calling this call, like Tower!
-    pub async fn send<Req>(&self, request: Req) -> Result<Req::Response>
+    pub async fn call<Req>(&self, request: Req) -> Result<Req::Response>
     where
         Req: Request + Serialize,
         Req::Response: DeserializeOwned,
@@ -159,13 +159,13 @@ impl Client {
         let mut tx = tx;
 
         if tx.sequence.is_none() {
-            let resp = self.send(AccountInfoRequest::new(&tx.account)).await?;
+            let resp = self.call(AccountInfoRequest::new(&tx.account)).await?;
 
             tx.sequence = Some(resp.account_data.sequence);
         }
 
         if tx.last_ledger_sequence.is_none() || tx.fee.is_none() {
-            let resp = self.send(ServerStateRequest::new()).await?;
+            let resp = self.call(ServerStateRequest::new()).await?;
 
             // The recommendation for backend applications is to use (last validated ledger index + 4).
             tx.last_ledger_sequence = Some(resp.state.validated_ledger.seq + 4);

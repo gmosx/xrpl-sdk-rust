@@ -15,7 +15,7 @@ mod tests {
         let client = Client::default();
 
         let resp = client
-            .send(AccountCurrenciesRequest::new(
+            .call(AccountCurrenciesRequest::new(
                 "r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59",
             ))
             .await;
@@ -28,7 +28,7 @@ mod tests {
         let client = Client::default();
 
         let req = AccountInfoRequest::new("r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59").strict(true);
-        let resp = client.send(req).await;
+        let resp = client.call(req).await;
 
         dbg!(&resp);
     }
@@ -38,7 +38,7 @@ mod tests {
         let client = Client::default();
 
         let resp = client
-            .send(AccountChannelsRequest::new(
+            .call(AccountChannelsRequest::new(
                 "rf1BiGeXwwQoi8Z2ueFYTEXSwuJYfV2Jpn",
             ))
             .await;
@@ -51,7 +51,7 @@ mod tests {
         let client = Client::default();
 
         let resp = client
-            .send(AccountLinesRequest::new(
+            .call(AccountLinesRequest::new(
                 "r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59",
             ))
             .await;
@@ -64,7 +64,7 @@ mod tests {
         let client = Client::default();
 
         let resp = client
-            .send(AccountOffersRequest::new(
+            .call(AccountOffersRequest::new(
                 "r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59",
             ))
             .await;
@@ -77,7 +77,7 @@ mod tests {
         let client = Client::default();
 
         let req = AccountTxRequest::new("r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59").limit(5);
-        let resp = client.send(req).await;
+        let resp = client.call(req).await;
 
         dbg!(&resp);
     }
@@ -87,7 +87,7 @@ mod tests {
         let client = Client::default();
 
         let resp = client
-            .send(GatewayBalancesRequest::new(
+            .call(GatewayBalancesRequest::new(
                 "rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq",
             ))
             .await;
@@ -99,7 +99,7 @@ mod tests {
     async fn client_can_fetch_info_about_the_last_closed_ledger() {
         let client = Client::default();
 
-        let resp = client.send(LedgerClosedRequest::new()).await;
+        let resp = client.call(LedgerClosedRequest::new()).await;
 
         dbg!(&resp);
     }
@@ -108,7 +108,7 @@ mod tests {
     async fn client_can_fetch_info_about_the_current_ledger() {
         let client = Client::default();
 
-        let resp = client.send(LedgerCurrentRequest::new()).await;
+        let resp = client.call(LedgerCurrentRequest::new()).await;
 
         dbg!(&resp);
     }
@@ -118,7 +118,7 @@ mod tests {
         let client = Client::default();
 
         let resp = client
-            .send(LedgerEntryRequest::new(
+            .call(LedgerEntryRequest::new(
                 "rf1BiGeXwwQoi8Z2ueFYTEXSwuJYfV2Jpn",
                 359,
             ))
@@ -132,7 +132,7 @@ mod tests {
         let client = Client::default();
 
         let resp = client
-            .send(GetOfferObjectRequest::new(
+            .call(GetOfferObjectRequest::new(
                 "rf1BiGeXwwQoi8Z2ueFYTEXSwuJYfV2Jpn",
                 359,
             ))
@@ -146,7 +146,7 @@ mod tests {
         let client = Client::default();
 
         let resp = client
-            .send(BookOffersRequest::new(
+            .call(BookOffersRequest::new(
                 &Currency::xrp(),
                 &Currency::issued("USD", "rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B"),
             ))
@@ -160,7 +160,7 @@ mod tests {
         let client = Client::default();
 
         let resp = client
-            .send(DepositAuthorizedRequest::new(
+            .call(DepositAuthorizedRequest::new(
                 "r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59",
                 "ra5nK24KXen9AHvsdFTKHSANinZseWnPcX",
             ))
@@ -174,7 +174,7 @@ mod tests {
         let client = Client::default();
 
         let resp = client
-            .send(
+            .call(
                 TransactionEntryRequest::new(
                     "DA86C7F1979A010BB5F54C49116697A44D8088F92C9AA3AAE419136FE8275A10",
                 )
@@ -190,7 +190,7 @@ mod tests {
         let client = Client::default();
 
         let resp = client
-            .send(ManifestRequest::new(
+            .call(ManifestRequest::new(
                 "nHUE7npJuqdYxFL93tGZS7CW9DuWNLAxBVjzc2rEbu65eL4iiA6s",
             ))
             .await;
@@ -202,7 +202,7 @@ mod tests {
     async fn client_can_fetch_fees() {
         let client = Client::default();
 
-        let resp = client.send(FeeRequest::new()).await;
+        let resp = client.call(FeeRequest::new()).await;
 
         dbg!(&resp);
     }
@@ -211,7 +211,7 @@ mod tests {
     async fn client_can_fetch_information_about_the_server() {
         let client = Client::default();
 
-        let resp = client.send(ServerInfoRequest::new()).await;
+        let resp = client.call(ServerInfoRequest::new()).await;
 
         dbg!(&resp);
     }
@@ -220,7 +220,7 @@ mod tests {
     async fn client_can_fetch_the_server_state() {
         let client = Client::default();
 
-        let resp = client.send(ServerStateRequest::new()).await;
+        let resp = client.call(ServerStateRequest::new()).await;
 
         dbg!(&resp);
     }
@@ -229,7 +229,7 @@ mod tests {
     async fn client_can_fetch_a_random_seed() {
         let client = Client::default();
 
-        let resp = client.send(RandomRequest::new()).await;
+        let resp = client.call(RandomRequest::new()).await;
 
         dbg!(&resp);
     }

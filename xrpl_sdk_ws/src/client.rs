@@ -31,13 +31,7 @@ impl Client {
         Ok(Self { stream })
     }
 
-    // // #Deprecated will be removed!
-    // pub async fn send_old(&mut self, msg: &str) -> Result<()> {
-    //     self.stream.send(Message::Text(msg.to_string())).await?;
-    //     Ok(())
-    // }
-
-    pub async fn send<Req>(&mut self, req: Req) -> Result<()>
+    pub async fn call<Req>(&mut self, req: Req) -> Result<()>
     where
         Req: Request + Serialize,
     {

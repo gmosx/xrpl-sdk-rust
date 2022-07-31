@@ -13,7 +13,7 @@ mod tests {
 
         let req = AccountInfoRequest::new("r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59").strict(true);
 
-        client.send(req).await.expect("cannot send request");
+        client.call(req).await.expect("cannot send request");
 
         let (_, rx) = client.stream.split();
 
@@ -31,7 +31,7 @@ mod tests {
             .expect("cannot connect");
 
         let req = SubscribeRequest::streams(&["ledger"]);
-        client.send(req).await.expect("cannot subscribe");
+        client.call(req).await.expect("cannot subscribe");
 
         let (_, rx) = client.stream.split();
 

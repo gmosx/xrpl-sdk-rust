@@ -12,7 +12,7 @@ pub fn account_info(account_matches: &ArgMatches, info_matches: &ArgMatches) {
         // TODO: render as text/md, html and json.
         // TODO: use handlebars for formatting?
 
-        let resp = client.send(AccountInfoRequest::new(account)).await;
+        let resp = client.call(AccountInfoRequest::new(account)).await;
 
         if let Ok(resp) = resp {
             if info_matches.is_present("json") {
