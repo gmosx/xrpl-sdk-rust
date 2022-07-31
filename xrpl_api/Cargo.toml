@@ -1,9 +1,12 @@
 [package]
 name = "xrpl_api"
+description = "XRPL Protocol endpoints and resouces"
 version = "0.1.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/gmosx/xrpl_sdk_rust/tree/main/xrpl_api"
+keywords = ["xrpl", "ledger", "api", "protocol"]
+authors = ["George Moschovitis <gmosx@reizu.org>"]
 
 [dependencies]
 serde = { version = "1", features = ["derive"]}
