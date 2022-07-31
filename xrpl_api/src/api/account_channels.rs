@@ -1,7 +1,14 @@
+//! The account_channels method returns information about an account's Payment
+//! Channels. This includes only channels where the specified account is the
+//! channel's source, not the destination. (A channel's "source" and "owner"
+//! are the same.) All information retrieved is relative to a particular version
+//! of the ledger.
+//!
+//! - https://xrpl.org/account_channels.html
+
 use crate::Request;
 use serde::{Deserialize, Serialize};
 
-/// https://xrpl.org/account_channels.html
 #[derive(Default, Clone, Serialize)]
 pub struct AccountChannelsRequest {
     /// The unique identifier of an account, typically the account's Address.

@@ -5,7 +5,7 @@ mod tests {
         AccountChannelsRequest, AccountCurrenciesRequest, AccountInfoRequest, AccountLinesRequest,
         AccountOffersRequest, AccountTxRequest, BookOffersRequest, DepositAuthorizedRequest,
         FeeRequest, GatewayBalancesRequest, GetOfferObjectRequest, LedgerClosedRequest,
-        LedgerCurrentRequest, LedgerEntryRequest, ManifestRequest, RandomRequest,
+        LedgerCurrentRequest, LedgerEntryRequest, ManifestRequest, PingRequest, RandomRequest,
         ServerInfoRequest, ServerStateRequest, TransactionEntryRequest,
     };
     use xrpl_types::Currency;
@@ -221,6 +221,15 @@ mod tests {
         let client = Client::default();
 
         let resp = client.call(ServerStateRequest::new()).await;
+
+        dbg!(&resp);
+    }
+
+    #[tokio::test]
+    async fn client_can_ping_the_server() {
+        let client = Client::default();
+
+        let resp = client.call(PingRequest::new()).await;
 
         dbg!(&resp);
     }

@@ -75,5 +75,8 @@ pub use unsubscribe::*;
 
 // Utility methods
 
+pub mod ping;
+pub use ping::*;
+
 pub mod random;
 pub use random::*;
