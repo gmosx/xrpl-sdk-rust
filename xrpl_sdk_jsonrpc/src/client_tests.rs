@@ -5,8 +5,8 @@ mod tests {
         AccountChannelsRequest, AccountCurrenciesRequest, AccountInfoRequest, AccountLinesRequest,
         AccountOffersRequest, AccountTxRequest, BookOffersRequest, DepositAuthorizedRequest,
         FeeRequest, GatewayBalancesRequest, GetOfferObjectRequest, LedgerClosedRequest,
-        LedgerCurrentRequest, LedgerEntryRequest, ManifestRequest, PingRequest, RandomRequest,
-        ServerInfoRequest, ServerStateRequest, TransactionEntryRequest,
+        LedgerCurrentRequest, LedgerDataRequest, LedgerEntryRequest, ManifestRequest, PingRequest,
+        RandomRequest, ServerInfoRequest, ServerStateRequest, TransactionEntryRequest,
     };
     use xrpl_types::Currency;
 
@@ -109,6 +109,19 @@ mod tests {
         let client = Client::default();
 
         let resp = client.call(LedgerCurrentRequest::new()).await;
+
+        dbg!(&resp);
+    }
+
+    #[tokio::test]
+    async fn client_can_fetch_ledger_data() {
+        let client = Client::default();
+
+        let resp = client
+            .call(LedgerDataRequest::new(
+                "842B57C1CC0613299A686D3E9F310EC0422C84D3911E5056389AA7E5808A93C8",
+            ))
+            .await;
 
         dbg!(&resp);
     }
