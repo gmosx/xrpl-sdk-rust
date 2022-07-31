@@ -2,11 +2,11 @@
 mod tests {
     use crate::client::Client;
     use xrpl_api::{
-        AccountCurrenciesRequest, AccountInfoRequest, AccountLinesRequest, AccountOffersRequest,
-        AccountTxRequest, BookOffersRequest, DepositAuthorizedRequest, FeeRequest,
-        GatewayBalancesRequest, GetOfferObjectRequest, LedgerClosedRequest, LedgerCurrentRequest,
-        LedgerEntryRequest, ManifestRequest, RandomRequest, ServerInfoRequest, ServerStateRequest,
-        TransactionEntryRequest,
+        AccountChannelsRequest, AccountCurrenciesRequest, AccountInfoRequest, AccountLinesRequest,
+        AccountOffersRequest, AccountTxRequest, BookOffersRequest, DepositAuthorizedRequest,
+        FeeRequest, GatewayBalancesRequest, GetOfferObjectRequest, LedgerClosedRequest,
+        LedgerCurrentRequest, LedgerEntryRequest, ManifestRequest, RandomRequest,
+        ServerInfoRequest, ServerStateRequest, TransactionEntryRequest,
     };
     use xrpl_types::Currency;
 
@@ -29,6 +29,19 @@ mod tests {
 
         let req = AccountInfoRequest::new("r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59").strict(true);
         let resp = client.send(req).await;
+
+        dbg!(&resp);
+    }
+
+    #[tokio::test]
+    async fn client_can_fetch_account_channels() {
+        let client = Client::default();
+
+        let resp = client
+            .send(AccountChannelsRequest::new(
+                "rf1BiGeXwwQoi8Z2ueFYTEXSwuJYfV2Jpn",
+            ))
+            .await;
 
         dbg!(&resp);
     }

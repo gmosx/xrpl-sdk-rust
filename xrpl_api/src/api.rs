@@ -9,6 +9,9 @@ pub use account_info::*;
 pub mod account_lines;
 pub use account_lines::*;
 
+pub mod account_channels;
+pub use account_channels::*;
+
 pub mod account_offers;
 pub use account_offers::*;
 

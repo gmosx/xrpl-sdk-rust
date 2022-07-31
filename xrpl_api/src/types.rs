@@ -144,3 +144,5 @@ pub struct Transaction {
 
     pub ledger_index: Option<u32>,
 }
+
+// #TODO add Marker (https://xrpl.org/markers-and-pagination.html)
