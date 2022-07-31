@@ -19,7 +19,7 @@ let client = Client::new();
 let account = env::var("XRPL_ACCOUNT_ADDRESS").expect("account not defined");
 
 let req = AccountTxRequest::new(&account).limit(5);
-let resp = client.send(req).await;
+let resp = client.call(req).await;
 
 dbg!(&resp);
 ```

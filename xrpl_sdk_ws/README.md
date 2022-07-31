@@ -12,7 +12,7 @@ let mut client = Client::connect(DEFAULT_WS_URL)
     .expect("cannot connect");
 
 let req = SubscribeRequest::streams(&["ledger"]);
-client.send(req).await.expect("cannot subscribe");
+client.call(req).await.expect("cannot subscribe");
 
 let (_, rx) = client.stream.split();
 
