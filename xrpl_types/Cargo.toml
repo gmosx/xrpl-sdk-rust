@@ -1,7 +1,7 @@
 [package]
 name = "xrpl_types"
 description = "Core types and related functions for the XRP Ledger"
-version = "0.3"
+version = "0.3.0"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/gmosx/xrpl_sdk_rust/tree/main/xrpl_types"
 keywords = ["xrpl", "ledger", "api"]
