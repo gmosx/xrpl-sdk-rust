@@ -15,6 +15,7 @@ pub const S1_MAINNET_WS_URL: &str = "wss://s1.ripple.com";
 pub const S2_MAINNET_WS_URL: &str = "wss://s2.ripple.com";
 pub const TESTNET_WS_URL: &str = "wss://s.altnet.rippletest.net/";
 pub const DEVNET_WS_URL: &str = "wss://s.devnet.rippletest.net/";
+pub const NFT_DEVNET_WS_URL: &str = "wss://xls20-sandbox.rippletest.net:51233";
 
 pub const DEFAULT_WS_URL: &str = XRPL_CLUSTER_MAINNET_WS_URL;
 

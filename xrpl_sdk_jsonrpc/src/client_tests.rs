@@ -1,12 +1,13 @@
 #[cfg(test)]
 mod tests {
-    use crate::client::Client;
+    use crate::client::{Client, NFT_DEVNET_URL};
     use xrpl_api::{
         AccountChannelsRequest, AccountCurrenciesRequest, AccountInfoRequest, AccountLinesRequest,
-        AccountOffersRequest, AccountTxRequest, BookOffersRequest, DepositAuthorizedRequest,
-        FeeRequest, GatewayBalancesRequest, GetOfferObjectRequest, LedgerClosedRequest,
-        LedgerCurrentRequest, LedgerDataRequest, LedgerEntryRequest, ManifestRequest, PingRequest,
-        RandomRequest, ServerInfoRequest, ServerStateRequest, TransactionEntryRequest,
+        AccountNftsRequest, AccountOffersRequest, AccountTxRequest, BookOffersRequest,
+        DepositAuthorizedRequest, FeeRequest, GatewayBalancesRequest, GetOfferObjectRequest,
+        LedgerClosedRequest, LedgerCurrentRequest, LedgerDataRequest, LedgerEntryRequest,
+        ManifestRequest, PingRequest, RandomRequest, ServerInfoRequest, ServerStateRequest,
+        TransactionEntryRequest,
     };
     use xrpl_types::Currency;
 
@@ -66,6 +67,19 @@ mod tests {
         let resp = client
             .call(AccountOffersRequest::new(
                 "r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59",
+            ))
+            .await;
+
+        dbg!(&resp);
+    }
+
+    #[tokio::test]
+    async fn client_can_fetch_account_nfts() {
+        let client = Client::builder().base_url(NFT_DEVNET_URL).build();
+
+        let resp = client
+            .call(AccountNftsRequest::new(
+                "rsuHaTvJh1bDmDoxX9QcKP7HEBSBt4XsHx",
             ))
             .await;
 

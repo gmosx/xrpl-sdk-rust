@@ -8,6 +8,8 @@ pub const GENERAL_PURPOSE_MAINNET_URL: &str = "https://s1.ripple.com:51234";
 pub const FULL_HISTORY_MAINNET_URL: &str = "https://s2.ripple.com:51234";
 pub const TESTNET_URL: &str = "https://s.altnet.rippletest.net:51234";
 pub const DEVNET_URL: &str = "https://s.devnet.rippletest.net:51234";
+pub const NFT_DEVNET_URL: &str = "http://xls20-sandbox.rippletest.net:51234";
+pub const HOOKS_TESTNET_V2_URL: &str = "?"; // #TODO
 
 pub const DEFAULT_BASE_URL: &str = GENERAL_PURPOSE_MAINNET_URL;
 
@@ -133,6 +135,7 @@ impl Client {
                 ));
             }
 
+            // dbg!(&body);
             match serde_json::from_value::<RpcResponse<Resp>>(body) {
                 Ok(body) => Ok(body.result),
                 Err(err) => {

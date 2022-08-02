@@ -12,6 +12,9 @@ pub use account_lines::*;
 pub mod account_channels;
 pub use account_channels::*;
 
+pub mod account_nfts;
+pub use account_nfts::*;
+
 pub mod account_offers;
 pub use account_offers::*;
 
