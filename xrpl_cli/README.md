@@ -3,7 +3,6 @@
 A CLI for the XRP Ledger.
 
 [![Crates.io](https://img.shields.io/crates/v/xrpl_cli)](https://crates.io/crates/xrpl_cli)
-[![Documentation](https://docs.rs/xrpl_cli/badge.svg)](https://docs.rs/xrpl_cli)
 
 More information about this crate can be found in the [crate documentation][docs].
 
