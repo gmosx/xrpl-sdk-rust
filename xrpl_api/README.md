@@ -2,6 +2,10 @@
 
 A low-level crate that extracts the common RPC protocol used by the HTML and WebSocket clients.
 
+[![Documentation](https://docs.rs/xrpl_api/badge.svg)](https://docs.rs/xrpl_api)
+
+More information about this crate can be found in the [crate documentation][docs].
+
 ## License
 
 The software is distributed under the terms of both the MIT license and the Apache License (Version 2.0). See [LICENSE-APACHE](LICENSE-APACHE) and [LICENSE-MIT](LICENSE-MIT) for details.
@@ -23,3 +27,5 @@ DEALINGS IN THE SOFTWARE.
 ## Copyright
 
 Copyright © 2022 [George Moschovitis](https://gmosx.ninja).
+
+[docs]: https://docs.rs/xrpl_api

@@ -4,6 +4,10 @@ A Rust SDK for working with [XRP Ledger](https://xrpl.org) APIs.
 
 This project is an *unofficial*, community-driven effort.
 
+[![Documentation](https://docs.rs/xrpl_types/badge.svg)](https://docs.rs/xrpl_types)
+
+More information about this crate can be found in the [crate documentation][docs].
+
 ## Components
 
 The SDK contains the following high-level crates:
@@ -72,3 +76,5 @@ DEALINGS IN THE SOFTWARE.
 ## Copyright
 
 Copyright © 2021-2022 [George Moschovitis](https://gmosx.ninja).
+
+[docs]: https://docs.rs/xrpl_types

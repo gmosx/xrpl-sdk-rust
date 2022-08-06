@@ -4,6 +4,10 @@ A strongly-typed client for the XRP Ledger JSONRPC API.
 
 This crate is an *unofficial*, community-driven effort.
 
+[![Documentation](https://docs.rs/xrpl_sdk_jsonrpc/badge.svg)](https://docs.rs/xrpl_sdk_jsonrpc)
+
+More information about this crate can be found in the [crate documentation][docs].
+
 ## Installation
 
 ```toml
@@ -61,3 +65,5 @@ DEALINGS IN THE SOFTWARE.
 ## Copyright
 
 Copyright © 2021-2022 [George Moschovitis](https://gmosx.ninja).
+
+[docs]: https://docs.rs/xrpl_sdk_jsonrpc
