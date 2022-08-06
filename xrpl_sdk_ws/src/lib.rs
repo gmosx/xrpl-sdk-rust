@@ -1,3 +1,5 @@
+//! A strongly-typed client for the XRP Ledger WebSocket API.
+
 pub mod client;
 pub mod error;
 

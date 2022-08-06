@@ -1,6 +1,6 @@
 # XRP Ledger JSONRPC client
 
-A strongly-typed client for the XRP Ledger JSONRPC API.
+A strongly-typed client for the XRP Ledger HTTP JSONRPC API.
 
 This crate is an *unofficial*, community-driven effort.
 

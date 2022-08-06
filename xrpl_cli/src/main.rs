@@ -1,3 +1,5 @@
+//! A CLI for the XRP Ledger.
+
 mod account;
 mod ledger;
 

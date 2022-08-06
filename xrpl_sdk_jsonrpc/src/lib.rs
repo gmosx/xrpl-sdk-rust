@@ -1,3 +1,5 @@
+//! A strongly-typed client for the XRP Ledger HTTP JSONRPC API.
+
 pub mod client;
 pub mod error;
 
