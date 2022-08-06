@@ -49,6 +49,9 @@ pub use submit::*;
 pub mod transaction_entry;
 pub use transaction_entry::*;
 
+pub mod tx;
+pub use tx::*;
+
 // Path and Orderbook methods
 
 pub mod book_offers;

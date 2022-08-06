@@ -1,12 +1,13 @@
+//! The transaction_entry method retrieves information on a single transaction
+//! from a specific ledger version. (The tx method, by contrast, searches all
+//! ledgers for the specified transaction. We recommend using that method
+//! instead.)
+//!
+//! https://xrpl.org/transaction_entry.html
+
 use crate::{types::Meta, types::Transaction, Request};
 use serde::{Deserialize, Serialize};
 
-/// The transaction_entry method retrieves information on a single transaction
-/// from a specific ledger version. (The tx method, by contrast, searches all
-/// ledgers for the specified transaction. We recommend using that method
-/// instead.)
-///
-/// https://xrpl.org/transaction_entry.html
 #[derive(Default, Clone, Serialize)]
 pub struct TransactionEntryRequest {
     #[serde(skip_serializing_if = "Option::is_none")]

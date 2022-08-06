@@ -7,7 +7,7 @@ mod tests {
         DepositAuthorizedRequest, FeeRequest, GatewayBalancesRequest, GetOfferObjectRequest,
         LedgerClosedRequest, LedgerCurrentRequest, LedgerDataRequest, LedgerEntryRequest,
         ManifestRequest, PingRequest, RandomRequest, ServerInfoRequest, ServerStateRequest,
-        TransactionEntryRequest,
+        TransactionEntryRequest, TxRequest,
     };
     use xrpl_types::Currency;
 
@@ -210,6 +210,20 @@ mod tests {
             .await;
 
         dbg!(&resp);
+    }
+
+    #[tokio::test]
+    async fn client_can_fetch_transactions() {
+        let client = Client::default();
+
+        let tx_hash = "C53ECF838647FA5A4C780377025FEC7999AB4182590510CA461444B207AB74A9";
+
+        let resp = client.call(TxRequest::new(tx_hash).binary(false)).await;
+
+        let resp = resp.expect("error response");
+
+        assert_eq!(resp.tx.hash, tx_hash);
+        assert_eq!(resp.ledger_index, 56865245);
     }
 
     #[tokio::test]
