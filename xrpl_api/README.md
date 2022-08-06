@@ -2,6 +2,7 @@
 
 A low-level crate that extracts the common RPC protocol used by the HTML and WebSocket clients.
 
+[![Crates.io](https://img.shields.io/crates/v/xrpl_api)](https://crates.io/crates/xrpl_api)
 [![Documentation](https://docs.rs/xrpl_api/badge.svg)](https://docs.rs/xrpl_api)
 
 More information about this crate can be found in the [crate documentation][docs].

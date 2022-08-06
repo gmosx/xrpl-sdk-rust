@@ -4,6 +4,7 @@ A strongly-typed client for the XRP Ledger JSONRPC API.
 
 This crate is an *unofficial*, community-driven effort.
 
+[![Crates.io](https://img.shields.io/crates/v/xrpl_sdk_jsonrpc)](https://crates.io/crates/xrpl_sdk_jsonrpc)
 [![Documentation](https://docs.rs/xrpl_sdk_jsonrpc/badge.svg)](https://docs.rs/xrpl_sdk_jsonrpc)
 
 More information about this crate can be found in the [crate documentation][docs].

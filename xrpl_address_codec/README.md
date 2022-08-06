@@ -2,6 +2,11 @@
 
 Serialization for XRPL Protocol addresses.
 
+[![Crates.io](https://img.shields.io/crates/v/xrpl_address_codec)](https://crates.io/crates/xrpl_address_codec)
+[![Documentation](https://docs.rs/xrpl_address_codec/badge.svg)](https://docs.rs/xrpl_address_codec)
+
+More information about this crate can be found in the [crate documentation][docs].
+
 ## Links
 
 - https://github.com/XRPLF/xrpl-py/tree/master/xrpl/core/addresscodec
@@ -39,3 +44,5 @@ DEALINGS IN THE SOFTWARE.
 ## Copyright
 
 Copyright © 2022 [George Moschovitis](https://gmosx.ninja).
+
+[docs]: https://docs.rs/xrpl_address_codec

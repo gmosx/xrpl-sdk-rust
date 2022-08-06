@@ -4,6 +4,7 @@ A strongly-typed client for the XRP Ledger WebSocket API.
 
 This crate is an *unofficial*, community-driven effort.
 
+[![Crates.io](https://img.shields.io/crates/v/xrpl_sdk_ws)](https://crates.io/crates/xrpl_sdk_ws)
 [![Documentation](https://docs.rs/xrpl_sdk_ws/badge.svg)](https://docs.rs/xrpl_sdk_ws)
 
 More information about this crate can be found in the [crate documentation][docs].

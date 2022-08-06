@@ -2,6 +2,7 @@
 
 Binary serialization for XRPL Protocol objects.
 
+[![Crates.io](https://img.shields.io/crates/v/xrpl_binary_codec)](https://crates.io/crates/xrpl_binary_codec)
 [![Documentation](https://docs.rs/xrpl_binary_codec/badge.svg)](https://docs.rs/xrpl_binary_codec)
 
 More information about this crate can be found in the [crate documentation][docs].
