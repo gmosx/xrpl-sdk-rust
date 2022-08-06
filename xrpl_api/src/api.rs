@@ -60,6 +60,9 @@ pub use book_offers::*;
 pub mod deposit_authorized;
 pub use deposit_authorized::*;
 
+pub mod nft_buy_offers;
+pub use nft_buy_offers::*;
+
 // Server Info methods
 
 pub mod fee;

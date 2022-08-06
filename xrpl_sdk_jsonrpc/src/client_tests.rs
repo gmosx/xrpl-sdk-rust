@@ -6,8 +6,8 @@ mod tests {
         AccountNftsRequest, AccountOffersRequest, AccountTxRequest, BookOffersRequest,
         DepositAuthorizedRequest, FeeRequest, GatewayBalancesRequest, GetOfferObjectRequest,
         LedgerClosedRequest, LedgerCurrentRequest, LedgerDataRequest, LedgerEntryRequest,
-        ManifestRequest, PingRequest, RandomRequest, ServerInfoRequest, ServerStateRequest,
-        TransactionEntryRequest, TxRequest,
+        ManifestRequest, NftBuyOffersRequest, PingRequest, RandomRequest, ServerInfoRequest,
+        ServerStateRequest, TransactionEntryRequest, TxRequest,
     };
     use xrpl_types::Currency;
 
@@ -194,6 +194,18 @@ mod tests {
             .await;
 
         dbg!(&resp);
+    }
+
+    #[tokio::test]
+    async fn client_can_fetch_nft_buy_offers() {
+        let client = Client::builder().base_url(NFT_DEVNET_URL).build();
+
+        let nft_id = "00090000D0B007439B080E9B05BF62403911301A7B1F0CFAA048C0A200000007";
+        let resp = client.call(NftBuyOffersRequest::new(nft_id)).await;
+
+        let resp = resp.expect("error response");
+
+        assert_eq!(resp.nft_id, nft_id);
     }
 
     #[tokio::test]
