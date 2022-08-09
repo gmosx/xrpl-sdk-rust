@@ -1,5 +1,9 @@
 use crate::util::Result;
-use futures::{future, StreamExt};
+use futures::{
+    future,
+    stream::{SplitSink, SplitStream},
+    StreamExt,
+};
 use futures_util::SinkExt;
 use serde::Serialize;
 use tokio::net::TcpStream;
@@ -25,13 +29,20 @@ pub const DEFAULT_WS_URL: &str = XRPL_CLUSTER_MAINNET_WS_URL;
 
 /// A WebSocket client for the XRP Ledger.
 pub struct Client {
-    pub stream: WebSocketStream<MaybeTlsStream<TcpStream>>,
+    // pub stream: WebSocketStream<MaybeTlsStream<TcpStream>>,
+    sender: SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, Message>,
+    receiver: SplitStream<WebSocketStream<MaybeTlsStream<TcpStream>>>,
 }
 
 impl Client {
     pub async fn connect(url: &str) -> Result<Self> {
         let (stream, _response) = connect_async(url).await?;
-        Ok(Self { stream })
+        let (sender, receiver) = stream.split();
+        Ok(Self {
+            // stream,
+            sender,
+            receiver,
+        })
     }
 
     pub async fn call<Req>(&mut self, req: Req) -> Result<()>
@@ -52,25 +63,30 @@ impl Client {
             );
             let msg = serde_json::to_string(&map).unwrap();
 
-            self.stream.send(Message::Text(msg.to_string())).await?;
+            self.sender.send(Message::Text(msg.to_string())).await?;
         }
 
         Ok(())
     }
 
-    pub fn messages(self) -> impl Stream<Item = Result<String>> {
-        let (_, rx) = self.stream.split();
+    pub fn split(
+        self,
+    ) -> (
+        SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, Message>,
+        impl Stream<Item = Result<String>>,
+    ) {
+        let receiver = self
+            .receiver
+            .map(|msg| {
+                if let Message::Text(string) = msg.unwrap() {
+                    Ok(Some(string))
+                } else {
+                    Ok(None)
+                }
+            })
+            .filter_map(|res| future::ready(res.transpose()));
 
-        // tokio::pin!(rx);
-
-        rx.map(|msg| {
-            if let Message::Text(string) = msg.unwrap() {
-                Ok(Some(string))
-            } else {
-                Ok(None)
-            }
-        })
-        .filter_map(|res| future::ready(res.transpose()))
+        (self.sender, receiver)
     }
 
     // #TODO make this customizable.
