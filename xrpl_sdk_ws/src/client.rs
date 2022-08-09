@@ -1,7 +1,9 @@
 use crate::util::Result;
+use futures::{future, StreamExt};
 use futures_util::SinkExt;
 use serde::Serialize;
 use tokio::net::TcpStream;
+use tokio_stream::Stream;
 use tokio_tungstenite::{
     connect_async, tungstenite::protocol::Message, MaybeTlsStream, WebSocketStream,
 };
@@ -54,6 +56,21 @@ impl Client {
         }
 
         Ok(())
+    }
+
+    pub fn messages(self) -> impl Stream<Item = Result<String>> {
+        let (_, rx) = self.stream.split();
+
+        // tokio::pin!(rx);
+
+        rx.map(|msg| {
+            if let Message::Text(string) = msg.unwrap() {
+                Ok(Some(string))
+            } else {
+                Ok(None)
+            }
+        })
+        .filter_map(|res| future::ready(res.transpose()))
     }
 
     // #TODO make this customizable.
