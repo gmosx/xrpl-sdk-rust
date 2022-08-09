@@ -38,11 +38,7 @@ impl Client {
     pub async fn connect(url: &str) -> Result<Self> {
         let (stream, _response) = connect_async(url).await?;
         let (sender, receiver) = stream.split();
-        Ok(Self {
-            // stream,
-            sender,
-            receiver,
-        })
+        Ok(Self { sender, receiver })
     }
 
     pub async fn call<Req>(&mut self, req: Req) -> Result<()>
