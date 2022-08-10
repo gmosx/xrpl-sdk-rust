@@ -14,8 +14,8 @@ serde = { version = "1", features = ["derive"]}
 serde_json = "1"
 futures-util = "0.3"
 tokio = { version = "1", features = ["full"] }
-tokio-stream = "0"
-tokio-tungstenite = { version = "0", features = ["rustls-tls-webpki-roots"] }
+tokio-stream = "0.1"
+tokio-tungstenite = { version = "0.17", features = ["rustls-tls-webpki-roots"] }
 async-stream = "0.3"
 tracing = "0.1"
 uuid = { version = "1", features = ["v4", "fast-rng"] }
