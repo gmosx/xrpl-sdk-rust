@@ -18,8 +18,6 @@ mod tests {
         if let Some(msg) = client.messages.next().await {
             dbg!(&msg);
         }
-
-        client.disconnect().await;
     }
 
     #[tokio::test]
@@ -40,7 +38,5 @@ mod tests {
             dbg!(&msg);
             i += 1;
         }
-
-        client.disconnect().await;
     }
 }

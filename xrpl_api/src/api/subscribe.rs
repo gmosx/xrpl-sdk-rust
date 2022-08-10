@@ -46,5 +46,14 @@ impl SubscribeRequest {
     }
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct LedgerClosedEvent {
+    #[serde(rename = "type")]
+    pub event_type: String,
+    pub fee_base: u32,
+    pub fee_ref: u32,
+    pub txn_count: u32,
+}
+
 #[derive(Debug, Deserialize)]
 pub struct SubscribeResponse {}

@@ -9,7 +9,7 @@ use tokio_tungstenite::{
     connect_async, tungstenite::protocol::Message, MaybeTlsStream, WebSocketStream,
 };
 use uuid::Uuid;
-use xrpl_api::{AccountInfoResponse, Request};
+use xrpl_api::{AccountInfoResponse, LedgerClosedEvent, Request};
 
 // https://xrpl.org/public-servers.html
 
@@ -27,6 +27,7 @@ pub const DEFAULT_WS_URL: &str = XRPL_CLUSTER_MAINNET_WS_URL;
 #[derive(Serialize, Deserialize, Debug)]
 pub enum Datum {
     AccountInfo(AccountInfoResponse),
+    LedgeClosed(LedgerClosedEvent),
     Other(String),
 }
 
@@ -48,9 +49,9 @@ impl Client {
                 if let Message::Text(string) = msg.unwrap() {
                     let mut value: serde_json::Value = serde_json::from_str(&string).unwrap();
 
-                    if let Some(id) = value["id"].take().as_str() {
+                    if let Some(id) = value["id"].as_str() {
                         if let Some(method) = requests.borrow_mut().get(id) {
-                            println!("=>>>>> {method}");
+                            // println!("=>>>>> {method}");
                             match method.as_str() {
                                 "account_info" => {
                                     let result = value["result"].take();
@@ -62,25 +63,20 @@ impl Client {
                             Ok(Some(Datum::Other(string)))
                         }
                     } else {
-                        Ok(Some(Datum::Other(string)))
+                        // No ID, this is a subscription event
+
+                        if let Some(event_type) = value["type"].as_str() {
+                            // println!("**** {event_type}");
+                            match event_type {
+                                "ledgerClosed" => {
+                                    Ok(Some(Datum::LedgeClosed(serde_json::from_value(value)?)))
+                                }
+                                _ => Ok(Some(Datum::Other(string))),
+                            }
+                        } else {
+                            Ok(Some(Datum::Other(string)))
+                        }
                     }
-
-                    // let result = value["result"].take();
-
-                    // Ok(Some(Datum::Other(string)))
-                    // Ok(Some(Datum::Other(result)))
-
-                    // dbg!(&value);
-
-                    // if value["type"].as_str() == Some("response") {
-                    //     // #TODO decide which response to parse.
-
-                    //     let resp: AccountInfoResponse = serde_json::from_value(result).unwrap();
-
-                    //     Ok(Some(Datum::AccountInfo(resp)))
-                    // } else {
-                    //     Ok(Some(Datum::Other(result)))
-                    // }
                 } else {
                     Ok(None)
                 }
@@ -92,10 +88,6 @@ impl Client {
             messages: Box::pin(receiver),
             requests: cloned_requests,
         })
-    }
-
-    pub async fn disconnect(&mut self) {
-        println!("DISCONNECTED");
     }
 
     pub async fn call<Req>(&mut self, req: Req) -> Result<()>
