@@ -15,11 +15,7 @@ mod tests {
 
         client.call(req).await.expect("cannot send request");
 
-        let (_, receiver) = client.split();
-
-        tokio::pin!(receiver);
-
-        if let Some(msg) = receiver.next().await {
+        if let Some(msg) = client.messages.next().await {
             dbg!(&msg);
         }
     }
@@ -33,11 +29,7 @@ mod tests {
         let req = SubscribeRequest::streams(&["ledger"]);
         client.call(req).await.expect("cannot subscribe");
 
-        let (_, receiver) = client.split();
-
-        tokio::pin!(receiver);
-
-        while let Some(msg) = receiver.next().await {
+        while let Some(msg) = client.messages.next().await {
             dbg!(&msg);
         }
     }

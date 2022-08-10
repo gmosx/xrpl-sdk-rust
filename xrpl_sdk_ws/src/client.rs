@@ -1,11 +1,8 @@
 use crate::util::Result;
-use futures::{
-    future,
-    stream::{SplitSink, SplitStream},
-    StreamExt,
-};
+use futures::{future, stream::SplitSink, StreamExt};
 use futures_util::SinkExt;
 use serde::{Deserialize, Serialize};
+use std::pin::Pin;
 use tokio::net::TcpStream;
 use tokio_stream::Stream;
 use tokio_tungstenite::{
@@ -35,16 +32,46 @@ pub enum Datum {
 
 /// A WebSocket client for the XRP Ledger.
 pub struct Client {
-    // pub stream: WebSocketStream<MaybeTlsStream<TcpStream>>,
     sender: SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, Message>,
-    receiver: SplitStream<WebSocketStream<MaybeTlsStream<TcpStream>>>,
+    pub messages: Pin<Box<dyn Stream<Item = Result<Datum>>>>,
 }
 
 impl Client {
     pub async fn connect(url: &str) -> Result<Self> {
         let (stream, _response) = connect_async(url).await?;
         let (sender, receiver) = stream.split();
-        Ok(Self { sender, receiver })
+
+        let receiver = receiver
+            .map(|msg| {
+                if let Message::Text(string) = msg.unwrap() {
+                    let mut value: serde_json::Value = serde_json::from_str(&string).unwrap();
+
+                    let result = value["result"].take();
+
+                    Ok(Some(Datum::Other(value)))
+                    // Ok(Some(Datum::Other(result)))
+
+                    // dbg!(&value);
+
+                    // if value["type"].as_str() == Some("response") {
+                    //     // #TODO decide which response to parse.
+
+                    //     let resp: AccountInfoResponse = serde_json::from_value(result).unwrap();
+
+                    //     Ok(Some(Datum::AccountInfo(resp)))
+                    // } else {
+                    //     Ok(Some(Datum::Other(result)))
+                    // }
+                } else {
+                    Ok(None)
+                }
+            })
+            .filter_map(|res| future::ready(res.transpose()));
+
+        Ok(Self {
+            sender,
+            messages: Box::pin(receiver),
+        })
     }
 
     pub async fn call<Req>(&mut self, req: Req) -> Result<()>
@@ -69,34 +96,6 @@ impl Client {
         }
 
         Ok(())
-    }
-
-    pub fn split(
-        self,
-    ) -> (
-        SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, Message>,
-        impl Stream<Item = Result<Datum>>,
-    ) {
-        let receiver = self
-            .receiver
-            .map(|msg| {
-                if let Message::Text(string) = msg.unwrap() {
-                    let mut value: serde_json::Value = serde_json::from_str(&string).unwrap();
-
-                    let result = value["result"].take();
-
-                    // #TODO decide which response to parse.
-
-                    let resp: AccountInfoResponse = serde_json::from_value(result).unwrap();
-
-                    Ok(Some(Datum::AccountInfo(resp)))
-                } else {
-                    Ok(None)
-                }
-            })
-            .filter_map(|res| future::ready(res.transpose()));
-
-        (self.sender, receiver)
     }
 
     // #TODO make this customizable.
