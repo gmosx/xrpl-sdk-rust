@@ -25,17 +25,17 @@ pub const DEFAULT_WS_URL: &str = XRPL_CLUSTER_MAINNET_WS_URL;
 // #TODO extract Connection
 
 #[derive(Serialize, Deserialize, Debug)]
-pub enum Datum {
+pub enum TypedMessage {
     AccountInfo(AccountInfoResponse),
-    LedgeClosed(LedgerClosedEvent),
+    LedgerClosed(LedgerClosedEvent),
     Other(String),
 }
 
 /// A WebSocket client for the XRP Ledger.
 pub struct Client {
     sender: SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, Message>,
-    pub messages: Pin<Box<dyn Stream<Item = Result<Datum>>>>,
     requests: Rc<RefCell<HashMap<String, String>>>,
+    pub messages: Pin<Box<dyn Stream<Item = Result<TypedMessage>>>>,
 }
 
 impl Client {
@@ -43,6 +43,7 @@ impl Client {
         let (stream, _response) = connect_async(url).await?;
         let (sender, receiver) = stream.split();
         let requests: Rc<RefCell<HashMap<String, String>>> = Rc::new(RefCell::new(HashMap::new()));
+
         let cloned_requests = requests.clone();
         let receiver = receiver
             .map(move |msg| {
@@ -50,31 +51,31 @@ impl Client {
                     let mut value: serde_json::Value = serde_json::from_str(&string).unwrap();
 
                     if let Some(id) = value["id"].as_str() {
+                        // If the message contains an id field it's a response to
+                        // an RPC request.
                         if let Some(method) = requests.borrow_mut().get(id) {
-                            // println!("=>>>>> {method}");
+                            let result = value["result"].take();
                             match method.as_str() {
-                                "account_info" => {
-                                    let result = value["result"].take();
-                                    Ok(Some(Datum::AccountInfo(serde_json::from_value(result)?)))
-                                }
-                                _ => Ok(Some(Datum::Other(string))),
+                                "account_info" => Ok(Some(TypedMessage::AccountInfo(
+                                    serde_json::from_value(result)?,
+                                ))),
+                                _ => Ok(Some(TypedMessage::Other(string))),
                             }
                         } else {
-                            Ok(Some(Datum::Other(string)))
+                            Ok(Some(TypedMessage::Other(string)))
                         }
                     } else {
-                        // No ID, this is a subscription event
+                        // If the message has no id field, it's a subscription event.
 
                         if let Some(event_type) = value["type"].as_str() {
-                            // println!("**** {event_type}");
                             match event_type {
-                                "ledgerClosed" => {
-                                    Ok(Some(Datum::LedgeClosed(serde_json::from_value(value)?)))
-                                }
-                                _ => Ok(Some(Datum::Other(string))),
+                                "ledgerClosed" => Ok(Some(TypedMessage::LedgerClosed(
+                                    serde_json::from_value(value)?,
+                                ))),
+                                _ => Ok(Some(TypedMessage::Other(string))),
                             }
                         } else {
-                            Ok(Some(Datum::Other(string)))
+                            Ok(Some(TypedMessage::Other(string)))
                         }
                     }
                 } else {

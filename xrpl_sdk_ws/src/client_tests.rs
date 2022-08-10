@@ -27,16 +27,17 @@ mod tests {
             .expect("cannot connect");
 
         let req = SubscribeRequest::streams(&["ledger"]);
+
         client.call(req).await.expect("cannot subscribe");
 
-        let mut i = 0;
+        let mut count = 0;
 
         while let Some(msg) = client.messages.next().await {
-            if i > 2 {
+            if count > 2 {
                 break;
             }
             dbg!(&msg);
-            i += 1;
+            count += 1;
         }
     }
 }
