@@ -16,14 +16,11 @@ let mut client = Client::connect(DEFAULT_WS_URL)
     .await
     .expect("cannot connect");
 
-let req = SubscribeRequest::streams(&["ledger"]);
-client.call(req).await.expect("cannot subscribe");
+let req = AccountInfoRequest::new("r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59").strict(true);
 
-let (_, rx) = client.stream.split();
+client.call(req).await.expect("cannot send request");
 
-tokio::pin!(rx);
-
-while let Some(msg) = rx.next().await {
+if let Some(msg) = client.messages.next().await {
     dbg!(&msg);
 }
 ```
