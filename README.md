@@ -22,6 +22,37 @@ Finally, a convenient CLI is provided to demonstrate example usage:
 
 - [xrpl_cli](xrpl_cli/)
 
+## Usage
+
+### JSONRPC Client example
+
+```rust
+let client = Client::new();
+
+let account = env::var("XRPL_ACCOUNT_ADDRESS").expect("account not defined");
+
+let req = AccountTxRequest::new(&account).limit(5);
+let resp = client.call(req).await;
+
+dbg!(&resp);
+```
+
+### WebSocket Client example
+
+```rust
+let mut client = Client::connect(DEFAULT_WS_URL)
+    .await
+    .expect("cannot connect");
+
+let req = AccountInfoRequest::new("r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59").strict(true);
+
+client.call(req).await.expect("cannot send request");
+
+if let Some(msg) = client.messages.next().await {
+    dbg!(&msg);
+}
+```
+
 
 ## Links
 
