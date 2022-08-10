@@ -1,12 +1,15 @@
 use crate::error::Error;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use tracing::debug;
+use xrpl_api::{AccountInfoRequest, Request, ServerStateRequest};
 use xrpl_types::Transaction;
 
 pub const GENERAL_PURPOSE_MAINNET_URL: &str = "https://s1.ripple.com:51234";
 pub const FULL_HISTORY_MAINNET_URL: &str = "https://s2.ripple.com:51234";
 pub const TESTNET_URL: &str = "https://s.altnet.rippletest.net:51234";
 pub const DEVNET_URL: &str = "https://s.devnet.rippletest.net:51234";
+pub const NFT_DEVNET_URL: &str = "http://xls20-sandbox.rippletest.net:51234";
+pub const HOOKS_TESTNET_V2_URL: &str = "?"; // #TODO
 
 pub const DEFAULT_BASE_URL: &str = GENERAL_PURPOSE_MAINNET_URL;
 
@@ -14,7 +17,7 @@ pub const DEFAULT_USER_AGENT: &str = "rust-xrpl-sdk-rippled-client/0.1.0";
 
 pub type Result<T> = std::result::Result<T, Error>;
 
-// TODO: add constructors for TESTNET and DEVNET.
+// #TODO add constructors for TESTNET and DEVNET.
 
 #[derive(Serialize)]
 pub struct RpcRequest<P: Serialize> {
@@ -26,18 +29,6 @@ pub struct RpcRequest<P: Serialize> {
 pub struct RpcResponse<T> {
     pub result: T,
 }
-
-pub trait RpcResponsePayload {
-    // TODO!
-}
-
-// #[derive(Error, Debug)]
-// pub enum RpcError {
-//     #[error("network error")]
-//     NetworkError,
-//     #[error("api error")]
-//     ApiError(String, String),
-// }
 
 #[derive(Default)]
 pub struct ClientBuilder {
@@ -98,14 +89,18 @@ impl Client {
         ClientBuilder::default()
     }
 
-    /// Sends a JSON-RPC request to rippled.
-    pub async fn send<Params, Resp>(&self, request: RpcRequest<Params>) -> Result<Resp>
+    // #TODO consider calling this call, like Tower!
+    pub async fn call<Req>(&self, request: Req) -> Result<Req::Response>
     where
-        Params: Serialize,
-        Resp: DeserializeOwned,
+        Req: Request + Serialize,
+        Req::Response: DeserializeOwned,
     {
-        // #TODO: remove the unwrap!
-        let body = serde_json::to_string(&request).unwrap();
+        let request = RpcRequest {
+            method: request.method(),
+            params: vec![request],
+        };
+
+        let body = serde_json::to_string(&request)?;
 
         debug!("POST {}", body);
 
@@ -117,22 +112,43 @@ impl Client {
             .send()
             .await?;
 
-        self.unwrap_response(response).await
+        self.parse_response(response).await
     }
 
-    async fn unwrap_response<Resp>(&self, response: reqwest::Response) -> Result<Resp>
+    async fn parse_response<Resp>(&self, response: reqwest::Response) -> Result<Resp>
     where
         Resp: DeserializeOwned,
     {
         if response.status() == 200 {
-            // TODO: add an option to show diagnostics?
-            // eprintln!("--> {}", response.text().await?);
-            // panic!();
-            let body: RpcResponse<Resp> = response.json().await?;
-            Ok(body.result)
+            let body: serde_json::Value = response.json().await?;
+
+            let status = body["result"]["status"].as_str().unwrap_or("error");
+
+            if status == "error" {
+                debug!("{}", body);
+
+                return Err(Error::Api(
+                    body["result"]["error"]
+                        .as_str()
+                        .unwrap_or_default()
+                        .to_owned(),
+                ));
+            }
+
+            // dbg!(&body);
+            match serde_json::from_value::<RpcResponse<Resp>>(body) {
+                Ok(body) => Ok(body.result),
+                Err(err) => {
+                    // #TODO add an option to show diagnostics?
+                    Err(Error::Format(err.to_string()))
+                }
+            }
         } else {
-            // TODO: Add proper error handling!
-            panic!()
+            Err(Error::Api(format!(
+                "Status {}: {}",
+                response.status(),
+                response.text().await?
+            )))
         }
     }
 
@@ -146,13 +162,13 @@ impl Client {
         let mut tx = tx;
 
         if tx.sequence.is_none() {
-            let resp = self.account_info(&tx.account).send().await?;
+            let resp = self.call(AccountInfoRequest::new(&tx.account)).await?;
 
             tx.sequence = Some(resp.account_data.sequence);
         }
 
         if tx.last_ledger_sequence.is_none() || tx.fee.is_none() {
-            let resp = self.server_state().send().await?;
+            let resp = self.call(ServerStateRequest::new()).await?;
 
             // The recommendation for backend applications is to use (last validated ledger index + 4).
             tx.last_ledger_sequence = Some(resp.state.validated_ledger.seq + 4);
@@ -162,5 +178,6 @@ impl Client {
         Ok(tx)
     }
 
-    // TODO: local_sign in external package!
+    // #TODO add additional helpers, like .submit(), and other requests with standard params.
+    // #TODO local_sign in external package!
 }

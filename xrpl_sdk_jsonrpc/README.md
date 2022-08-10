@@ -1,8 +1,13 @@
 # XRP Ledger JSONRPC client
 
-A strongly-typed client for the XRP Ledger JSONRPC API.
+A strongly-typed client for the XRP Ledger HTTP JSONRPC API.
 
 This crate is an *unofficial*, community-driven effort.
+
+[![Crates.io](https://img.shields.io/crates/v/xrpl_sdk_jsonrpc)](https://crates.io/crates/xrpl_sdk_jsonrpc)
+[![Documentation](https://docs.rs/xrpl_sdk_jsonrpc/badge.svg)](https://docs.rs/xrpl_sdk_jsonrpc)
+
+More information about this crate can be found in the [crate documentation][docs].
 
 ## Installation
 
@@ -14,20 +19,15 @@ xrpl_sdk_jsonrpc = "0.6"
 ## Usage
 
 ```rust
-    let client = Client::new();
+let client = Client::new();
 
-    let account = env::var("XRPL_ACCOUNT_ADDRESS").unwrap();
+let account = env::var("XRPL_ACCOUNT_ADDRESS").expect("account not defined");
 
-    let resp = client.account_tx(&account).limit(5).send().await;
+let req = AccountTxRequest::new(&account).limit(5);
+let resp = client.call(req).await;
 
-    dbg!(&resp);
+dbg!(&resp);
 ```
-
-## FAQ
-
-### Why provide both execute and send methods for API endpoint handlers?
-
-Providing the lower-level `execute` method allows for more flexibility. Since `execute` is generic you can pass any type of object to deserialize the response to, e.g. you could deserialize to a `HashMap` instead of the 'default' response for each API call. Or you could use a custom struct with only the fields you are interested in.
 
 ## Links
 
@@ -66,3 +66,5 @@ DEALINGS IN THE SOFTWARE.
 ## Copyright
 
 Copyright © 2021-2022 [George Moschovitis](https://gmosx.ninja).
+
+[docs]: https://docs.rs/xrpl_sdk_jsonrpc

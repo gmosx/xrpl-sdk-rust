@@ -4,6 +4,30 @@ A strongly-typed client for the XRP Ledger WebSocket API.
 
 This crate is an *unofficial*, community-driven effort.
 
+[![Crates.io](https://img.shields.io/crates/v/xrpl_sdk_ws)](https://crates.io/crates/xrpl_sdk_ws)
+[![Documentation](https://docs.rs/xrpl_sdk_ws/badge.svg)](https://docs.rs/xrpl_sdk_ws)
+
+More information about this crate can be found in the [crate documentation][docs].
+
+## Usage
+
+```rust
+let mut client = Client::connect(DEFAULT_WS_URL)
+    .await
+    .expect("cannot connect");
+
+let req = SubscribeRequest::streams(&["ledger"]);
+client.call(req).await.expect("cannot subscribe");
+
+let (_, rx) = client.stream.split();
+
+tokio::pin!(rx);
+
+while let Some(msg) = rx.next().await {
+    dbg!(&msg);
+}
+```
+
 ## Status
 
 Under construction, nothing to see here.
@@ -37,3 +61,5 @@ DEALINGS IN THE SOFTWARE.
 ## Copyright
 
 Copyright © 2021-2022 [George Moschovitis](https://gmosx.ninja).
+
+[docs]: https://docs.rs/xrpl_sdk_ws

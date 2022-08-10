@@ -3,6 +3,11 @@
 Core types and related functions for the XRP Ledger. Reused between Web and
 WebSocket clients and potentially for server-side code.
 
+[![Crates.io](https://img.shields.io/crates/v/xrpl_types)](https://crates.io/crates/xrpl_types)
+[![Documentation](https://docs.rs/xrpl_types/badge.svg)](https://docs.rs/xrpl_types)
+
+More information about this crate can be found in the [crate documentation][docs].
+
 ## Status
 
 The software is under active development and the API is expected to change.
@@ -36,3 +41,5 @@ DEALINGS IN THE SOFTWARE.
 ## Copyright
 
 Copyright © 2021-2022 [George Moschovitis](https://gmosx.ninja).
+
+[docs]: https://docs.rs/xrpl_types

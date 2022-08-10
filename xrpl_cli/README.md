@@ -2,6 +2,10 @@
 
 A CLI for the XRP Ledger.
 
+[![Crates.io](https://img.shields.io/crates/v/xrpl_cli)](https://crates.io/crates/xrpl_cli)
+
+More information about this crate can be found in the [crate documentation][docs].
+
 ## Setup
 
 To install the binary from source, run:
@@ -70,3 +74,5 @@ DEALINGS IN THE SOFTWARE.
 ## Copyright
 
 Copyright © 2022 [George Moschovitis](https://gmosx.ninja).
+
+[docs]: https://docs.rs/xrpl_cli

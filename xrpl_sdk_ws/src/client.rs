@@ -1,10 +1,12 @@
 use crate::util::Result;
 use futures_util::SinkExt;
+use serde::Serialize;
 use tokio::net::TcpStream;
 use tokio_tungstenite::{
     connect_async, tungstenite::protocol::Message, MaybeTlsStream, WebSocketStream,
 };
 use uuid::Uuid;
+use xrpl_api::Request;
 
 // https://xrpl.org/public-servers.html
 
@@ -13,11 +15,11 @@ pub const S1_MAINNET_WS_URL: &str = "wss://s1.ripple.com";
 pub const S2_MAINNET_WS_URL: &str = "wss://s2.ripple.com";
 pub const TESTNET_WS_URL: &str = "wss://s.altnet.rippletest.net/";
 pub const DEVNET_WS_URL: &str = "wss://s.devnet.rippletest.net/";
+pub const NFT_DEVNET_WS_URL: &str = "wss://xls20-sandbox.rippletest.net:51233";
 
 pub const DEFAULT_WS_URL: &str = XRPL_CLUSTER_MAINNET_WS_URL;
 
 // #TODO extract Connection
-// #TODO split into multiple `api` files
 
 /// A WebSocket client for the XRP Ledger.
 pub struct Client {
@@ -30,8 +32,27 @@ impl Client {
         Ok(Self { stream })
     }
 
-    pub async fn send(&mut self, msg: &str) -> Result<()> {
-        self.stream.send(Message::Text(msg.to_string())).await?;
+    pub async fn call<Req>(&mut self, req: Req) -> Result<()>
+    where
+        Req: Request + Serialize,
+    {
+        let id = self.next_id();
+
+        let msg = serde_json::to_value(&req).unwrap(); // #TODO use `?`.
+
+        // #TODO, this is temp code, add error-handling!
+
+        if let serde_json::Value::Object(mut map) = msg {
+            map.insert("id".to_owned(), serde_json::Value::String(id));
+            map.insert(
+                "command".to_owned(),
+                serde_json::Value::String(req.method()),
+            );
+            let msg = serde_json::to_string(&map).unwrap();
+
+            self.stream.send(Message::Text(msg.to_string())).await?;
+        }
+
         Ok(())
     }
 

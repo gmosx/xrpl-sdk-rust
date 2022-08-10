@@ -1,27 +1,20 @@
-use crate::{client::RpcRequest, Client, Result};
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use crate::Request;
+use serde::{Deserialize, Serialize};
 
 #[derive(Default, Clone, Serialize)]
-pub struct FeeParams {}
+pub struct FeeRequest {}
 
-/// - https://xrpl.org/fee.html
-#[must_use = "Does nothing until you send or execute it"]
-#[derive(Default, Clone)]
-pub struct FeeRequest {
-    client: Client,
+impl Request for FeeRequest {
+    type Response = FeeResponse;
+
+    fn method(&self) -> String {
+        "fee".to_owned()
+    }
 }
 
 impl FeeRequest {
-    pub async fn execute<T: DeserializeOwned>(self) -> Result<T> {
-        let request = RpcRequest {
-            method: "fee".to_string(),
-            params: vec![],
-        };
-        self.client.send::<FeeParams, T>(request).await
-    }
-
-    pub async fn send(self) -> Result<FeeResponse> {
-        self.execute().await
+    pub fn new() -> Self {
+        Self::default()
     }
 }
 
@@ -78,26 +71,4 @@ pub struct FeeResponse {
     /// The maximum number of transactions that the transaction queue can currently
     /// hold.
     pub max_queue_size: String,
-}
-
-impl Client {
-    pub fn fee(&self) -> FeeRequest {
-        FeeRequest {
-            client: self.clone(),
-        }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::client::Client;
-
-    #[tokio::test]
-    async fn fee_should_return_fee_info() {
-        let client = Client::default();
-
-        let resp = client.fee().send().await;
-
-        dbg!(&resp);
-    }
 }

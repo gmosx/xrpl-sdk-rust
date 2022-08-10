@@ -1,8 +1,11 @@
 [package]
 name = "xrpl_address_codec"
-version = "0.1.0"
+description = "Binary serialization for XRPL Protocol addresses"
+version = "0.9.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/gmosx/xrpl_sdk_rust/tree/main/xrpl_address_codec"
+keywords = ["xrpl", "ledger", "api", "protocol"]
+authors = ["George Moschovitis <gmosx@reizu.org>"]
 
 [dependencies]

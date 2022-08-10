@@ -1,7 +1,10 @@
+//! - https://xrpl.org/account_info.html
+
+use crate::Request;
 use serde::{Deserialize, Serialize};
 
 #[derive(Default, Clone, Serialize)]
-pub struct AccountInfoRequestPayload {
+pub struct AccountInfoRequest {
     pub account: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub queue: Option<bool>,
@@ -15,13 +18,30 @@ pub struct AccountInfoRequestPayload {
     pub strict: Option<bool>,
 }
 
-impl AccountInfoRequestPayload {
+impl Request for AccountInfoRequest {
+    type Response = AccountInfoResponse;
+
+    fn method(&self) -> String {
+        "account_info".to_owned()
+    }
+}
+
+impl AccountInfoRequest {
     pub fn new(account: &str) -> Self {
         Self {
             account: account.to_owned(),
             ..Default::default()
         }
     }
+
+    pub fn strict(self, strict: bool) -> Self {
+        Self {
+            strict: Some(strict),
+            ..self
+        }
+    }
+
+    // #TODO more builder methods
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -38,7 +58,7 @@ pub struct AccountData {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct AccountInfoResponsePayload {
+pub struct AccountInfoResponse {
     // #TODO add missing fields!
     pub account_data: AccountData,
 }

@@ -1,5 +1,5 @@
 use clap::ArgMatches;
-use xrpl_sdk_jsonrpc::Client;
+use xrpl_sdk_jsonrpc::{AccountInfoRequest, Client};
 
 pub fn account_info(account_matches: &ArgMatches, info_matches: &ArgMatches) {
     let account = account_matches.value_of("ACCOUNT").unwrap();
@@ -12,7 +12,7 @@ pub fn account_info(account_matches: &ArgMatches, info_matches: &ArgMatches) {
         // TODO: render as text/md, html and json.
         // TODO: use handlebars for formatting?
 
-        let resp = client.account_info(account).send().await;
+        let resp = client.call(AccountInfoRequest::new(account)).await;
 
         if let Ok(resp) = resp {
             if info_matches.is_present("json") {

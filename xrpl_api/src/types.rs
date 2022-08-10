@@ -1,54 +1,10 @@
-use crate::{client::RpcRequest, Client, Result};
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use serde::Deserialize;
 use xrpl_types::{Amount, TransactionType};
 
-#[derive(Default, Clone, Serialize)]
-pub struct AccountTxParams {
-    account: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    ledger_hash: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    ledger_index: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    ledger_index_min: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    ledger_index_max: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    limit: Option<u32>,
-    // TODO: add more parameters!
-}
+pub trait Request {
+    type Response;
 
-/// - https://xrpl.org/account_tx.html
-#[must_use = "Does nothing until you send or execute it"]
-#[derive(Default, Clone)]
-pub struct AccountTxRequest {
-    client: Client,
-    params: AccountTxParams,
-}
-
-impl AccountTxRequest {
-    // TODO: add more builders.
-    pub fn limit(self, limit: u32) -> Self {
-        Self {
-            params: AccountTxParams {
-                limit: Some(limit),
-                ..self.params
-            },
-            ..self
-        }
-    }
-
-    pub async fn execute<T: DeserializeOwned>(self) -> Result<T> {
-        let request = RpcRequest {
-            method: "account_tx".to_string(),
-            params: vec![self.params],
-        };
-        self.client.send::<AccountTxParams, T>(request).await
-    }
-
-    pub async fn send(self) -> Result<AccountTxResponse> {
-        self.execute().await
-    }
+    fn method(&self) -> String;
 }
 
 // #[derive(Debug, Deserialize)]
@@ -182,40 +138,11 @@ pub struct Transaction {
     #[serde(rename = "TxnSignature")]
     pub txn_signature: Option<String>,
 
-    pub date: u32, // TODO: what is the correct type?
+    pub date: Option<u32>, // TODO: what is the correct type?
 
     pub hash: String,
 
-    pub ledger_index: u32,
+    pub ledger_index: Option<u32>,
 }
 
-#[derive(Debug, Deserialize)]
-pub struct AccountTransaction {
-    pub meta: Meta,
-    // pub tx: serde_json::Value,
-    pub tx: Transaction,
-    pub validated: bool,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct AccountTxResponse {
-    pub account: String,
-    pub limit: u32,
-    pub transactions: Vec<AccountTransaction>,
-}
-
-impl Client {
-    pub fn account_tx(&self, account: &str) -> AccountTxRequest {
-        AccountTxRequest {
-            client: self.clone(),
-            params: AccountTxParams {
-                account: account.to_string(),
-                ledger_hash: None,
-                ledger_index: None,
-                ledger_index_min: None,
-                ledger_index_max: None,
-                limit: None,
-            },
-        }
-    }
-}
+// #TODO add Marker (https://xrpl.org/markers-and-pagination.html)

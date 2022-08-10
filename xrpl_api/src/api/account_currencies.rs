@@ -2,8 +2,10 @@
 
 use serde::{Deserialize, Serialize};
 
+use crate::Request;
+
 #[derive(Default, Clone, Serialize)]
-pub struct AccountCurrenciesRequestPayload {
+pub struct AccountCurrenciesRequest {
     pub account: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ledger_hash: Option<String>,
@@ -13,8 +15,25 @@ pub struct AccountCurrenciesRequestPayload {
     pub strict: Option<bool>,
 }
 
+impl Request for AccountCurrenciesRequest {
+    type Response = AccountCurrenciesResponse;
+
+    fn method(&self) -> String {
+        "account_currencies".to_owned()
+    }
+}
+
+impl AccountCurrenciesRequest {
+    pub fn new(account: &str) -> Self {
+        Self {
+            account: account.to_owned(),
+            ..Default::default()
+        }
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize)]
-pub struct AccountCurrenciesResponsePayload {
+pub struct AccountCurrenciesResponse {
     /// The ledger index of the ledger version used to retrieve this data.
     pub ledger_index: u32,
     /// Array of Currency Codes for currencies that this account can receive.
