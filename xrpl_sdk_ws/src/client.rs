@@ -81,11 +81,11 @@ impl Client {
             .receiver
             .map(|msg| {
                 if let Message::Text(string) = msg.unwrap() {
-                    // let datum: Datum = serde_json::from_str(&string).unwrap();
                     let mut value: serde_json::Value = serde_json::from_str(&string).unwrap();
 
                     let result = value["result"].take();
-                    // #TODO
+
+                    // #TODO decide which response to parse.
 
                     let resp: AccountInfoResponse = serde_json::from_value(result).unwrap();
 
