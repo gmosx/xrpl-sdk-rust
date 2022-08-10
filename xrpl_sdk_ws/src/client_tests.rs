@@ -18,6 +18,8 @@ mod tests {
         if let Some(msg) = client.messages.next().await {
             dbg!(&msg);
         }
+
+        client.disconnect().await;
     }
 
     #[tokio::test]
@@ -29,8 +31,16 @@ mod tests {
         let req = SubscribeRequest::streams(&["ledger"]);
         client.call(req).await.expect("cannot subscribe");
 
+        let mut i = 0;
+
         while let Some(msg) = client.messages.next().await {
+            if i > 2 {
+                break;
+            }
             dbg!(&msg);
+            i += 1;
         }
+
+        client.disconnect().await;
     }
 }

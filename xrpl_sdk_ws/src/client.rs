@@ -2,7 +2,7 @@ use crate::util::Result;
 use futures::{future, stream::SplitSink, StreamExt};
 use futures_util::SinkExt;
 use serde::{Deserialize, Serialize};
-use std::pin::Pin;
+use std::{cell::RefCell, collections::HashMap, pin::Pin, rc::Rc};
 use tokio::net::TcpStream;
 use tokio_stream::Stream;
 use tokio_tungstenite::{
@@ -27,28 +27,47 @@ pub const DEFAULT_WS_URL: &str = XRPL_CLUSTER_MAINNET_WS_URL;
 #[derive(Serialize, Deserialize, Debug)]
 pub enum Datum {
     AccountInfo(AccountInfoResponse),
-    Other(serde_json::Value),
+    Other(String),
 }
 
 /// A WebSocket client for the XRP Ledger.
 pub struct Client {
     sender: SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, Message>,
     pub messages: Pin<Box<dyn Stream<Item = Result<Datum>>>>,
+    requests: Rc<RefCell<HashMap<String, String>>>,
 }
 
 impl Client {
     pub async fn connect(url: &str) -> Result<Self> {
         let (stream, _response) = connect_async(url).await?;
         let (sender, receiver) = stream.split();
-
+        let requests: Rc<RefCell<HashMap<String, String>>> = Rc::new(RefCell::new(HashMap::new()));
+        let cloned_requests = requests.clone();
         let receiver = receiver
-            .map(|msg| {
+            .map(move |msg| {
                 if let Message::Text(string) = msg.unwrap() {
                     let mut value: serde_json::Value = serde_json::from_str(&string).unwrap();
 
-                    let result = value["result"].take();
+                    if let Some(id) = value["id"].take().as_str() {
+                        if let Some(method) = requests.borrow_mut().get(id) {
+                            println!("=>>>>> {method}");
+                            match method.as_str() {
+                                "account_info" => {
+                                    let result = value["result"].take();
+                                    Ok(Some(Datum::AccountInfo(serde_json::from_value(result)?)))
+                                }
+                                _ => Ok(Some(Datum::Other(string))),
+                            }
+                        } else {
+                            Ok(Some(Datum::Other(string)))
+                        }
+                    } else {
+                        Ok(Some(Datum::Other(string)))
+                    }
 
-                    Ok(Some(Datum::Other(value)))
+                    // let result = value["result"].take();
+
+                    // Ok(Some(Datum::Other(string)))
                     // Ok(Some(Datum::Other(result)))
 
                     // dbg!(&value);
@@ -71,7 +90,12 @@ impl Client {
         Ok(Self {
             sender,
             messages: Box::pin(receiver),
+            requests: cloned_requests,
         })
+    }
+
+    pub async fn disconnect(&mut self) {
+        println!("DISCONNECTED");
     }
 
     pub async fn call<Req>(&mut self, req: Req) -> Result<()>
@@ -85,7 +109,7 @@ impl Client {
         // #TODO, this is temp code, add error-handling!
 
         if let serde_json::Value::Object(mut map) = msg {
-            map.insert("id".to_owned(), serde_json::Value::String(id));
+            map.insert("id".to_owned(), serde_json::Value::String(id.clone()));
             map.insert(
                 "command".to_owned(),
                 serde_json::Value::String(req.method()),
@@ -93,6 +117,8 @@ impl Client {
             let msg = serde_json::to_string(&map).unwrap();
 
             self.sender.send(Message::Text(msg.to_string())).await?;
+
+            self.requests.borrow_mut().insert(id, req.method());
         }
 
         Ok(())
