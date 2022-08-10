@@ -5,14 +5,14 @@ use futures::{
     StreamExt,
 };
 use futures_util::SinkExt;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use tokio::net::TcpStream;
 use tokio_stream::Stream;
 use tokio_tungstenite::{
     connect_async, tungstenite::protocol::Message, MaybeTlsStream, WebSocketStream,
 };
 use uuid::Uuid;
-use xrpl_api::Request;
+use xrpl_api::{AccountInfoResponse, Request};
 
 // https://xrpl.org/public-servers.html
 
@@ -26,6 +26,12 @@ pub const NFT_DEVNET_WS_URL: &str = "wss://xls20-sandbox.rippletest.net:51233";
 pub const DEFAULT_WS_URL: &str = XRPL_CLUSTER_MAINNET_WS_URL;
 
 // #TODO extract Connection
+
+#[derive(Serialize, Deserialize, Debug)]
+pub enum Datum {
+    AccountInfo(AccountInfoResponse),
+    Other(serde_json::Value),
+}
 
 /// A WebSocket client for the XRP Ledger.
 pub struct Client {
@@ -69,13 +75,21 @@ impl Client {
         self,
     ) -> (
         SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, Message>,
-        impl Stream<Item = Result<String>>,
+        impl Stream<Item = Result<Datum>>,
     ) {
         let receiver = self
             .receiver
             .map(|msg| {
                 if let Message::Text(string) = msg.unwrap() {
-                    Ok(Some(string))
+                    // let datum: Datum = serde_json::from_str(&string).unwrap();
+                    let mut value: serde_json::Value = serde_json::from_str(&string).unwrap();
+
+                    let result = value["result"].take();
+                    // #TODO
+
+                    let resp: AccountInfoResponse = serde_json::from_value(result).unwrap();
+
+                    Ok(Some(Datum::AccountInfo(resp)))
                 } else {
                     Ok(None)
                 }
