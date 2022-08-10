@@ -44,8 +44,9 @@ let mut client = Client::connect(DEFAULT_WS_URL)
     .await
     .expect("cannot connect");
 
-let req = AccountInfoRequest::new("r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59").strict(true);
+let account = env::var("XRPL_ACCOUNT_ADDRESS").expect("account not defined");
 
+let req = AccountInfoRequest::new(&account).strict(true);
 client.call(req).await.expect("cannot send request");
 
 if let Some(msg) = client.messages.next().await {
