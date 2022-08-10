@@ -1,12 +1,15 @@
 use crate::util::Result;
+use futures::{future, stream::SplitSink, StreamExt};
 use futures_util::SinkExt;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
+use std::{cell::RefCell, collections::HashMap, pin::Pin, rc::Rc};
 use tokio::net::TcpStream;
+use tokio_stream::Stream;
 use tokio_tungstenite::{
     connect_async, tungstenite::protocol::Message, MaybeTlsStream, WebSocketStream,
 };
 use uuid::Uuid;
-use xrpl_api::Request;
+use xrpl_api::{AccountInfoResponse, LedgerClosedEvent, Request};
 
 // https://xrpl.org/public-servers.html
 
@@ -21,15 +24,71 @@ pub const DEFAULT_WS_URL: &str = XRPL_CLUSTER_MAINNET_WS_URL;
 
 // #TODO extract Connection
 
+#[derive(Serialize, Deserialize, Debug)]
+pub enum TypedMessage {
+    AccountInfo(AccountInfoResponse),
+    LedgerClosed(LedgerClosedEvent),
+    Other(String),
+}
+
 /// A WebSocket client for the XRP Ledger.
 pub struct Client {
-    pub stream: WebSocketStream<MaybeTlsStream<TcpStream>>,
+    sender: SplitSink<WebSocketStream<MaybeTlsStream<TcpStream>>, Message>,
+    requests: Rc<RefCell<HashMap<String, String>>>,
+    pub messages: Pin<Box<dyn Stream<Item = Result<TypedMessage>>>>,
 }
 
 impl Client {
     pub async fn connect(url: &str) -> Result<Self> {
         let (stream, _response) = connect_async(url).await?;
-        Ok(Self { stream })
+        let (sender, receiver) = stream.split();
+        let requests: Rc<RefCell<HashMap<String, String>>> = Rc::new(RefCell::new(HashMap::new()));
+
+        let cloned_requests = requests.clone();
+        let receiver = receiver
+            .map(move |msg| {
+                if let Message::Text(string) = msg.unwrap() {
+                    let mut value: serde_json::Value = serde_json::from_str(&string).unwrap();
+
+                    if let Some(id) = value["id"].as_str() {
+                        // If the message contains an id field it's a response to
+                        // an RPC request.
+                        if let Some(method) = requests.borrow_mut().get(id) {
+                            let result = value["result"].take();
+                            match method.as_str() {
+                                "account_info" => Ok(Some(TypedMessage::AccountInfo(
+                                    serde_json::from_value(result)?,
+                                ))),
+                                _ => Ok(Some(TypedMessage::Other(string))),
+                            }
+                        } else {
+                            Ok(Some(TypedMessage::Other(string)))
+                        }
+                    } else {
+                        // If the message has no id field, it's a subscription event.
+
+                        if let Some(event_type) = value["type"].as_str() {
+                            match event_type {
+                                "ledgerClosed" => Ok(Some(TypedMessage::LedgerClosed(
+                                    serde_json::from_value(value)?,
+                                ))),
+                                _ => Ok(Some(TypedMessage::Other(string))),
+                            }
+                        } else {
+                            Ok(Some(TypedMessage::Other(string)))
+                        }
+                    }
+                } else {
+                    Ok(None)
+                }
+            })
+            .filter_map(|res| future::ready(res.transpose()));
+
+        Ok(Self {
+            sender,
+            messages: Box::pin(receiver),
+            requests: cloned_requests,
+        })
     }
 
     pub async fn call<Req>(&mut self, req: Req) -> Result<()>
@@ -43,14 +102,16 @@ impl Client {
         // #TODO, this is temp code, add error-handling!
 
         if let serde_json::Value::Object(mut map) = msg {
-            map.insert("id".to_owned(), serde_json::Value::String(id));
+            map.insert("id".to_owned(), serde_json::Value::String(id.clone()));
             map.insert(
                 "command".to_owned(),
                 serde_json::Value::String(req.method()),
             );
             let msg = serde_json::to_string(&map).unwrap();
 
-            self.stream.send(Message::Text(msg.to_string())).await?;
+            self.sender.send(Message::Text(msg.to_string())).await?;
+
+            self.requests.borrow_mut().insert(id, req.method());
         }
 
         Ok(())
