@@ -102,6 +102,7 @@ impl Client {
 
         let body = serde_json::to_string(&request)?;
 
+        // dbg!(&body);
         debug!("POST {}", body);
 
         let response = self
@@ -125,6 +126,7 @@ impl Client {
             let status = body["result"]["status"].as_str().unwrap_or("error");
 
             if status == "error" {
+                // dbg!(&body);
                 debug!("{}", body);
 
                 return Err(Error::Api(

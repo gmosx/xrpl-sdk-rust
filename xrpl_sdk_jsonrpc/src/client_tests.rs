@@ -1,15 +1,19 @@
 #[cfg(test)]
 mod tests {
-    use crate::client::{Client, NFT_DEVNET_URL};
+    use crate::{
+        client::{Client, NFT_DEVNET_URL},
+        error::Error,
+    };
     use xrpl_api::{
         AccountChannelsRequest, AccountCurrenciesRequest, AccountInfoRequest, AccountLinesRequest,
         AccountNftsRequest, AccountOffersRequest, AccountTxRequest, BookOffersRequest,
         DepositAuthorizedRequest, FeeRequest, GatewayBalancesRequest, GetOfferObjectRequest,
         LedgerClosedRequest, LedgerCurrentRequest, LedgerDataRequest, LedgerEntryRequest,
         ManifestRequest, NftBuyOffersRequest, NftSellOffersRequest, PingRequest, RandomRequest,
-        ServerInfoRequest, ServerStateRequest, TransactionEntryRequest, TxRequest,
+        RipplePathFindRequest, ServerInfoRequest, ServerStateRequest, TransactionEntryRequest,
+        TxRequest,
     };
-    use xrpl_types::Currency;
+    use xrpl_types::{Amount, Currency};
 
     #[tokio::test]
     async fn client_can_fetch_account_currencies() {
@@ -218,6 +222,24 @@ mod tests {
         let resp = resp.expect("error response");
 
         assert_eq!(resp.nft_id, nft_id);
+    }
+
+    #[tokio::test]
+    async fn client_can_find_a_payment_path() {
+        let client = Client::default();
+
+        let resp = client
+            .call(RipplePathFindRequest::new(
+                "r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59",
+                "r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59",
+                Amount::issued("0.001", "USD", "rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B"),
+            ))
+            .await;
+
+        let resp = resp;
+
+        // #TODO investigate why the server returns notSupported?
+        assert!(matches!(resp, Err(Error::Api(s)) if s == "notSupported"));
     }
 
     #[tokio::test]

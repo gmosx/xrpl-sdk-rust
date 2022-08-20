@@ -2,7 +2,7 @@ use crate::Currency;
 use serde::{Deserialize, Serialize};
 
 /// https://xrpl.org/serialization.html#amount-fields
-#[derive(Debug, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Eq, PartialEq, Serialize, Deserialize, Clone)]
 #[serde(untagged)]
 pub enum Amount {
     Issued {
@@ -11,6 +11,12 @@ pub enum Amount {
         issuer: String,
     },
     Drops(String),
+}
+
+impl Default for Amount {
+    fn default() -> Self {
+        Amount::drops(0)
+    }
 }
 
 impl Amount {
