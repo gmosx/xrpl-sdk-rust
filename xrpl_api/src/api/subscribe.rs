@@ -5,6 +5,7 @@
 
 use crate::Request;
 use serde::{Deserialize, Serialize};
+use xrpl_types::Book;
 
 #[derive(Default, Clone, Serialize)]
 pub struct SubscribeRequest {
@@ -12,6 +13,8 @@ pub struct SubscribeRequest {
     streams: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     accounts: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    books: Option<Vec<Book>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     url: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -33,6 +36,9 @@ impl SubscribeRequest {
         Self::default()
     }
 
+    /// The ledger stream only sends ledgerClosed messages when the consensus
+    /// process declares a new validated ledger. The message identifies the
+    /// ledger and provides some information about its contents.
     pub fn streams(streams: &[&str]) -> Self {
         let streams = streams.iter().map(|s| s.to_string()).collect();
         Self {
@@ -45,6 +51,15 @@ impl SubscribeRequest {
         let accounts = accounts.iter().map(|a| a.to_string()).collect();
         Self {
             accounts: Some(accounts),
+            ..Default::default()
+        }
+    }
+
+    /// When you subscribe to one or more order books with the books field, you
+    /// get back any transactions that affect those order books.
+    pub fn books(books: &[Book]) -> Self {
+        Self {
+            books: Some(books.to_vec()),
             ..Default::default()
         }
     }

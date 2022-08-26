@@ -1,38 +1,7 @@
 use serde::{Deserialize, Serialize};
-use xrpl_types::{Currency, Offer};
+use xrpl_types::{Currency, CurrencySpec, Offer};
 
 use crate::Request;
-
-#[derive(Clone, Serialize)]
-pub struct CurrencyParams {
-    pub currency: String, // TODO: hm, consider name.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub issuer: Option<String>,
-}
-
-impl Default for CurrencyParams {
-    fn default() -> Self {
-        Self {
-            currency: "XRP".to_string(),
-            issuer: None,
-        }
-    }
-}
-
-impl CurrencyParams {
-    pub fn from_currency(c: &Currency) -> Self {
-        match c {
-            Currency::Xrp => CurrencyParams {
-                currency: "XRP".to_owned(),
-                issuer: None,
-            },
-            Currency::Issued { name, issuer } => CurrencyParams {
-                currency: name.clone(),
-                issuer: Some(issuer.clone()),
-            },
-        }
-    }
-}
 
 /// - https://xrpl.org/book_offers.html
 #[derive(Default, Clone, Serialize)]
@@ -45,8 +14,8 @@ pub struct BookOffersRequest {
     limit: Option<u32>,
     #[serde(skip_serializing_if = "Option::is_none")]
     taker: Option<String>,
-    taker_gets: CurrencyParams,
-    taker_pays: CurrencyParams,
+    taker_gets: CurrencySpec,
+    taker_pays: CurrencySpec,
 }
 
 impl Request for BookOffersRequest {
@@ -60,8 +29,8 @@ impl Request for BookOffersRequest {
 impl BookOffersRequest {
     pub fn new(taker_gets: &Currency, taker_pays: &Currency) -> Self {
         Self {
-            taker_gets: CurrencyParams::from_currency(taker_gets),
-            taker_pays: CurrencyParams::from_currency(taker_pays),
+            taker_gets: CurrencySpec::from_currency(taker_gets),
+            taker_pays: CurrencySpec::from_currency(taker_pays),
             ..Default::default()
         }
     }

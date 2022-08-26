@@ -37,3 +37,36 @@ impl Currency {
         !self.is_xrp()
     }
 }
+
+// #TODO implement from/into.
+/// Currency specification for books.
+#[derive(Debug, Clone, Serialize)]
+pub struct CurrencySpec {
+    pub currency: String, // TODO: hm, consider name.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub issuer: Option<String>,
+}
+
+impl Default for CurrencySpec {
+    fn default() -> Self {
+        Self {
+            currency: "XRP".to_string(),
+            issuer: None,
+        }
+    }
+}
+
+impl CurrencySpec {
+    pub fn from_currency(c: &Currency) -> Self {
+        match c {
+            Currency::Xrp => CurrencySpec {
+                currency: "XRP".to_owned(),
+                issuer: None,
+            },
+            Currency::Issued { name, issuer } => CurrencySpec {
+                currency: name.clone(),
+                issuer: Some(issuer.clone()),
+            },
+        }
+    }
+}
