@@ -14,6 +14,8 @@ pub struct SubscribeRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     accounts: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    accounts_proposed: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     books: Option<Vec<Book>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     url: Option<String>,
@@ -55,11 +57,33 @@ impl SubscribeRequest {
         }
     }
 
+    pub fn accounts_proposed(accounts: &[&str]) -> Self {
+        let accounts = accounts.iter().map(|a| a.to_string()).collect();
+        Self {
+            accounts_proposed: Some(accounts),
+            ..Default::default()
+        }
+    }
+
     /// When you subscribe to one or more order books with the books field, you
     /// get back any transactions that affect those order books.
     pub fn books(books: &[Book]) -> Self {
         Self {
             books: Some(books.to_vec()),
+            ..Default::default()
+        }
+    }
+
+    pub fn url(url: &str) -> Self {
+        Self {
+            url: Some(url.to_owned()),
+            ..Default::default()
+        }
+    }
+
+    pub fn url_username(url: &str) -> Self {
+        Self {
+            url: Some(url.to_owned()),
             ..Default::default()
         }
     }
