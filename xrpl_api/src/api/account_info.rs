@@ -1,4 +1,4 @@
-//! - https://xrpl.org/account_info.html
+//! <https://xrpl.org/account_info.html>
 
 use crate::Request;
 use serde::{Deserialize, Serialize};

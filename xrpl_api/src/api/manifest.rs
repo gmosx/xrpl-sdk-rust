@@ -1,11 +1,12 @@
+//! The manifest method reports the current "manifest" information for a given
+//! validator public key. The "manifest" is the public portion of that
+//! validator's configured token. Updated in: rippled 1.7.0
+//!
+//! <https://xrpl.org/manifest.html>
+
 use crate::Request;
 use serde::{Deserialize, Serialize};
 
-/// The manifest method reports the current "manifest" information for a given
-/// validator public key. The "manifest" is the public portion of that
-/// validator's configured token. Updated in: rippled 1.7.0
-///
-/// -https://xrpl.org/manifest.html
 #[derive(Default, Clone, Serialize)]
 pub struct ManifestRequest {
     public_key: String,

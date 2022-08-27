@@ -1,9 +1,13 @@
+//! The book_offers method retrieves a list of offers, also known as the order
+//! book, between two currencies.
+//!
+//! <https://xrpl.org/book_offers.html>
+
 use serde::{Deserialize, Serialize};
 use xrpl_types::{Currency, CurrencySpec, Offer};
 
 use crate::Request;
 
-/// - https://xrpl.org/book_offers.html
 #[derive(Default, Clone, Serialize)]
 pub struct BookOffersRequest {
     #[serde(skip_serializing_if = "Option::is_none")]

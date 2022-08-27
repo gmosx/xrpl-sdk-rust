@@ -1,9 +1,11 @@
+//! The ledger_closed method returns the unique identifiers of the most recently
+//! closed ledger. (This ledger is not necessarily validated and immutable yet.)
+//!
+//! <https://xrpl.org/ledger_closed.html>
+
 use crate::Request;
 use serde::{Deserialize, Serialize};
 
-/// The ledger_closed method returns the unique identifiers of the most recently
-/// closed ledger. (This ledger is not necessarily validated and immutable yet.)
-/// https://xrpl.org/ledger_closed.html
 #[derive(Default, Clone, Serialize)]
 pub struct LedgerClosedRequest {}
 

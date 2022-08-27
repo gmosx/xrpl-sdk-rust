@@ -9,7 +9,8 @@ pub const LSF_SELL: u32 = 0x00020000;
 
 /// An offer in the ledger.
 ///
-/// https://xrpl.org/offer.html
+/// <https://xrpl.org/offer.html>
+///
 /// {
 ///     "Account": "rBqb89MRQJnMPq8wTwEbtz4kvxrEDfcYvt",
 ///     "BookDirectory": "ACC27DE91DBA86FC509069EAF4BC511D73128B780F2E54BF5E07A369E2446000",

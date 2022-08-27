@@ -21,7 +21,7 @@
 //! re-submit the tx_blob transaction: it won't be applied twice since it has
 //! the same sequence number as the old transaction.
 //!
-//! - https://xrpl.org/submit.html
+//! <https://xrpl.org/submit.html>
 
 use crate::Request;
 use serde::Serialize;

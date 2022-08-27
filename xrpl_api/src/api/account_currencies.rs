@@ -1,4 +1,4 @@
-//! https://xrpl.org/account_currencies.html
+//! <https://xrpl.org/account_currencies.html>
 
 use serde::{Deserialize, Serialize};
 

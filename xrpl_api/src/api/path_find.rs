@@ -12,6 +12,6 @@
 //! close - Stop sending pathfinding information
 //! status - Get the information of the currently-open pathfinding request
 //!
-//! - https://xrpl.org/path_find.html
+//! <https://xrpl.org/path_find.html>
 
 // #TODO

@@ -1,7 +1,7 @@
 //! The `tx` method retrieves information on a single transaction, by its
 //! identifying hash.
 //!
-//! - https://xrpl.org/tx.html
+//! <https://xrpl.org/tx.html>
 
 use crate::{types::Meta, types::Transaction, Request};
 use serde::{Deserialize, Serialize};

@@ -157,9 +157,7 @@ impl Client {
     /// Prepares a transaction for signing and reliable submission by
     /// auto-filling required fields.
     ///
-    /// ## Links
-    ///
-    /// - https://xrpl.org/reliable-transaction-submission.html
+    /// <https://xrpl.org/reliable-transaction-submission.html>
     pub async fn prepare_transaction(&self, tx: Transaction) -> Result<Transaction> {
         let mut tx = tx;
 

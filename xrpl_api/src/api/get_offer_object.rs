@@ -1,3 +1,7 @@
+//! <https://xrpl.org/ledger_entry.html>
+//!
+//! <https://xrpl.org/ledger_entry.html#get-offer-object>
+
 use serde::{Deserialize, Serialize};
 use xrpl_types::Offer;
 
@@ -9,8 +13,6 @@ pub struct OfferParams {
     seq: u32,
 }
 
-/// https://xrpl.org/ledger_entry.html
-/// https://xrpl.org/ledger_entry.html#get-offer-object
 #[derive(Default, Clone, Serialize)]
 pub struct GetOfferObjectRequest {
     ledger_hash: Option<String>,

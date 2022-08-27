@@ -3,7 +3,7 @@
 //! ledgers for the specified transaction. We recommend using that method
 //! instead.)
 //!
-//! https://xrpl.org/transaction_entry.html
+//! <https://xrpl.org/transaction_entry.html>
 
 use crate::{types::Meta, types::Transaction, Request};
 use serde::{Deserialize, Serialize};

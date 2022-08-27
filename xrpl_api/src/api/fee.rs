@@ -1,3 +1,8 @@
+//! The fee command reports the current state of the open-ledger requirements
+//! for the transaction cost.
+//!
+//! <https://xrpl.org/fee.html>
+
 use crate::Request;
 use serde::{Deserialize, Serialize};
 

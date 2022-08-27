@@ -1,11 +1,12 @@
+//! The deposit_authorized command indicates whether one account is authorized
+//! to send payments directly to another. See Deposit Authorization for
+//! information on how to require authorization to deliver money to your account.
+//!
+//! <https://xrpl.org/deposit_authorized.html>
+
 use crate::Request;
 use serde::{Deserialize, Serialize};
 
-/// The deposit_authorized command indicates whether one account is authorized
-/// to send payments directly to another. See Deposit Authorization for
-/// information on how to require authorization to deliver money to your account.
-///
-/// - https://xrpl.org/deposit_authorized.html
 #[derive(Default, Clone, Serialize)]
 pub struct DepositAuthorizedRequest {
     /// The sender of a possible payment.

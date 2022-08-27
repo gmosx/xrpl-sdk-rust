@@ -10,8 +10,8 @@ const MAX_MANTISSA: i64 = 10i64.pow(16) - 1;
 /// Converts a string to the internal binary format. Please note, this is a decimal
 /// format, not a floating-point one.
 ///
-/// - https://github.com/ripple/rippled/blob/develop/src/ripple/protocol/impl/STAmount.cpp#L781
-/// - https://github.com/XRPLF/xrpl-py/blob/master/xrpl/core/binarycodec/types/amount.py#L141
+/// - <https://github.com/ripple/rippled/blob/develop/src/ripple/protocol/impl/STAmount.cpp#L781>
+/// - <https://github.com/XRPLF/xrpl-py/blob/master/xrpl/core/binarycodec/types/amount.py#L141>
 pub fn internal_number_from_string(s: &str) -> u64 {
     // TODO: handle sign
     // TODO: handle zero case

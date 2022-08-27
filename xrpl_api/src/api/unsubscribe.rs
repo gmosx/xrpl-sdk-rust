@@ -1,7 +1,8 @@
+//! <https://xrpl.org/unsubscribe.html>
+
 use crate::Request;
 use serde::{Deserialize, Serialize};
 
-/// https://xrpl.org/unsubscribe.html
 #[derive(Default, Clone, Serialize)]
 pub struct UnsubscribeRequest {
     #[serde(skip_serializing_if = "Option::is_none")]

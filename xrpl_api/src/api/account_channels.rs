@@ -4,7 +4,7 @@
 //! are the same.) All information retrieved is relative to a particular version
 //! of the ledger.
 //!
-//! - https://xrpl.org/account_channels.html
+//! <https://xrpl.org/account_channels.html>
 
 use crate::Request;
 use serde::{Deserialize, Serialize};

@@ -9,8 +9,9 @@
 //! of paths for making a payment, it is not guaranteed that the paths
 //! returned by this method are, in fact, the best paths.
 //!
-//! - https://xrpl.org/ripple_path_find.html
-//! - https://xrpl.org/paths.html
+//! <https://xrpl.org/ripple_path_find.html>
+//!
+//! <https://xrpl.org/paths.html>
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;

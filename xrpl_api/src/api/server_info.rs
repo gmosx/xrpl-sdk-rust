@@ -1,12 +1,12 @@
-use std::collections::HashMap;
+//! The server_info command asks the server for a human-readable version of
+//! various information about the rippled server being queried.
+//!
+//! <https://xrpl.org/server_info.html>
 
 use crate::Request;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
-/// The server_info command asks the server for a human-readable version of
-/// various information about the rippled server being queried.
-///
-/// - https://xrpl.org/server_info.html
 #[derive(Default, Clone, Serialize)]
 pub struct ServerInfoRequest {}
 
@@ -24,7 +24,7 @@ impl ServerInfoRequest {
     }
 }
 
-/// https://xrpl.org/rippled-server-states.html
+/// <https://xrpl.org/rippled-server-states.html>
 pub type ServerState = String;
 
 /// Information about the time the server spends in server state. This can be

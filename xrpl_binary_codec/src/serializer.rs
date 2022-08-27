@@ -47,8 +47,8 @@ impl Serializer {
         self.push((value & 0xff) as u8);
     }
 
-    /// https://xrpl.org/serialization.html#field-ids
-    /// https://github.com/seelabs/rippled/blob/cecc0ad75849a1d50cc573188ad301ca65519a5b/src/ripple/protocol/impl/Serializer.cpp#L117-L148
+    /// - <https://xrpl.org/serialization.html#field-ids>
+    /// - <https://github.com/seelabs/rippled/blob/cecc0ad75849a1d50cc573188ad301ca65519a5b/src/ripple/protocol/impl/Serializer.cpp#L117-L148>
     pub fn push_field_id(&mut self, type_code: u8, field_code: u8) {
         if type_code < 16 {
             if field_code < 16 {
@@ -67,7 +67,7 @@ impl Serializer {
         }
     }
 
-    /// https://xrpl.org/serialization.html#length-prefixing
+    /// <https://xrpl.org/serialization.html#length-prefixing>
     pub fn push_vl_prefix(&mut self, length: u32) {
         if length < 192 {
             self.push(length as u8);
@@ -96,9 +96,9 @@ impl Serializer {
         self.push_u64(value | 0x4000000000000000);
     }
 
-    /// - https://xrpl.org/serialization.html#issued-currency-amount-format
-    /// - https://github.com/ripple/ripple-binary-codec/blob/master/src/types/amount.ts
-    /// - https://github.com/ripple/rippled/blob/develop/src/ripple/protocol/impl/STAmount.cpp
+    /// - <https://xrpl.org/serialization.html#issued-currency-amount-format>
+    /// - <https://github.com/ripple/ripple-binary-codec/blob/master/src/types/amount.ts>
+    /// - <https://github.com/ripple/rippled/blob/develop/src/ripple/protocol/impl/STAmount.cpp>
     pub fn push_issued_amount(&mut self, value: &str, currency: &str, issuer: &str) {
         self.push_u64(internal_number_from_string(value));
         self.push_currency(currency);
@@ -116,7 +116,7 @@ impl Serializer {
         }
     }
 
-    /// https://xrpl.org/serialization.html#currency-codes
+    /// <https://xrpl.org/serialization.html#currency-codes>
     pub fn push_currency(&mut self, currency: &str) {
         // Non-standard currency codes are 160 bits = 20 bytes in hex (40 chars).
 
@@ -188,7 +188,7 @@ impl Serializer {
 
     /// ## Serialization order
     ///
-    /// https://github.com/ripple/rippled/blob/master/src/ripple/protocol/impl/SField.cpp
+    /// <https://github.com/ripple/rippled/blob/master/src/ripple/protocol/impl/SField.cpp>
     ///
     /// 16 bit integers (common)
     ///

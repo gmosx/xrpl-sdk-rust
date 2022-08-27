@@ -1,7 +1,7 @@
 //! The nft_sell_offers method returns a list of sell offers for a given NFToken
 //! object.
 //!
-//! - https://xrpl.org/nft_sell_offers.html
+//! <https://xrpl.org/nft_sell_offers.html>
 
 use crate::Request;
 use serde::{Deserialize, Serialize};

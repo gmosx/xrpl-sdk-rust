@@ -1,7 +1,9 @@
+//! <https://xrpl.org/ledger_entry.html>
+//!
+//! TIP: Better use the more specialized methods, like `get_offer_object`.
+
 use crate::Request;
 use serde::{Deserialize, Serialize};
-
-// TIP: Better use the more specialized methods, like `get_offer_object`.
 
 #[derive(Default, Clone, Serialize)]
 pub struct OfferParams {
@@ -9,7 +11,6 @@ pub struct OfferParams {
     seq: u32,
 }
 
-/// https://xrpl.org/ledger_entry.html
 #[derive(Default, Clone, Serialize)]
 pub struct LedgerEntryRequest {
     #[serde(skip_serializing_if = "Option::is_none")]

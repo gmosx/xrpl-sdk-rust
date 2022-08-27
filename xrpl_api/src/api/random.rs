@@ -1,7 +1,7 @@
 //! The random command provides a random number to be used as a source of
 //! entropy for random number generation by clients.
 //!
-//! - https://xrpl.org/random.html
+//! <https://xrpl.org/random.html>
 
 use crate::Request;
 use serde::{Deserialize, Serialize};

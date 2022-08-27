@@ -1,7 +1,7 @@
 //! The ping command returns an acknowledgement, so that clients can test the
 //! connection status and latency.
 //!
-//! - https://xrpl.org/ping.html
+//! <https://xrpl.org/ping.html>
 
 use crate::Request;
 use serde::{Deserialize, Serialize};

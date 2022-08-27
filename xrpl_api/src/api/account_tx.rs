@@ -1,10 +1,14 @@
+//! The account_tx method retrieves a list of transactions that involved the
+//! specified account.
+//!
+//! <https://xrpl.org/account_tx.html>
+
 use crate::{
     types::{Meta, Transaction},
     Request,
 };
 use serde::{Deserialize, Serialize};
 
-/// - https://xrpl.org/account_tx.html
 #[derive(Default, Clone, Serialize)]
 pub struct AccountTxRequest {
     account: String,

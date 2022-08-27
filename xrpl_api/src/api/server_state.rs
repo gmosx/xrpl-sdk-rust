@@ -5,7 +5,7 @@
 //! integer drops instead of scientific notation or decimal values, and time is
 //! given in milliseconds instead of seconds.)
 //!
-//! - https://xrpl.org/server_state.html
+//! <https://xrpl.org/server_state.html>
 
 use crate::Request;
 use serde::{Deserialize, Serialize};

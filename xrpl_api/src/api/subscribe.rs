@@ -1,7 +1,7 @@
 //! The subscribe method requests periodic notifications from the server when
 //! certain events happen.
 //!
-//! - https://xrpl.org/subscribe.html
+//! <https://xrpl.org/subscribe.html>
 
 use crate::Request;
 use serde::{Deserialize, Serialize};

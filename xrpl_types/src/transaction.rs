@@ -58,9 +58,9 @@ pub const TF_CLEAR_NO_RIPPLE: u32 = 0x0004_0000;
 ///
 /// ## Links
 ///
-/// - https://xrpl.org/transaction-formats.html
-/// - https://github.com/ripple/rippled/blob/master/src/ripple/protocol/impl/SField.cpp
-/// - https://github.com/ripple/ripple-binary-codec/blob/master/src/enums/definitions.json
+/// - <https://xrpl.org/transaction-formats.html>
+/// - <https://github.com/ripple/rippled/blob/master/src/ripple/protocol/impl/SField.cpp>
+/// - <https://github.com/ripple/ripple-binary-codec/blob/master/src/enums/definitions.json>
 #[derive(Debug)]
 pub struct Transaction {
     pub transaction_type: TransactionType,
@@ -97,7 +97,7 @@ pub struct Transaction {
 impl Transaction {
     // TODO: Synthetic offer_replace constructor?
 
-    /// https://xrpl.org/offercreate.html
+    /// <https://xrpl.org/offercreate.html>
     pub fn offer_create(account: &str, taker_pays: Amount, taker_gets: Amount) -> Self {
         // TODO: Add support for expiration, offer_sequence
         Self {
@@ -122,7 +122,7 @@ impl Transaction {
         }
     }
 
-    /// https://xrpl.org/offercancel.html
+    /// <https://xrpl.org/offercancel.html>
     pub fn offer_cancel(account: &str, offer_sequence: u32) -> Self {
         Self {
             transaction_type: TransactionType::OfferCancel,
@@ -146,7 +146,7 @@ impl Transaction {
         }
     }
 
-    /// https://xrpl.org/payment.html
+    /// <https://xrpl.org/payment.html>
     pub fn payment(account: &str, destination: &str, amount: Amount) -> Self {
         Self {
             transaction_type: TransactionType::Payment,
@@ -171,7 +171,7 @@ impl Transaction {
     }
 
     // TODO: make sure we add the NO RIPPLE flag!!!!
-    /// https://xrpl.org/trustset.html
+    /// <https://xrpl.org/trustset.html>
     pub fn trust_set(
         account: &str,
         limit_amount: Amount,
@@ -200,7 +200,7 @@ impl Transaction {
         }
     }
 
-    /// https://xrpl.org/trustset.html
+    /// <https://xrpl.org/trustset.html>
     pub fn trust_set_no_ripple(
         account: &str,
         limit_amount: Amount,

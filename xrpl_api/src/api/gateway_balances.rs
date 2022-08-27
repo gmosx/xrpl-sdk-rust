@@ -1,12 +1,13 @@
+//! The gateway_balances command calculates the total balances issued by a
+//! given account, optionally excluding amounts held by operational addresses.
+//!
+//! <https://xrpl.org/gateway_balances>
+
 use crate::Request;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use xrpl_types::Amount;
 
-/// The gateway_balances command calculates the total balances issued by a
-/// given account, optionally excluding amounts held by operational addresses.
-///
-/// -https://xrpl.org/gateway_balances
 #[derive(Default, Clone, Serialize)]
 pub struct GatewayBalancesRequest {
     /// The address to check. This should be the issuing address.

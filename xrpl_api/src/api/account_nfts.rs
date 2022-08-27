@@ -1,7 +1,7 @@
 //! The account_nfts method returns a list of NFToken objects for the specified
 //! account.
 //!
-//! - https://xrpl.org/account_nfts.html
+//! <https://xrpl.org/account_nfts.html>
 
 use crate::Request;
 use serde::{Deserialize, Serialize};

@@ -1,7 +1,7 @@
 use crate::Currency;
 use serde::{Deserialize, Serialize};
 
-/// https://xrpl.org/serialization.html#amount-fields
+/// <https://xrpl.org/serialization.html#amount-fields>
 #[derive(Debug, Eq, PartialEq, Serialize, Deserialize, Clone)]
 #[serde(untagged)]
 pub enum Amount {

@@ -2,7 +2,7 @@
 //! iterate through several calls to retrieve the entire contents of a single
 //! ledger version.
 //!
-//! - https://xrpl.org/ledger_data.html
+//! <https://xrpl.org/ledger_data.html>
 
 use crate::Request;
 use serde::{Deserialize, Serialize};
@@ -15,7 +15,6 @@ pub struct OfferParams {
     seq: u32,
 }
 
-/// https://xrpl.org/ledger_data.html
 #[derive(Default, Clone, Serialize)]
 pub struct LedgerDataRequest {
     /// A 20-byte hex string for the ledger version to use.

@@ -1,11 +1,12 @@
+//! The account_offers method retrieves a list of offers made by a given account
+//! that are outstanding as of a particular ledger version.
+//!
+//! <https://xrpl.org/account_offers.html>
+
 use crate::Request;
 use serde::{Deserialize, Serialize};
 use xrpl_types::Amount;
 
-/// The account_offers method retrieves a list of offers made by a given account
-/// that are outstanding as of a particular ledger version.
-///
-/// https://xrpl.org/account_offers.html
 #[derive(Default, Clone, Serialize)]
 pub struct AccountOffersRequest {
     account: String,
