@@ -14,7 +14,9 @@ pub struct AccountLinesRequest {
     /// connecting the two accounts.
     #[serde(skip_serializing_if = "Option::is_none")]
     peer: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     limit: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     marker: Option<String>,
 }
 
