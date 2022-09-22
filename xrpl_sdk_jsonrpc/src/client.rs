@@ -1,5 +1,6 @@
 use crate::error::Error;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use std::time::Duration;
 use tracing::debug;
 use xrpl_api::{AccountInfoRequest, Request, ServerStateRequest};
 use xrpl_types::Transaction;
@@ -11,9 +12,11 @@ pub const DEVNET_URL: &str = "https://s.devnet.rippletest.net:51234";
 pub const NFT_DEVNET_URL: &str = "http://xls20-sandbox.rippletest.net:51234";
 pub const HOOKS_TESTNET_V2_URL: &str = "?"; // #TODO
 
-pub const DEFAULT_BASE_URL: &str = GENERAL_PURPOSE_MAINNET_URL;
+const DEFAULT_TIMEOUT: Duration = Duration::from_secs(10);
 
-pub const DEFAULT_USER_AGENT: &str = "rust-xrpl-sdk-rippled-client/0.1.0";
+const DEFAULT_BASE_URL: &str = GENERAL_PURPOSE_MAINNET_URL;
+
+const DEFAULT_USER_AGENT: &str = "rust-xrpl-sdk-rippled-client/0.1.0";
 
 pub type Result<T> = std::result::Result<T, Error>;
 
@@ -35,6 +38,7 @@ pub struct ClientBuilder {
     base_url: Option<String>,
     user_agent: Option<String>,
     http_client: Option<reqwest::Client>,
+    timeout: Option<Duration>,
 }
 
 impl ClientBuilder {
@@ -53,7 +57,13 @@ impl ClientBuilder {
         self
     }
 
+    pub fn timeout(mut self, timeout: Duration) -> Self {
+        self.timeout = Some(timeout);
+        self
+    }
+
     pub fn build(self) -> Client {
+        // #TODO handle the unwrap
         Client {
             base_url: self
                 .base_url
@@ -61,7 +71,12 @@ impl ClientBuilder {
             user_agent: self
                 .user_agent
                 .unwrap_or_else(|| DEFAULT_USER_AGENT.to_string()),
-            http_client: self.http_client.unwrap_or_else(reqwest::Client::new),
+            http_client: self.http_client.unwrap_or_else(|| {
+                reqwest::Client::builder()
+                    .timeout(self.timeout.unwrap_or(DEFAULT_TIMEOUT))
+                    .build()
+                    .unwrap()
+            }),
         }
     }
 }
