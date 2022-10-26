@@ -26,6 +26,9 @@ pub use gateway_balances::*;
 
 // Ledger methods
 
+pub mod ledger;
+pub use ledger::*;
+
 pub mod ledger_closed;
 pub use ledger_closed::*;
 
