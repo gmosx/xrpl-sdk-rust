@@ -1,18 +1,18 @@
 //! <https://xrpl.org/ledger.html>
 
-use crate::{types::Transaction, AccountTransaction, Request};
+use crate::{types::Transaction, Request};
 use serde::{Deserialize, Serialize};
 
 #[derive(Default, Clone, Serialize)]
 pub struct LedgerTransactionsRequest {
     #[serde(flatten)]
-    pub LedgerRequest: LedgerRequest,
+    pub ledger_request: LedgerRequest,
 }
 
 #[derive(Default, Clone, Serialize)]
 pub struct LedgerExpandRequest {
     #[serde(flatten)]
-    pub LedgerRequest: LedgerRequest,
+    pub ledger_request: LedgerRequest,
 }
 
 #[derive(Default, Clone, Serialize)]
@@ -49,7 +49,7 @@ impl Request for LedgerRequest {
 impl LedgerTransactionsRequest {
     pub fn new(ledger_index: &str, transactions: bool) -> Self {
         Self {
-            LedgerRequest: LedgerRequest {
+            ledger_request: LedgerRequest {
                 ledger_index: Some(ledger_index.to_owned()),
                 transactions: Some(transactions),
                 expand: Some(false),
@@ -59,7 +59,7 @@ impl LedgerTransactionsRequest {
     }
 }
 
-impl Request for LedgerExpandTransactionsRequest {
+impl Request for LedgerExpandRequest {
     type Response = Expand;
 
     fn method(&self) -> String {
@@ -67,10 +67,10 @@ impl Request for LedgerExpandTransactionsRequest {
     }
 }
 
-impl LedgerExpandTransactionsRequest {
+impl LedgerExpandRequest {
     pub fn new(ledger_index: &str, transactions: bool) -> Self {
         Self {
-            LedgerRequest: LedgerRequest {
+            ledger_request: LedgerRequest {
                 ledger_index: Some(ledger_index.to_owned()),
                 transactions: Some(transactions),
                 expand: Some(true),
