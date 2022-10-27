@@ -41,6 +41,13 @@ impl AccountInfoRequest {
         }
     }
 
+    pub fn ledger_index(self, ledger_index: &str) -> Self {
+        Self {
+            ledger_index: Some(ledger_index.to_owned()),
+            ..self
+        }
+    }
+
     // #TODO more builder methods
 }
 
@@ -61,4 +68,5 @@ pub struct AccountData {
 pub struct AccountInfoResponse {
     // #TODO add missing fields!
     pub account_data: AccountData,
+    pub ledger_current_index: u64,
 }

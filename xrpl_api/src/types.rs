@@ -109,11 +109,17 @@ pub struct Transaction {
     #[serde(rename = "Account")]
     pub account: String,
 
+    #[serde(rename = "SourceTag")]
+    pub source_tag: Option<u32>,
+
     #[serde(rename = "Fee")]
     pub fee: String,
 
     #[serde(rename = "Destination")]
     pub destination: Option<String>,
+
+    #[serde(rename = "DestinationTag")]
+    pub destination_tag: Option<u32>,
 
     #[serde(rename = "Amount")]
     pub amount: Option<Amount>,
