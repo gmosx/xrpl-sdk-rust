@@ -93,6 +93,8 @@ pub struct Meta {
     pub transaction_index: u32,
     #[serde(rename = "TransactionResult")]
     pub transaction_result: String,
+    #[serde(rename = "delivered_amount")]
+    pub delivered_amount: Option<Amount>,
 }
 
 // #[derive(Debug, Deserialize)]
@@ -143,6 +145,9 @@ pub struct Transaction {
     pub hash: String,
 
     pub ledger_index: Option<u32>,
+
+    #[serde(rename = "metaData")]
+    pub meta: Meta,
 }
 
 // #TODO add Marker (https://xrpl.org/markers-and-pagination.html)
