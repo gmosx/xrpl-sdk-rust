@@ -38,7 +38,7 @@ pub struct LedgerRequest {
     queue: Option<bool>,
 }
 
-impl Request for LedgerRequest {
+impl Request for LedgerTransactionsRequest {
     type Response = Hash;
 
     fn method(&self) -> String {
