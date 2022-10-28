@@ -153,7 +153,7 @@ pub struct Transaction {
     pub ledger_index: Option<u32>,
 
     #[serde(rename = "metaData")]
-    pub meta: Meta,
+    pub meta: Option<Meta>,
 }
 
 // #TODO add Marker (https://xrpl.org/markers-and-pagination.html)
