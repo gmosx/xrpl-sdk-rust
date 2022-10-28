@@ -2,7 +2,7 @@
 //! in-progress ledger. This command is mostly useful for testing, because the
 //! ledger returned is still in flux.
 //!
-//! <https://xrpl.org/ledger_closed.html>
+//! <https://xrpl.org/ledger_current.html>
 
 use crate::Request;
 use serde::{Deserialize, Serialize};
