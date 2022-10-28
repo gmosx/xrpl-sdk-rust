@@ -3,6 +3,9 @@
 use crate::{types::Transaction, Request};
 use serde::{Deserialize, Serialize};
 
+// #TODO refactor to make the two variants internal!
+// #TODO add tests
+
 #[derive(Default, Clone, Serialize)]
 pub struct LedgerTransactionsRequest {
     #[serde(flatten)]
@@ -127,5 +130,6 @@ pub struct Ledger<TransactionType> {
     pub transactions: Option<Vec<TransactionType>>,
 }
 
+// #TODO refactor this!
 type Expand = LedgerResponse<Transaction>;
 type Hash = LedgerResponse<String>;
