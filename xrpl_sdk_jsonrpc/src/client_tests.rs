@@ -9,9 +9,9 @@ mod tests {
         AccountNftsRequest, AccountOffersRequest, AccountTxRequest, BookOffersRequest,
         DepositAuthorizedRequest, FeeRequest, GatewayBalancesRequest, GetOfferObjectRequest,
         LedgerClosedRequest, LedgerCurrentRequest, LedgerDataRequest, LedgerEntryRequest,
-        ManifestRequest, NftBuyOffersRequest, NftSellOffersRequest, PingRequest, RandomRequest,
-        RipplePathFindRequest, ServerInfoRequest, ServerStateRequest, TransactionEntryRequest,
-        TxRequest,
+        LedgerRequest, ManifestRequest, NftBuyOffersRequest, NftSellOffersRequest, PingRequest,
+        RandomRequest, RipplePathFindRequest, ServerInfoRequest, ServerStateRequest,
+        TransactionEntryRequest, TxRequest,
     };
     use xrpl_types::{Amount, Currency};
 
@@ -108,6 +108,25 @@ mod tests {
             .call(GatewayBalancesRequest::new(
                 "rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq",
             ))
+            .await;
+
+        dbg!(&resp);
+    }
+
+    #[tokio::test]
+    async fn client_can_fetch_ledger() {
+        let client = Client::default();
+
+        let resp = client.call(LedgerRequest::new()).await;
+
+        dbg!(&resp);
+
+        let resp = client.call(LedgerRequest::new().transactions(true)).await;
+
+        dbg!(&resp);
+
+        let resp = client
+            .call(LedgerRequest::new().transactions(true).expanded())
             .await;
 
         dbg!(&resp);

@@ -104,7 +104,6 @@ impl Client {
         ClientBuilder::default()
     }
 
-    // #TODO consider calling this call, like Tower!
     pub async fn call<Req>(&self, request: Req) -> Result<Req::Response>
     where
         Req: Request + Serialize,
@@ -117,7 +116,7 @@ impl Client {
 
         let body = serde_json::to_string(&request)?;
 
-        // dbg!(&body);
+        dbg!(&body);
         debug!("POST {}", body);
 
         let response = self

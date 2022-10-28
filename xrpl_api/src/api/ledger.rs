@@ -13,7 +13,7 @@ pub struct LedgerTransactionsRequest {
 }
 
 #[derive(Default, Clone, Serialize)]
-pub struct LedgerExpandRequest {
+pub struct ExpandLedgerRequest {
     #[serde(flatten)]
     pub ledger_request: LedgerRequest,
 }
@@ -41,45 +41,44 @@ pub struct LedgerRequest {
     queue: Option<bool>,
 }
 
-impl Request for LedgerTransactionsRequest {
-    type Response = Hash;
+impl Request for LedgerRequest {
+    type Response = LedgerResponse<String>;
 
     fn method(&self) -> String {
         "ledger".to_owned()
     }
 }
 
-impl LedgerTransactionsRequest {
-    pub fn new(ledger_index: &str, transactions: bool) -> Self {
+impl LedgerRequest {
+    pub fn new() -> Self {
         Self {
-            ledger_request: LedgerRequest {
-                ledger_index: Some(ledger_index.to_owned()),
-                transactions: Some(transactions),
-                expand: Some(false),
-                ..Default::default()
-            },
+            expand: Some(false),
+            ..Default::default()
         }
     }
-}
 
-impl Request for LedgerExpandRequest {
-    type Response = Expand;
-
-    fn method(&self) -> String {
-        "ledger".to_owned()
-    }
-}
-
-impl LedgerExpandRequest {
-    pub fn new(ledger_index: &str, transactions: bool) -> Self {
+    pub fn transactions(self, transactions: bool) -> Self {
         Self {
+            transactions: Some(transactions),
+            ..self
+        }
+    }
+
+    pub fn expanded(self) -> ExpandLedgerRequest {
+        ExpandLedgerRequest {
             ledger_request: LedgerRequest {
-                ledger_index: Some(ledger_index.to_owned()),
-                transactions: Some(transactions),
                 expand: Some(true),
-                ..Default::default()
+                ..self
             },
         }
+    }
+}
+
+impl Request for ExpandLedgerRequest {
+    type Response = LedgerResponse<Transaction>;
+
+    fn method(&self) -> String {
+        "ledger".to_owned()
     }
 }
 
@@ -124,12 +123,8 @@ pub struct Ledger<TransactionType> {
     /// Hash of the transaction information included in this ledger, as hex
     pub transaction_hash: String,
     /// (Omitted unless requested) Transactions applied in this ledger version.
-    /// By default, members are the transactions' identifying Hash strings. If the request specified expand as true,
+    /// By default, members are the transactions identifying Hash strings. If the request specified expand as true,
     /// members are full representations of the transactions instead,
     /// in either JSON or binary depending on whether the request specified binary as true.
     pub transactions: Option<Vec<TransactionType>>,
 }
-
-// #TODO refactor this!
-type Expand = LedgerResponse<Transaction>;
-type Hash = LedgerResponse<String>;
