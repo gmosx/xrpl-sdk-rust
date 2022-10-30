@@ -69,4 +69,5 @@ pub struct AccountInfoResponse {
     // #TODO add missing fields!
     pub account_data: AccountData,
     pub ledger_current_index: Option<u64>,
+    pub ledger_index: Option<u64>,
 }
