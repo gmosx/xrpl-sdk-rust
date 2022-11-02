@@ -11,8 +11,8 @@ pub enum Error {
     // Unauthorized,
     #[error("format error: {0}")]
     Format(String),
-    #[error("api error: {0}")]
-    Api(String),
+    #[error("api error")]
+    Api { status_code: u16, reason: String },
 }
 
 impl From<reqwest::Error> for Error {
