@@ -144,12 +144,13 @@ impl Client {
                 // dbg!(&body);
                 debug!("{}", body);
 
-                return Err(Error::Api(
-                    body["result"]["error"]
+                return Err(Error::Api {
+                    reason: body["result"]["error_message"]
                         .as_str()
                         .unwrap_or_default()
                         .to_owned(),
-                ));
+                    status_code: body["result"]["error_code"].as_u64().unwrap_or_default() as u16,
+                });
             }
 
             // dbg!(&body);
@@ -161,11 +162,10 @@ impl Client {
                 }
             }
         } else {
-            Err(Error::Api(format!(
-                "Status {}: {}",
-                response.status(),
-                response.text().await?
-            )))
+            Err(Error::Api {
+                status_code: response.status().as_u16(),
+                reason: response.text().await?,
+            })
         }
     }
 
