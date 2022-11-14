@@ -16,6 +16,8 @@ const DEFAULT_TIMEOUT: Duration = Duration::from_secs(10);
 
 const DEFAULT_BASE_URL: &str = GENERAL_PURPOSE_MAINNET_URL;
 
+const DEFAULT_BASE_TOKEN: &str = "";
+
 const DEFAULT_USER_AGENT: &str = "rust-xrpl-sdk-rippled-client/0.1.0";
 
 pub type Result<T> = std::result::Result<T, Error>;
@@ -36,6 +38,7 @@ pub struct RpcResponse<T> {
 #[derive(Default)]
 pub struct ClientBuilder {
     base_url: Option<String>,
+    token: Option<String>,
     user_agent: Option<String>,
     http_client: Option<reqwest::Client>,
     timeout: Option<Duration>,
@@ -44,6 +47,11 @@ pub struct ClientBuilder {
 impl ClientBuilder {
     pub fn base_url(mut self, base_url: &str) -> Self {
         self.base_url = Some(base_url.to_string());
+        self
+    }
+
+    pub fn token(mut self, token: &str) -> Self {
+        self.token = Some(token.to_string());
         self
     }
 
@@ -68,6 +76,7 @@ impl ClientBuilder {
             base_url: self
                 .base_url
                 .unwrap_or_else(|| DEFAULT_BASE_URL.to_string()),
+            token: self.token.unwrap_or_else(|| DEFAULT_BASE_TOKEN.to_string()),
             user_agent: self
                 .user_agent
                 .unwrap_or_else(|| DEFAULT_USER_AGENT.to_string()),
@@ -85,6 +94,7 @@ impl ClientBuilder {
 pub struct Client {
     base_url: String,
     user_agent: String,
+    token: String,
     // TODO: hm, not really used currently.
     http_client: reqwest::Client,
 }
@@ -125,6 +135,7 @@ impl Client {
             .post(&self.base_url)
             .body(body)
             .header(reqwest::header::USER_AGENT, &self.user_agent)
+            .bearer_auth(&self.token)
             .send()
             .await?;
 
