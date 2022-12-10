@@ -231,6 +231,31 @@ impl Transaction {
     }
 }
 
+impl Default for Transaction {
+    fn default() -> Self {
+        Transaction {
+            transaction_type: TransactionType::Payment,
+            account: String::from(""),
+            flags: None,
+            last_ledger_sequence: None,
+            fee: None,
+            sequence: None,
+            signing_public_key: None,
+            signature: None,
+            memos: None,
+            amount: None,
+            destination: None,
+            offer_sequence: None,
+            taker_pays: None,
+            taker_gets: None,
+            expiration: None,
+            limit_amount: None,
+            quality_in: None,
+            quality_out: None,
+        }
+    }
+}
+
 impl Transaction {
     pub fn with_memo(self, memo_type: &str, memo_data: &str) -> Self {
         let mut memos = self.memos.unwrap_or_default();
