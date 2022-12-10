@@ -63,10 +63,6 @@ impl Parser {
         // Process the remaining bytes by first reading the field_id to check what is about to be consumed next
         while !self.bytes.is_empty() {
             let field_id = self.read_field_id().unwrap();
-            println!(
-                "The type code is: {} and the field code is: {}",
-                field_id.type_code, field_id.field_code,
-            );
 
             // Transaction type
             let read_result = self.read_field(field_id);
@@ -192,18 +188,15 @@ impl Parser {
                 field_code,
             } => match field_code {
                 3 => {
-                    println!("Going to parse signing_public_key");
                     let length = self.read_variable_length_length()?;
                     self.read_n_bytes(length).and_then(|signing_key_bytes| {
                         Ok(self.transaction.signing_public_key = Some(signing_key_bytes))
                     })
                 }
                 4 => {
-                    println!("Going to parse signature");
                     let length = self.read_variable_length_length()?;
-                    self.read_n_bytes(length).and_then(|signing_key_bytes| {
-                        Ok(self.transaction.signing_public_key = Some(signing_key_bytes))
-                    })
+                    self.read_n_bytes(length)
+                        .and_then(|signature| Ok(self.transaction.signature = Some(signature)))
                 }
                 _ => Err(BinaryCodecError::ParseError(format!(
                     "Unrecognized field code: {} for type code: {}",
@@ -230,8 +223,8 @@ impl Parser {
                 field_code,
             } => {
                 if field_code == 9 {
-                    self.transaction.memos = None;
-                    Ok(())
+                    let memos = self.parse_memos().ok();
+                    Ok(self.transaction.memos = memos)
                 } else {
                     Err(BinaryCodecError::ParseError(format!(
                         "Unrecognized field code: {} for type code: {}",
@@ -246,7 +239,85 @@ impl Parser {
     }
 
     fn parse_memos(&mut self) -> Result<Vec<Memo>, BinaryCodecError> {
-        Ok(Vec::<Memo>::new())
+        // While the next byte is not the array end indicator 0xf1 keep reading a memo object
+        let next_byte = self.peek();
+        let mut memos = Vec::<Memo>::new();
+        while next_byte != 0xf1 {
+            // parse_memo
+            let memo = self.parse_memo()?;
+            memos.push(memo)
+        }
+
+        Ok(memos)
+    }
+
+    fn parse_memo(&mut self) -> Result<Memo, BinaryCodecError> {
+        // read field code and verify it is a memo object coming up (14, 10)
+        let field_id = self.read_field_id()?;
+        let FieldId {
+            type_code,
+            field_code,
+        } = field_id;
+
+        if type_code != 14 && field_code != 10 {
+            Err(BinaryCodecError::ParseError(format!(
+                "Expected field id for object 14 , 10 but found type code: {} and field code: {}",
+                type_code, field_code
+            )))
+        } else {
+            // Attempt to read the memo_type field (7,12)
+            let field_id = self.read_field_id()?;
+            let FieldId {
+                type_code,
+                field_code,
+            } = field_id;
+            if type_code != 7 && field_code != 12 {
+                return Err(BinaryCodecError::ParseError(format!("Expected field id for memo type 7 , 12 but found type code: {} and field code: {}",type_code, field_code  )));
+            }
+            let memo_tyoe_blob_length = self.read_variable_length_length()?;
+            let memo_type = self.read_n_bytes(memo_tyoe_blob_length)?;
+
+            // Attempt to read the memo_type field (7,13)
+            let field_id = self.read_field_id()?;
+            let FieldId {
+                type_code,
+                field_code,
+            } = field_id;
+            if type_code != 7 && field_code != 12 {
+                return Err(BinaryCodecError::ParseError(format!("Expected field id for memo data 7 , 13 but found type code: {} and field code: {}",type_code, field_code  )));
+            }
+
+            let memo_data_blob_length = self.read_variable_length_length()?;
+            let memo_data = self.read_n_bytes(memo_data_blob_length)?;
+
+            // Check if the next byte is the end byte, if not then we have a format field to parse
+            let memo_format: Option<Vec<u8>>;
+            let next_byte = self.peek();
+            if next_byte == 0xe1 {
+                //consume the object end byte and return a None format
+                self.read_u_int_8()?;
+                memo_format = None;
+            } else {
+                // parse the format field of the object
+                let field_id = self.read_field_id()?;
+                let FieldId {
+                    type_code,
+                    field_code,
+                } = field_id;
+                if type_code != 7 && field_code != 12 {
+                    return Err(BinaryCodecError::ParseError(format!("Expected field id for memo format 7 , 14 but found type code: {} and field code: {}",type_code, field_code  )));
+                } else {
+                    let memo_format_blob_length = self.read_variable_length_length()?;
+                    memo_format = self.read_n_bytes(memo_format_blob_length).ok();
+                }
+            }
+
+            Ok(Memo {
+                memo_type: memo_type,
+                memo_data: memo_data,
+                memo_format: memo_format,
+            })
+        }
     }
 
     fn parse_transaction_type(&mut self) -> Result<TransactionType, BinaryCodecError> {
@@ -306,10 +377,6 @@ impl Parser {
                 "Issued Amount currently not supported".to_string(),
             ))
         }
-
-        // let n_bytes_to_read = if is_xrp { 48 } else { 8 };
-
-        // if token
     }
 
     fn parse_account_id(&mut self) -> Result<String, BinaryCodecError> {
@@ -406,9 +473,7 @@ impl Parser {
 
     fn peek_n(&self, n: i32) -> Vec<u8> {
         let n_usize: usize = n.try_into().unwrap();
-        println!("Bytes before: {:?}", self.bytes);
         let v = self.bytes.clone()[..n_usize].to_vec();
-        println!("Bytes after: {:?}", self.bytes);
         v
     }
 
@@ -470,6 +535,25 @@ mod tests {
         tx.sequence = Some(12 as u32);
         tx.last_ledger_sequence = Some(12 as u32);
         tx.fee = Some(100 as u64);
+        tx.memos = Some(vec![Memo {
+            memo_data: vec![0x21, 0x33],
+            memo_type: vec![0x21, 0x33],
+            memo_format: Some(vec![0x21, 0x33]),
+        }]);
+
+        let public_key =
+            hex::decode("165F2F406B5DCC37E666B7A0C9686CD4C92B67D5D362C618A96627E394F2FF45")
+                .unwrap();
+        tx.signing_public_key = Some(public_key.clone());
+
+        let signature = vec![
+            48, 68, 2, 32, 89, 232, 71, 94, 242, 31, 56, 10, 10, 143, 247, 15, 249, 118, 245, 61,
+            251, 46, 234, 173, 217, 136, 96, 246, 66, 191, 64, 4, 160, 8, 190, 247, 2, 32, 20, 39,
+            148, 153, 33, 141, 209, 70, 11, 117, 49, 53, 174, 174, 213, 166, 57, 53, 172, 229, 151,
+            88, 105, 195, 32, 72, 134, 177, 243, 70, 86, 158,
+        ];
+        tx.signature = Some(signature.clone());
+
         let mut s = Serializer::new();
         s.push_transaction(&tx, None);
 
@@ -487,6 +571,9 @@ mod tests {
 
         assert_eq!(p_tx.account, account);
         assert_eq!(p_tx.destination, Some(String::from(destination)));
+
+        assert_eq!(p_tx.signing_public_key, Some(public_key));
+        assert_eq!(p_tx.signature, Some(signature));
     }
 
     #[test]
