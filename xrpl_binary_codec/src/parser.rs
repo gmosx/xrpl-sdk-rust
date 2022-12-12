@@ -17,7 +17,7 @@ struct FieldId {
     field_code: u8,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ParsedTransaction<'a> {
     pub transaction: &'a Transaction,
     pub prefix: Option<[u8; 4]>,
