@@ -115,8 +115,7 @@ impl Parser {
             } => {
                 if field_code == 2 {
                     let maybe_tx_type = self.parse_transaction_type();
-                    maybe_tx_type
-                        .and_then(|tx_type| Ok(self.transaction.transaction_type = tx_type))
+                    maybe_tx_type.map(|tx_type| self.transaction.transaction_type = tx_type)
                 } else {
                     Err(BinaryCodecError::ParseError(format!(
                         "Unrecognized field code: {} for type code: {}",
@@ -130,21 +129,21 @@ impl Parser {
             } => match field_code {
                 2 => self
                     .read_u_int_32()
-                    .and_then(|flags| Ok(self.transaction.flags = Some(flags))),
+                    .map(|flags| self.transaction.flags = Some(flags)),
                 4 => self
                     .read_u_int_32()
-                    .and_then(|sequence| Ok(self.transaction.sequence = Some(sequence))),
+                    .map(|sequence| self.transaction.sequence = Some(sequence)),
                 20 => self
                     .read_u_int_32()
-                    .and_then(|quality_in| Ok(self.transaction.quality_in = Some(quality_in))),
+                    .map(|quality_in| self.transaction.quality_in = Some(quality_in)),
                 21 => self
                     .read_u_int_32()
-                    .and_then(|quality_out| Ok(self.transaction.quality_out = Some(quality_out))),
-                25 => self.read_u_int_32().and_then(|offer_sequence| {
-                    Ok(self.transaction.offer_sequence = Some(offer_sequence))
-                }),
-                27 => self.read_u_int_32().and_then(|last_ledger_sequence| {
-                    Ok(self.transaction.last_ledger_sequence = Some(last_ledger_sequence))
+                    .map(|quality_out| self.transaction.quality_out = Some(quality_out)),
+                25 => self
+                    .read_u_int_32()
+                    .map(|offer_sequence| self.transaction.offer_sequence = Some(offer_sequence)),
+                27 => self.read_u_int_32().map(|last_ledger_sequence| {
+                    self.transaction.last_ledger_sequence = Some(last_ledger_sequence)
                 }),
                 _ => Err(BinaryCodecError::ParseError(format!(
                     "Unrecognized field code: {} for type code: {}",
@@ -157,16 +156,16 @@ impl Parser {
             } => match field_code {
                 1 => self
                     .parse_amount()
-                    .and_then(|amount| Ok(self.transaction.amount = Some(amount))),
-                3 => self.parse_amount().and_then(|limit_amount| {
-                    Ok(self.transaction.limit_amount = Some(limit_amount))
-                }),
+                    .map(|amount| self.transaction.amount = Some(amount)),
+                3 => self
+                    .parse_amount()
+                    .map(|limit_amount| self.transaction.limit_amount = Some(limit_amount)),
                 4 => self
                     .parse_amount()
-                    .and_then(|taker_pays| Ok(self.transaction.taker_pays = Some(taker_pays))),
+                    .map(|taker_pays| self.transaction.taker_pays = Some(taker_pays)),
                 5 => self
                     .parse_amount()
-                    .and_then(|taker_gets| Ok(self.transaction.taker_gets = Some(taker_gets))),
+                    .map(|taker_gets| self.transaction.taker_gets = Some(taker_gets)),
                 8 => {
                     let amount = self.parse_amount()?;
                     match amount {
@@ -175,8 +174,8 @@ impl Parser {
                             "fee should never come back as anything other than drops".to_string(),
                         )),
                     }?
-                    .map_err(|err| BinaryCodecError::from(err))
-                    .and_then(|amount_u64| Ok(self.transaction.fee = Some(amount_u64)))
+                    .map_err(BinaryCodecError::from)
+                    .map(|amount_u64| self.transaction.fee = Some(amount_u64))
                 }
                 _ => Err(BinaryCodecError::ParseError(format!(
                     "Unrecognized field code: {} for type code: {}",
@@ -189,14 +188,14 @@ impl Parser {
             } => match field_code {
                 3 => {
                     let length = self.read_variable_length_length()?;
-                    self.read_n_bytes(length).and_then(|signing_key_bytes| {
-                        Ok(self.transaction.signing_public_key = Some(signing_key_bytes))
+                    self.read_n_bytes(length).map(|signing_key_bytes| {
+                        self.transaction.signing_public_key = Some(signing_key_bytes)
                     })
                 }
                 4 => {
                     let length = self.read_variable_length_length()?;
                     self.read_n_bytes(length)
-                        .and_then(|signature| Ok(self.transaction.signature = Some(signature)))
+                        .map(|signature| self.transaction.signature = Some(signature))
                 }
                 _ => Err(BinaryCodecError::ParseError(format!(
                     "Unrecognized field code: {} for type code: {}",
@@ -209,10 +208,10 @@ impl Parser {
             } => match field_code {
                 1 => self
                     .parse_account_id()
-                    .and_then(|account_id| Ok(self.transaction.account = account_id)),
+                    .map(|account_id| self.transaction.account = account_id),
                 3 => self
                     .parse_account_id()
-                    .and_then(|destination| Ok(self.transaction.destination = Some(destination))),
+                    .map(|destination| self.transaction.destination = Some(destination)),
                 _ => Err(BinaryCodecError::ParseError(format!(
                     "Unrecognized field code: {} for type code: {}",
                     field_code, 7
@@ -224,7 +223,8 @@ impl Parser {
             } => {
                 if field_code == 9 {
                     let memos = self.parse_memos().ok();
-                    Ok(self.transaction.memos = memos)
+                    self.transaction.memos = memos;
+                    Ok(())
                 } else {
                     Err(BinaryCodecError::ParseError(format!(
                         "Unrecognized field code: {} for type code: {}",
@@ -238,14 +238,16 @@ impl Parser {
         }
     }
 
+    // #TODO investigate if this function is correct!
     fn parse_memos(&mut self) -> Result<Vec<Memo>, BinaryCodecError> {
         // While the next byte is not the array end indicator 0xf1 keep reading a memo object
-        let next_byte = self.peek();
+        let mut next_byte = self.peek();
         let mut memos = Vec::<Memo>::new();
         while next_byte != 0xf1 {
             // parse_memo
             let memo = self.parse_memo()?;
-            memos.push(memo)
+            memos.push(memo);
+            next_byte = self.peek();
         }
 
         Ok(memos)
@@ -313,9 +315,9 @@ impl Parser {
             }
 
             Ok(Memo {
-                memo_type: memo_type,
-                memo_data: memo_data,
-                memo_format: memo_format,
+                memo_type,
+                memo_data,
+                memo_format,
             })
         }
     }
@@ -369,7 +371,7 @@ impl Parser {
 
         let mask = 0x80;
 
-        let last_bit_is_not_set = !(self.peek() & mask == mask);
+        let last_bit_is_not_set = self.peek() & mask != mask;
 
         if last_bit_is_not_set {
             // If the last bit is not set this is an xrp amount
@@ -474,13 +476,13 @@ impl Parser {
     }
 
     fn peek(&self) -> u8 {
-        self.bytes.get(0).unwrap().to_owned()
+        self.bytes.first().unwrap().to_owned()
     }
 
     fn peek_n(&self, n: i32) -> Vec<u8> {
         let n_usize: usize = n.try_into().unwrap();
-        let v = self.bytes.clone()[..n_usize].to_vec();
-        v
+
+        self.bytes.clone()[..n_usize].to_vec()
     }
 
     fn read_n_bytes(&mut self, n: i32) -> Result<Vec<u8>, BinaryCodecError> {
@@ -502,19 +504,19 @@ impl Parser {
     fn read_variable_length_length(&mut self) -> Result<i32, BinaryCodecError> {
         let first_byte = self.read_u_int_8()?;
         if first_byte <= 192 {
-            return Ok(first_byte as i32);
+            Ok(first_byte as i32)
         } else {
             let second_byte: u8;
             if first_byte <= 240 {
                 second_byte = self.read_u_int_8()?;
-                return Ok(193 + (first_byte as i32 - 193) * 256 + second_byte as i32);
+                Ok(193 + (first_byte as i32 - 193) * 256 + second_byte as i32)
             } else if first_byte <= 254 {
                 second_byte = self.read_u_int_8()?;
                 let third_byte = self.read_u_int_8()?;
-                return Ok(12481
+                Ok(12481
                     + (first_byte as i32 - 240 - 1) * 65536
                     + second_byte as i32 * 256
-                    + third_byte as i32);
+                    + third_byte as i32)
             } else {
                 Err(BinaryCodecError::ParseError(
                     "Invalid variable length indicator".to_string(),
@@ -538,9 +540,9 @@ mod tests {
 
         let destination = "rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe";
         let mut tx: Transaction = Transaction::payment(account, destination, Amount::xrp("10"));
-        tx.sequence = Some(12 as u32);
-        tx.last_ledger_sequence = Some(12 as u32);
-        tx.fee = Some(100 as u64);
+        tx.sequence = Some(12_u32);
+        tx.last_ledger_sequence = Some(12_u32);
+        tx.fee = Some(100_u64);
         tx.memos = Some(vec![Memo {
             memo_data: vec![0x21, 0x33],
             memo_type: vec![0x21, 0x33],
@@ -568,12 +570,12 @@ mod tests {
 
         assert_eq!(p_tx.transaction_type, TransactionType::Payment);
         assert_eq!(p_tx.flags, None);
-        assert_eq!(p_tx.sequence, Some(12 as u32));
-        assert_eq!(p_tx.last_ledger_sequence, Some(12 as u32));
+        assert_eq!(p_tx.sequence, Some(12_u32));
+        assert_eq!(p_tx.last_ledger_sequence, Some(12_u32));
 
         // Currency amount common
         assert_eq!(p_tx.amount, Some(Amount::xrp("10")));
-        assert_eq!(p_tx.fee, Some(100 as u64));
+        assert_eq!(p_tx.fee, Some(100_u64));
 
         assert_eq!(p_tx.account, account);
         assert_eq!(p_tx.destination, Some(String::from(destination)));
@@ -588,9 +590,9 @@ mod tests {
 
         let destination = "rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe";
         let mut tx: Transaction = Transaction::payment(account, destination, Amount::xrp("10"));
-        tx.sequence = Some(12 as u32);
-        tx.last_ledger_sequence = Some(12 as u32);
-        tx.fee = Some(100 as u64);
+        tx.sequence = Some(12_u32);
+        tx.last_ledger_sequence = Some(12_u32);
+        tx.fee = Some(100_u64);
         let mut s = Serializer::new();
         s.push_transaction(&tx, Some(&HASH_PREFIX_TRANSACTION));
 
@@ -603,12 +605,12 @@ mod tests {
 
         assert_eq!(p_tx.transaction_type, TransactionType::Payment);
         assert_eq!(p_tx.flags, None);
-        assert_eq!(p_tx.sequence, Some(12 as u32));
-        assert_eq!(p_tx.last_ledger_sequence, Some(12 as u32));
+        assert_eq!(p_tx.sequence, Some(12_u32));
+        assert_eq!(p_tx.last_ledger_sequence, Some(12_u32));
 
         // Currency amount common
         assert_eq!(p_tx.amount, Some(Amount::xrp("10")));
-        assert_eq!(p_tx.fee, Some(100 as u64));
+        assert_eq!(p_tx.fee, Some(100_u64));
 
         assert_eq!(p_tx.account, account);
         assert_eq!(p_tx.destination, Some(String::from(destination)));
