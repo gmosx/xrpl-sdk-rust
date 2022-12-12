@@ -27,6 +27,12 @@ pub enum TransactionType {
     DepositPreauth = 19,
     TrustSet = 20,
     AccountDelete = 21,
+    SetHook = 22,
+    NFTokenMint = 25,
+    NFTokenBurn = 26,
+    NFTokenCreateOffer = 27,
+    NFTokenCancelOffer = 28,
+    NFTokenAcceptOffer = 29,
     EnableAmendment = 100,
     SetFee = 101,
     UNLModify = 102,
@@ -227,6 +233,31 @@ impl Transaction {
             limit_amount: Some(limit_amount),
             quality_in,
             quality_out,
+        }
+    }
+}
+
+impl Default for Transaction {
+    fn default() -> Self {
+        Transaction {
+            transaction_type: TransactionType::Payment,
+            account: String::from(""),
+            flags: None,
+            last_ledger_sequence: None,
+            fee: None,
+            sequence: None,
+            signing_public_key: None,
+            signature: None,
+            memos: None,
+            amount: None,
+            destination: None,
+            offer_sequence: None,
+            taker_pays: None,
+            taker_gets: None,
+            expiration: None,
+            limit_amount: None,
+            quality_in: None,
+            quality_out: None,
         }
     }
 }
