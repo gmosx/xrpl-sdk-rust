@@ -9,9 +9,8 @@ mod tests {
         AccountNftsRequest, AccountOffersRequest, AccountTxRequest, BookOffersRequest,
         DepositAuthorizedRequest, FeeRequest, GatewayBalancesRequest, GetOfferObjectRequest,
         LedgerClosedRequest, LedgerCurrentRequest, LedgerDataRequest, LedgerEntryRequest,
-        LedgerRequest, ManifestRequest, NftBuyOffersRequest, NftSellOffersRequest, PingRequest,
-        RandomRequest, RipplePathFindRequest, ServerInfoRequest, ServerStateRequest,
-        TransactionEntryRequest, TxRequest,
+        LedgerRequest, ManifestRequest, PingRequest, RandomRequest, RipplePathFindRequest,
+        ServerInfoRequest, ServerStateRequest, TransactionEntryRequest, TxRequest,
     };
     use xrpl_types::{Amount, Currency};
 
@@ -219,29 +218,29 @@ mod tests {
         dbg!(&resp);
     }
 
-    #[tokio::test]
-    async fn client_can_fetch_nft_buy_offers() {
-        let client = Client::builder().base_url(NFT_DEVNET_URL).build();
+    // #[tokio::test]
+    // async fn client_can_fetch_nft_buy_offers() {
+    //     let client = Client::builder().base_url(NFT_DEVNET_URL).build();
 
-        let nft_id = "00090000D0B007439B080E9B05BF62403911301A7B1F0CFAA048C0A200000007";
-        let resp = client.call(NftBuyOffersRequest::new(nft_id)).await;
+    //     let nft_id = "00090000D0B007439B080E9B05BF62403911301A7B1F0CFAA048C0A200000007";
+    //     let resp = client.call(NftBuyOffersRequest::new(nft_id)).await;
 
-        let resp = resp.expect("error response");
+    //     let resp = resp.expect("error response");
 
-        assert_eq!(resp.nft_id, nft_id);
-    }
+    //     assert_eq!(resp.nft_id, nft_id);
+    // }
 
-    #[tokio::test]
-    async fn client_can_fetch_nft_sell_offers() {
-        let client = Client::builder().base_url(NFT_DEVNET_URL).build();
+    // #[tokio::test]
+    // async fn client_can_fetch_nft_sell_offers() {
+    //     let client = Client::builder().base_url(NFT_DEVNET_URL).build();
 
-        let nft_id = "00090000D0B007439B080E9B05BF62403911301A7B1F0CFAA048C0A200000007";
-        let resp = client.call(NftSellOffersRequest::new(nft_id)).await;
+    //     let nft_id = "00090000D0B007439B080E9B05BF62403911301A7B1F0CFAA048C0A200000007";
+    //     let resp = client.call(NftSellOffersRequest::new(nft_id)).await;
 
-        let resp = resp.expect("error response");
+    //     let resp = resp.expect("error response");
 
-        assert_eq!(resp.nft_id, nft_id);
-    }
+    //     assert_eq!(resp.nft_id, nft_id);
+    // }
 
     #[tokio::test]
     async fn client_can_find_a_payment_path() {

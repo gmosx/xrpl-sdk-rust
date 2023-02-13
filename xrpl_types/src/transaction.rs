@@ -1,7 +1,7 @@
 use super::{AccountId, Amount};
 use serde::{Deserialize, Serialize};
 
-// https://github.com/ripple/ripple-binary-codec/blob/master/src/enums/definitions.json
+// https://github.com/XRPLF/xrpl.js/blob/main/packages/ripple-binary-codec/src/enums/definitions.json
 #[repr(u8)]
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize, Deserialize)]
 pub enum TransactionType {
