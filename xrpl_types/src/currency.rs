@@ -2,7 +2,7 @@ use serde::Serialize;
 
 /// An XRP Ledger currency. Can be either an Issued Currency (IOU) or the native
 /// XRP digital asset.
-#[derive(Clone, Serialize)]
+#[derive(Clone, Serialize, Debug)]
 pub enum Currency {
     Issued { name: String, issuer: String },
     Xrp,
