@@ -54,3 +54,34 @@ pub struct Offer {
 
     pub index: Option<String>,
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_deserialize_offer() {
+        let json = r#"
+{
+    "Account": "rBqb89MRQJnMPq8wTwEbtz4kvxrEDfcYvt",
+    "BookDirectory": "ACC27DE91DBA86FC509069EAF4BC511D73128B780F2E54BF5E07A369E2446000",
+    "BookNode": "0000000000000000",
+    "Flags": 131072,
+    "LedgerEntryType": "Offer",
+    "OwnerNode": "0000000000000000",
+    "PreviousTxnID": "F0AB71E777B2DA54B86231E19B82554EF1F8211F92ECA473121C655BFC5329BF",
+    "PreviousTxnLgrSeq": 14524914,
+    "Sequence": 866,
+    "TakerGets": {
+        "currency": "XAG",
+        "issuer": "r9Dr5xwkeLegBeXq6ujinjSBLQzQ1zQGjH",
+        "value": "37"
+    },
+    "TakerPays": "79550000000",
+    "index": "96F76F27D8A327FC48753167EC04A46AA0E382E6F57F32FD12274144D00F1797"
+}
+"#;
+
+        let _offer: Offer = serde_json::from_str(json).unwrap();
+    }
+}

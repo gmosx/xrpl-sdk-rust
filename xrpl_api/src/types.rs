@@ -1,5 +1,5 @@
 use serde::Deserialize;
-use xrpl_types::{Amount, TransactionType};
+use xrpl_types::{Amount, TransactionType, ripple_state::RippleState};
 
 pub trait Request {
     type Response;
@@ -45,7 +45,7 @@ pub trait Request {
 // #[derive(Debug, Deserialize)]
 // pub struct NewFields {}
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub enum AffectedNode {
     // CreateNode {},
     // CreatedNode(serde_json::Value),
@@ -85,7 +85,7 @@ pub enum AffectedNode {
     },
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct Meta {
     #[serde(rename = "AffectedNodes")]
     pub affected_nodes: Vec<AffectedNode>,
@@ -104,7 +104,7 @@ pub struct Meta {
 // }
 
 // TODO: rename to `Tx`? nah...
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct Transaction {
     #[serde(rename = "Account")]
     pub account: String,
@@ -154,6 +154,15 @@ pub struct Transaction {
 
     #[serde(rename = "metaData")]
     pub meta: Option<Meta>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(tag = "LedgerEntryType")]
+pub enum LedgerEntry {
+    RippleState(RippleState),
+    // TODO: add the rest of the entry types and remove Other variant
+    #[serde(other)]
+    Other,
 }
 
 // #TODO add Marker (https://xrpl.org/markers-and-pagination.html)

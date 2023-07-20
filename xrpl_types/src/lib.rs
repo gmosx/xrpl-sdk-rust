@@ -6,6 +6,7 @@ pub mod amount;
 pub mod book;
 pub mod currency;
 pub mod offer;
+pub mod ripple_state;
 pub mod transaction;
 
 pub use account::*;
