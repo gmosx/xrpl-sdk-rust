@@ -6,19 +6,19 @@ use serde::{Deserialize, Serialize};
 // #TODO refactor to make the two variants internal!
 // #TODO add tests
 
-#[derive(Default, Clone, Serialize)]
+#[derive(Default, Debug, Clone, Serialize)]
 pub struct LedgerTransactionsRequest {
     #[serde(flatten)]
     pub ledger_request: LedgerRequest,
 }
 
-#[derive(Default, Clone, Serialize)]
+#[derive(Default, Debug, Clone, Serialize)]
 pub struct ExpandLedgerRequest {
     #[serde(flatten)]
     pub ledger_request: LedgerRequest,
 }
 
-#[derive(Default, Clone, Serialize)]
+#[derive(Default, Debug, Clone, Serialize)]
 pub struct LedgerRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     ledger_hash: Option<String>,

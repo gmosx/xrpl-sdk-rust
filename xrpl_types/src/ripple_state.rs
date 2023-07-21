@@ -61,6 +61,8 @@ pub struct RippleState {
 
     #[serde(rename = "LowQualityOut")]
     pub low_quality_out: Option<u32>,
+
+    pub index: Option<String>,
 }
 
 #[cfg(test)]

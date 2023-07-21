@@ -6,7 +6,7 @@
 use crate::Request;
 use serde::{Deserialize, Serialize};
 
-#[derive(Default, Clone, Serialize)]
+#[derive(Default, Debug, Clone, Serialize)]
 pub struct AccountNftsRequest {
     /// The unique identifier of an account, typically the account's Address.
     /// The request returns a list of NFTs owned by this account.

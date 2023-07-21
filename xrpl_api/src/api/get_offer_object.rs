@@ -7,7 +7,7 @@ use xrpl_types::Offer;
 
 use crate::Request;
 
-#[derive(Default, Clone, Serialize)]
+#[derive(Default, Debug, Clone, Serialize)]
 pub struct OfferParams {
     account: String,
     seq: u32,

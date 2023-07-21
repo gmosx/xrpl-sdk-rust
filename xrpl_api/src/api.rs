@@ -15,6 +15,9 @@ pub use account_channels::*;
 pub mod account_nfts;
 pub use account_nfts::*;
 
+pub mod account_objects;
+pub use account_objects::*;
+
 pub mod account_offers;
 pub use account_offers::*;
 
@@ -104,3 +107,7 @@ pub use ping::*;
 
 pub mod random;
 pub use random::*;
+
+// Generalizations of request/response properties
+pub mod with_ledger_spec;
+pub use with_ledger_spec::*;

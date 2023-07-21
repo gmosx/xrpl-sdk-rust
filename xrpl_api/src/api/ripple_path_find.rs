@@ -20,7 +20,7 @@ use xrpl_types::Amount;
 use crate::Request;
 
 // #TODO is Clone really needed?
-#[derive(Default, Clone, Serialize)]
+#[derive(Default, Debug, Clone, Serialize)]
 pub struct RipplePathFindRequest {
     /// Unique address of the account that would send funds in a transaction.
     source_account: String,

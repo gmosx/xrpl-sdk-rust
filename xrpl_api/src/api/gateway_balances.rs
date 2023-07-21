@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use xrpl_types::Amount;
 
-#[derive(Default, Clone, Serialize)]
+#[derive(Default, Debug, Clone, Serialize)]
 pub struct GatewayBalancesRequest {
     /// The address to check. This should be the issuing address.
     pub account: String,

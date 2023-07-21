@@ -8,7 +8,7 @@ use xrpl_types::{Currency, CurrencySpec, Offer};
 
 use crate::Request;
 
-#[derive(Default, Clone, Serialize)]
+#[derive(Default, Debug, Clone, Serialize)]
 pub struct BookOffersRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     ledger_hash: Option<String>,

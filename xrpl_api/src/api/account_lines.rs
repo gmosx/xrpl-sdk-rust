@@ -1,15 +1,13 @@
 //! <https://xrpl.org/account_lines.html>
 
-use crate::Request;
+use crate::{
+    LedgerSpecRequestFragment, LedgerSpecResponseFragment, Request, RequestWithLedgerSpec,
+};
 use serde::{Deserialize, Serialize};
 
-#[derive(Default, Clone, Serialize)]
+#[derive(Default, Debug, Clone, Serialize)]
 pub struct AccountLinesRequest {
     pub account: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    ledger_hash: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    ledger_index: Option<String>,
     /// The Address of a second account. If provided, show only lines of trust
     /// connecting the two accounts.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -18,6 +16,8 @@ pub struct AccountLinesRequest {
     limit: Option<u32>,
     #[serde(skip_serializing_if = "Option::is_none")]
     marker: Option<String>,
+    #[serde(flatten)]
+    pub ledger_spec: LedgerSpecRequestFragment,
 }
 
 impl Request for AccountLinesRequest {
@@ -25,6 +25,16 @@ impl Request for AccountLinesRequest {
 
     fn method(&self) -> String {
         "account_lines".to_owned()
+    }
+}
+
+impl RequestWithLedgerSpec for AccountLinesRequest {
+    fn as_ledger_index(&self) -> &crate::LedgerSpecRequestFragment {
+        &self.ledger_spec
+    }
+
+    fn as_ledger_index_mut(&mut self) -> &mut crate::LedgerSpecRequestFragment {
+        &mut self.ledger_spec
     }
 }
 
@@ -96,4 +106,6 @@ pub struct AccountLine {
 #[derive(Debug, Deserialize)]
 pub struct AccountLinesResponse {
     pub lines: Vec<AccountLine>,
+    #[serde(flatten)]
+    pub ledger_spec: LedgerSpecResponseFragment,
 }

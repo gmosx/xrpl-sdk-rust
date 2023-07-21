@@ -7,7 +7,7 @@ use crate::Request;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-#[derive(Default, Clone, Serialize)]
+#[derive(Default, Debug, Clone, Serialize)]
 pub struct ServerInfoRequest {}
 
 impl Request for ServerInfoRequest {
