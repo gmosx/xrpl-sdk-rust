@@ -1,6 +1,6 @@
 use serde::Serialize;
 
-/// Specification of ledger.
+/// Specification of ledger to retreive data from.
 /// See <<https://xrpl.org/basic-data-types.html#specifying-ledgers>
 #[derive(Debug, Clone)]
 pub enum LedgerSpec {
@@ -8,7 +8,7 @@ pub enum LedgerSpec {
     LedgerHash(String),
 }
 
-/// Specification of ledger by the `ledger_index` property.
+/// Specification of ledger to retreive data from by the `ledger_index` property.
 /// See <<https://xrpl.org/basic-data-types.html#specifying-ledgers>
 #[derive(Debug, Clone, Copy)]
 pub enum LedgerIndex {

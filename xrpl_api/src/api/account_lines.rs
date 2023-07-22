@@ -1,7 +1,9 @@
 //! <https://xrpl.org/account_lines.html>
 
 use crate::{
-    LedgerSpecRequestFragment, LedgerSpecResponseFragment, Request, RequestWithLedgerSpec,
+    Request, RequestPaginationFragment, RequestWithPagination, ResponsePaginationFragment,
+    ResponseWithPagination, RetrieveDataLedgerSpecFragment, ReturnDataLedgerSpecFragment,
+    WithRetrieveDataLedgerSpec,
 };
 use serde::{Deserialize, Serialize};
 
@@ -12,12 +14,10 @@ pub struct AccountLinesRequest {
     /// connecting the two accounts.
     #[serde(skip_serializing_if = "Option::is_none")]
     peer: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    limit: Option<u32>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    marker: Option<String>,
     #[serde(flatten)]
-    pub ledger_spec: LedgerSpecRequestFragment,
+    pub ledger_spec: RetrieveDataLedgerSpecFragment,
+    #[serde(flatten)]
+    pub pagination: RequestPaginationFragment,
 }
 
 impl Request for AccountLinesRequest {
@@ -28,13 +28,23 @@ impl Request for AccountLinesRequest {
     }
 }
 
-impl RequestWithLedgerSpec for AccountLinesRequest {
-    fn as_ledger_index(&self) -> &crate::LedgerSpecRequestFragment {
+impl WithRetrieveDataLedgerSpec for AccountLinesRequest {
+    fn as_ledger_spec(&self) -> &crate::RetrieveDataLedgerSpecFragment {
         &self.ledger_spec
     }
 
-    fn as_ledger_index_mut(&mut self) -> &mut crate::LedgerSpecRequestFragment {
+    fn as_ledger_spec_mut(&mut self) -> &mut crate::RetrieveDataLedgerSpecFragment {
         &mut self.ledger_spec
+    }
+}
+
+impl RequestWithPagination for AccountLinesRequest {
+    fn as_pagination(&self) -> &RequestPaginationFragment {
+        &self.pagination
+    }
+
+    fn as_pagination_mut(&mut self) -> &mut RequestPaginationFragment {
+        &mut self.pagination
     }
 }
 
@@ -49,13 +59,6 @@ impl AccountLinesRequest {
     pub fn peer(self, peer: &str) -> Self {
         Self {
             peer: Some(peer.to_owned()),
-            ..self
-        }
-    }
-
-    pub fn limit(self, limit: u32) -> Self {
-        Self {
-            limit: Some(limit),
             ..self
         }
     }
@@ -107,5 +110,13 @@ pub struct AccountLine {
 pub struct AccountLinesResponse {
     pub lines: Vec<AccountLine>,
     #[serde(flatten)]
-    pub ledger_spec: LedgerSpecResponseFragment,
+    pub ledger_spec: ReturnDataLedgerSpecFragment,
+    #[serde(flatten)]
+    pub pagination: ResponsePaginationFragment,
+}
+
+impl ResponseWithPagination for AccountLinesResponse {
+    fn as_pagination(&self) -> &ResponsePaginationFragment {
+        &self.pagination
+    }
 }

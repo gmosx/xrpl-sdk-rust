@@ -111,3 +111,6 @@ pub use random::*;
 // Generalizations of request/response properties
 pub mod with_ledger_spec;
 pub use with_ledger_spec::*;
+
+pub mod with_pagination;
+pub use with_pagination::*;

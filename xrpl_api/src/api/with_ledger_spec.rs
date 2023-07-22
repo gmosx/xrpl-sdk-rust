@@ -1,18 +1,18 @@
-use crate::{Request};
+use crate::Request;
 use serde::{Deserialize, Serialize};
 use xrpl_types::{LedgerIndex, LedgerSpec};
 
 /// Request that allows specifying ledger index to execute
 /// request on. See <https://xrpl.org/basic-data-types.html#specifying-ledgers>.
-pub trait RequestWithLedgerSpec: Request {
-    fn as_ledger_index(&self) -> &LedgerSpecRequestFragment;
-    fn as_ledger_index_mut(&mut self) -> &mut LedgerSpecRequestFragment;
+pub trait WithRetrieveDataLedgerSpec: Request {
+    fn as_ledger_spec(&self) -> &RetrieveDataLedgerSpecFragment;
+    fn as_ledger_spec_mut(&mut self) -> &mut RetrieveDataLedgerSpecFragment;
 
     fn ledger_index(mut self, ledger_index: LedgerIndex) -> Self
     where
         Self: Sized,
     {
-        self.as_ledger_index_mut().ledger_index = Some(ledger_index);
+        self.as_ledger_spec_mut().ledger_index = Some(ledger_index);
         self
     }
 
@@ -20,7 +20,7 @@ pub trait RequestWithLedgerSpec: Request {
     where
         Self: Sized,
     {
-        self.as_ledger_index_mut().ledger_hash = Some(ledger_hash);
+        self.as_ledger_spec_mut().ledger_hash = Some(ledger_hash);
         self
     }
 
@@ -36,7 +36,7 @@ pub trait RequestWithLedgerSpec: Request {
 }
 
 #[derive(Default, Debug, Clone, Serialize)]
-pub struct LedgerSpecRequestFragment {
+pub struct RetrieveDataLedgerSpecFragment {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ledger_hash: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -44,7 +44,7 @@ pub struct LedgerSpecRequestFragment {
 }
 
 #[derive(Default, Debug, Clone, Deserialize)]
-pub struct LedgerSpecResponseFragment {
+pub struct ReturnDataLedgerSpecFragment {
     pub ledger_hash: Option<String>,
     pub ledger_index: Option<u32>,
     pub ledger_current_index: Option<u32>,

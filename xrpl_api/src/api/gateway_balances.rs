@@ -3,7 +3,10 @@
 //!
 //! <https://xrpl.org/gateway_balances>
 
-use crate::Request;
+use crate::{
+    Request, RetrieveDataLedgerSpecFragment, ReturnDataLedgerSpecFragment,
+    WithRetrieveDataLedgerSpec,
+};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use xrpl_types::Amount;
@@ -17,11 +20,9 @@ pub struct GatewayBalancesRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub hotwallet: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub ledger_hash: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub ledger_index: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub strict: Option<bool>,
+    #[serde(flatten)]
+    pub ledger_spec: RetrieveDataLedgerSpecFragment,
 }
 
 impl Request for GatewayBalancesRequest {
@@ -29,6 +30,16 @@ impl Request for GatewayBalancesRequest {
 
     fn method(&self) -> String {
         "gateway_balances".to_owned()
+    }
+}
+
+impl WithRetrieveDataLedgerSpec for GatewayBalancesRequest {
+    fn as_ledger_spec(&self) -> &RetrieveDataLedgerSpecFragment {
+        &self.ledger_spec
+    }
+
+    fn as_ledger_spec_mut(&mut self) -> &mut RetrieveDataLedgerSpecFragment {
+        &mut self.ledger_spec
     }
 }
 
@@ -50,14 +61,13 @@ impl GatewayBalancesRequest {
     // #TODO more builder methods
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Deserialize)]
 pub struct GatewayBalancesResponse {
     /// The address of the account that issued the balances.
     pub account: String,
     pub obligations: Option<HashMap<String, String>>,
     pub balances: Option<HashMap<String, Vec<Amount>>>,
     pub assets: Option<HashMap<String, Vec<Amount>>>,
-    pub ledger_hash: Option<String>,
-    pub ledger_index: Option<u32>,
-    pub ledger_current_index: Option<u32>,
+    #[serde(flatten)]
+    pub ledger_spec: ReturnDataLedgerSpecFragment,
 }

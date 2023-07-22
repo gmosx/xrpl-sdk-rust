@@ -1,8 +1,9 @@
 //! <https://xrpl.org/account_objects.html>
 
 use crate::{
-    types::LedgerEntry, LedgerSpecRequestFragment, LedgerSpecResponseFragment, Request,
-    RequestWithLedgerSpec,
+    types::LedgerObject, Request, RequestPaginationFragment, RequestWithPagination,
+    ResponsePaginationFragment, ResponseWithPagination, RetrieveDataLedgerSpecFragment,
+    ReturnDataLedgerSpecFragment, WithRetrieveDataLedgerSpec,
 };
 use serde::{Deserialize, Serialize};
 
@@ -11,12 +12,10 @@ pub struct AccountObjectsRequest {
     pub account: String,
     #[serde(rename = "type", skip_serializing_if = "Option::is_none")]
     pub object_type: Option<AccountObjectType>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    limit: Option<u32>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    marker: Option<String>,
     #[serde(flatten)]
-    pub ledger_spec: LedgerSpecRequestFragment,
+    pub ledger_spec: RetrieveDataLedgerSpecFragment,
+    #[serde(flatten)]
+    pub pagination: RequestPaginationFragment,
 }
 
 impl Request for AccountObjectsRequest {
@@ -27,13 +26,23 @@ impl Request for AccountObjectsRequest {
     }
 }
 
-impl RequestWithLedgerSpec for AccountObjectsRequest {
-    fn as_ledger_index(&self) -> &crate::LedgerSpecRequestFragment {
+impl WithRetrieveDataLedgerSpec for AccountObjectsRequest {
+    fn as_ledger_spec(&self) -> &crate::RetrieveDataLedgerSpecFragment {
         &self.ledger_spec
     }
 
-    fn as_ledger_index_mut(&mut self) -> &mut crate::LedgerSpecRequestFragment {
+    fn as_ledger_spec_mut(&mut self) -> &mut crate::RetrieveDataLedgerSpecFragment {
         &mut self.ledger_spec
+    }
+}
+
+impl RequestWithPagination for AccountObjectsRequest {
+    fn as_pagination(&self) -> &RequestPaginationFragment {
+        &self.pagination
+    }
+
+    fn as_pagination_mut(&mut self) -> &mut RequestPaginationFragment {
+        &mut self.pagination
     }
 }
 
@@ -71,7 +80,15 @@ impl AccountObjectsRequest {
 #[derive(Debug, Deserialize)]
 pub struct AccountObjectsResponse {
     pub account: String,
-    pub account_objects: Vec<LedgerEntry>, // TODO: should we rather use serde_json::Value here and let user deserialize?
+    pub account_objects: Vec<LedgerObject>, // TODO: should we rather use serde_json::Value here and let user deserialize?
     #[serde(flatten)]
-    pub ledger_spec: LedgerSpecResponseFragment,
+    pub ledger_spec: ReturnDataLedgerSpecFragment,
+    #[serde(flatten)]
+    pub pagination: ResponsePaginationFragment,
+}
+
+impl ResponseWithPagination for AccountObjectsResponse {
+    fn as_pagination(&self) -> &ResponsePaginationFragment {
+        &self.pagination
+    }
 }

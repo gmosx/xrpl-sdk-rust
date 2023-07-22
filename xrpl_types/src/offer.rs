@@ -29,7 +29,7 @@ pub const LSF_SELL: u32 = 0x00020000;
 ///     "TakerPays": "79550000000",
 ///     "index": "96F76F27D8A327FC48753167EC04A46AA0E382E6F57F32FD12274144D00F1797"
 /// }
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct Offer {
     #[serde(rename = "Account")]
     pub account: String,
