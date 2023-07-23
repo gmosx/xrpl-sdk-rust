@@ -1,5 +1,5 @@
 use serde::Deserialize;
-use xrpl_types::{ripple_state::RippleState, Amount, Offer, TransactionType};
+use xrpl_types::{ripple_state::RippleState, AccountRoot, Amount, Offer, TransactionType};
 
 pub trait Request {
     type Response;
@@ -162,6 +162,7 @@ pub struct Transaction {
 pub enum LedgerObject {
     RippleState(RippleState),
     Offer(Offer),
+    AccountRoot(AccountRoot),
     // TODO: add the rest of the entry types and remove Other variant
     #[serde(other)]
     Other,

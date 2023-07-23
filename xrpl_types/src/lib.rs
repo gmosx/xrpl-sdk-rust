@@ -6,8 +6,6 @@ pub mod amount;
 pub mod book;
 pub mod currency;
 pub mod ledger_index;
-pub mod offer;
-pub mod ripple_state;
 pub mod transaction;
 
 pub use account::*;
@@ -15,5 +13,15 @@ pub use amount::*;
 pub use book::*;
 pub use currency::*;
 pub use ledger_index::*;
-pub use offer::*;
 pub use transaction::*;
+
+// Ledger objects: (https://xrpl.org/ledger-object-types.html)
+
+pub mod offer;
+pub use offer::*;
+
+pub mod ripple_state;
+pub use ripple_state::*;
+
+pub mod account_root;
+pub use account_root::*;
