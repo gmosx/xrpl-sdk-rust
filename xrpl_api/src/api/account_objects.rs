@@ -80,7 +80,7 @@ impl AccountObjectsRequest {
 #[derive(Debug, Deserialize)]
 pub struct AccountObjectsResponse {
     pub account: String,
-    pub account_objects: Vec<LedgerObject>, // TODO: should we rather use serde_json::Value here and let user deserialize?
+    pub account_objects: Vec<LedgerObject>,
     #[serde(flatten)]
     pub ledger_spec: ReturnDataLedgerSpecFragment,
     #[serde(flatten)]
