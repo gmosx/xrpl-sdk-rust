@@ -1,15 +1,11 @@
 use crate::Currency;
 use serde::{Deserialize, Serialize};
 
-/// <https://xrpl.org/serialization.html#amount-fields>
+/// Amount of XRP or issued token. See <https://xrpl.org/currency-formats.html#specifying-currency-amounts>
 #[derive(Debug, Eq, PartialEq, Serialize, Deserialize, Clone)]
 #[serde(untagged)]
 pub enum Amount {
-    Issued {
-        value: String,
-        currency: String,
-        issuer: String,
-    },
+    Issued(IssuedTokenAmount),
     Drops(String),
 }
 
@@ -20,16 +16,12 @@ impl Default for Amount {
 }
 
 impl Amount {
-    pub fn issued(value: &str, currency: &str, issuer: &str) -> Self {
-        Self::Issued {
-            value: value.to_string(),
-            currency: currency.to_string(),
-            issuer: issuer.to_string(),
-        }
-    }
-
-    pub fn iou(value: &str, currency: &str, issuer: &str) -> Self {
-        Self::issued(value, currency, issuer)
+    pub fn issued(
+        value: impl Into<String>,
+        currency: impl Into<String>,
+        issuer: impl Into<String>,
+    ) -> Self {
+        Self::Issued(IssuedTokenAmount::new(value, currency, issuer))
     }
 
     pub fn xrp(value: &str) -> Self {
@@ -51,7 +43,29 @@ impl Amount {
     pub fn size(&self) -> f64 {
         match self {
             Amount::Drops(value) => value.parse::<f64>().unwrap() / 1_000_000.0,
-            Amount::Issued { value, .. } => value.parse::<f64>().unwrap(),
+            Amount::Issued(IssuedTokenAmount { value, .. }) => value.parse::<f64>().unwrap(),
+        }
+    }
+}
+
+/// Amount of issued token. See <https://xrpl.org/currency-formats.html#token-amounts>
+#[derive(Debug, Eq, PartialEq, Serialize, Deserialize, Clone)]
+pub struct IssuedTokenAmount {
+    pub value: String,
+    pub currency: String,
+    pub issuer: String,
+}
+
+impl IssuedTokenAmount {
+    pub fn new(
+        value: impl Into<String>,
+        currency: impl Into<String>,
+        issuer: impl Into<String>,
+    ) -> Self {
+        Self {
+            value: value.into(),
+            currency: currency.into(),
+            issuer: issuer.into(),
         }
     }
 }

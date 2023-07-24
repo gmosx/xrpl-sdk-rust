@@ -1,6 +1,6 @@
 use serde::Deserialize;
 
-use crate::Amount;
+use crate::{Amount, IssuedTokenAmount};
 
 /// An ripple state in the ledger.
 ///
@@ -33,13 +33,13 @@ use crate::Amount;
 #[derive(Debug, Clone, Deserialize)]
 pub struct RippleState {
     #[serde(rename = "Balance")]
-    pub balance: Amount,
+    pub balance: IssuedTokenAmount,
 
     #[serde(rename = "Flags")]
     pub flags: u32,
 
     #[serde(rename = "HighLimit")]
-    pub high_limit: Amount,
+    pub high_limit: IssuedTokenAmount,
 
     #[serde(rename = "HighNode")]
     pub high_node: String,
@@ -51,7 +51,7 @@ pub struct RippleState {
     pub high_quality_out: Option<u32>,
 
     #[serde(rename = "LowLimit")]
-    pub low_limit: Amount,
+    pub low_limit: IssuedTokenAmount,
 
     #[serde(rename = "LowNode")]
     pub low_node: String,
