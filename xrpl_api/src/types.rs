@@ -1,5 +1,5 @@
 use serde::Deserialize;
-use xrpl_types::{ripple_state::RippleState, AccountRoot, Amount, Offer, TransactionType};
+use xrpl_types::{ripple_state::RippleState, Amount, Offer, TransactionType, AccountRoot};
 
 pub trait Request {
     type Response;

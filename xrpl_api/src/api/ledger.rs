@@ -21,24 +21,24 @@ pub struct ExpandLedgerRequest {
 #[derive(Default, Debug, Clone, Serialize)]
 pub struct LedgerRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
-    ledger_hash: Option<String>,
+    pub ledger_hash: Option<String>,
     /// The ledger index of the ledger to use, or a shortcut string to choose a ledger automatically.
     #[serde(skip_serializing_if = "Option::is_none")]
-    ledger_index: Option<String>,
+    pub ledger_index: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    full: Option<bool>,
+    pub full: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    accounts: Option<bool>,
+    pub accounts: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    transactions: Option<bool>,
+    pub transactions: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    expand: Option<bool>,
+    pub expand: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    owner_funds: Option<bool>,
+    pub owner_funds: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    binary: Option<bool>,
+    pub binary: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    queue: Option<bool>,
+    pub queue: Option<bool>,
 }
 
 impl Request for LedgerRequest {

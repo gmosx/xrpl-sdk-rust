@@ -1,6 +1,6 @@
 use serde::Deserialize;
 
-use crate::{Amount, IssuedTokenAmount};
+use crate::IssuedTokenAmount;
 
 /// An ripple state in the ledger.
 ///
@@ -41,8 +41,10 @@ pub struct RippleState {
     #[serde(rename = "HighLimit")]
     pub high_limit: IssuedTokenAmount,
 
+    /// This field is mandatory on `RippleState` object, but we leave it optional, such
+    /// that we can parse the object from `CreateNode` fields where it is not set. See <https://xrpl.org/transaction-metadata.html>
     #[serde(rename = "HighNode")]
-    pub high_node: String,
+    pub high_node: Option<String>,
 
     #[serde(rename = "HighQualityIn")]
     pub high_quality_in: Option<u32>,
@@ -53,8 +55,10 @@ pub struct RippleState {
     #[serde(rename = "LowLimit")]
     pub low_limit: IssuedTokenAmount,
 
+    /// This field is mandatory on `RippleState` object, but we leave it optional, such
+    /// that we can parse the object from `CreateNode` fields where it is not set. See <https://xrpl.org/transaction-metadata.html>
     #[serde(rename = "LowNode")]
-    pub low_node: String,
+    pub low_node: Option<String>,
 
     #[serde(rename = "LowQualityIn")]
     pub low_quality_in: Option<u32>,

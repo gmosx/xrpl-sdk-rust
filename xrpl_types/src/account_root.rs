@@ -58,11 +58,15 @@ pub struct AccountRoot {
     #[serde(rename = "OwnerCount")]
     pub owner_count: u32,
 
+    /// This field is mandatory on `AccountRoot` object, but we leave it optional, such
+    /// that we can parse the object from `ModifiedNode` fields. See <https://xrpl.org/transaction-metadata.html#modifiednode-fields>
     #[serde(rename = "PreviousTxnID")]
-    pub previous_txn_id: String,
+    pub previous_txn_id: Option<String>,
 
+/// This field is mandatory on `AccountRoot` object, but we leave it optional, such
+    /// that we can parse the object from `ModifiedNode` fields. See <https://xrpl.org/transaction-metadata.html#modifiednode-fields>
     #[serde(rename = "PreviousTxnLgrSeq")]
-    pub previous_txn_lgr_seq: u32,
+    pub previous_txn_lgr_seq: Option<u32>,
 
     #[serde(rename = "RegularKey")]
     pub regular_key: Option<String>,
