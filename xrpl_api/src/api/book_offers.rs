@@ -4,7 +4,7 @@
 //! <https://xrpl.org/book_offers.html>
 
 use serde::{Deserialize, Serialize};
-use xrpl_types::{Currency, CurrencySpec, Offer};
+use xrpl_types::{Currency, Offer};
 
 use crate::Request;
 
@@ -18,8 +18,8 @@ pub struct BookOffersRequest {
     limit: Option<u32>,
     #[serde(skip_serializing_if = "Option::is_none")]
     taker: Option<String>,
-    taker_gets: CurrencySpec,
-    taker_pays: CurrencySpec,
+    taker_gets: Currency,
+    taker_pays: Currency,
 }
 
 impl Request for BookOffersRequest {
@@ -31,10 +31,10 @@ impl Request for BookOffersRequest {
 }
 
 impl BookOffersRequest {
-    pub fn new(taker_gets: &Currency, taker_pays: &Currency) -> Self {
+    pub fn new(taker_gets: Currency, taker_pays: Currency) -> Self {
         Self {
-            taker_gets: CurrencySpec::from_currency(taker_gets),
-            taker_pays: CurrencySpec::from_currency(taker_pays),
+            taker_gets,
+            taker_pays,
             ..Default::default()
         }
     }

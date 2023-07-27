@@ -196,8 +196,8 @@ mod tests {
 
         let resp = client
             .call(BookOffersRequest::new(
-                &Currency::xrp(),
-                &Currency::issued("USD", "rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B"),
+                Currency::xrp(),
+                Currency::issued("USD", "rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B"),
             ))
             .await;
 
