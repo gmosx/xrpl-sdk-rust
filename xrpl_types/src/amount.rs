@@ -43,10 +43,7 @@ impl Amount {
 
     pub fn with_currency(value: &str, currency: &Currency) -> Self {
         match currency {
-            Currency::Issued {
-                currency: name,
-                issuer,
-            } => Self::issued(value, name, issuer),
+            Currency::Issued { currency, issuer } => Self::issued(value, currency, issuer),
             Currency::Xrp => Self::xrp(value),
         }
     }
