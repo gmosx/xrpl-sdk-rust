@@ -117,6 +117,6 @@ mod test {
 }
 "#;
 
-        let _account_root: AccoutRoot = serde_json::from_str(json).unwrap();
+        let _account_root: AccountRoot = serde_json::from_str(json).unwrap();
     }
 }
