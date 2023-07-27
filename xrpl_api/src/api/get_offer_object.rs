@@ -5,13 +5,7 @@
 use serde::{Deserialize, Serialize};
 use xrpl_types::Offer;
 
-use crate::Request;
-
-#[derive(Default, Clone, Serialize)]
-pub struct OfferParams {
-    account: String,
-    seq: u32,
-}
+use crate::{types::OfferParams, Request};
 
 #[derive(Default, Clone, Serialize)]
 pub struct GetOfferObjectRequest {

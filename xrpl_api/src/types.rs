@@ -1,4 +1,4 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use xrpl_types::{Amount, TransactionType};
 
 pub trait Request {
@@ -158,7 +158,7 @@ pub struct Transaction {
 
 // #TODO add Marker (https://xrpl.org/markers-and-pagination.html)
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct NFTokenOffer {
     /// The amount offered to buy the NFT for, as a String representing an amount
     /// in drops of XRP, or an object representing an amount of a fungible token.
@@ -170,4 +170,10 @@ pub struct NFTokenOffer {
     pub nft_offer_index: String,
     /// The account that placed this offer.
     pub owner: String,
+}
+
+#[derive(Default, Clone, Serialize)]
+pub struct OfferParams {
+    pub account: String,
+    pub seq: u32,
 }
