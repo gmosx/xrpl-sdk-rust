@@ -50,8 +50,8 @@ mod tests {
             .expect("cannot connect");
 
         let book = Book::new(
-            &Currency::Xrp,
-            &Currency::issued("USD", "rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B"),
+            Currency::Xrp,
+            Currency::issued("USD", "rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B"),
             "rf1BiGeXwwQoi8Z2ueFYTEXSwuJYfV2Jpn",
         )
         .snapshot(true);

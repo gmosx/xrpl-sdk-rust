@@ -1,5 +1,5 @@
 use super::util::internal_number_from_string;
-use xrpl_types::{Amount, IssuedTokenAmount, Memo, Transaction};
+use xrpl_types::{Amount, IssuedAmount, Memo, Transaction};
 
 // https://xrpl.org/serialization.html
 // https://github.com/ripple/ripple-binary-codec/blob/master/src/enums/definitions.json
@@ -108,7 +108,7 @@ impl Serializer {
     pub fn push_amount(&mut self, amount: &Amount) {
         match amount {
             Amount::Drops(value) => self.push_drops_amount(value.parse::<u64>().unwrap()),
-            Amount::Issued(IssuedTokenAmount {
+            Amount::Issued(IssuedAmount {
                 value,
                 currency,
                 issuer,
