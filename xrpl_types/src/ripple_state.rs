@@ -1,3 +1,4 @@
+use enumflags2::{bitflags, BitFlags};
 use serde::Deserialize;
 
 use crate::IssuedAmount;
@@ -36,7 +37,7 @@ pub struct RippleState {
     pub balance: IssuedAmount,
 
     #[serde(rename = "Flags")]
-    pub flags: u32,
+    pub flags: BitFlags<RippleStateFlags>,
 
     #[serde(rename = "HighLimit")]
     pub high_limit: IssuedAmount,
@@ -67,6 +68,20 @@ pub struct RippleState {
     pub low_quality_out: Option<u32>,
 
     pub index: Option<String>,
+}
+
+#[bitflags]
+#[repr(u32)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum RippleStateFlags {
+    LowReserve = 0x00010000,
+    HighReserve = 0x00020000,
+    LowAuth = 0x00040000,
+    HighAuth = 0x00080000,
+    LowNoRipple = 0x00100000,
+    HighNoRipple = 0x00200000,
+    LowFreeze = 0x00400000,
+    HighFreeze = 0x00800000,
 }
 
 #[cfg(test)]

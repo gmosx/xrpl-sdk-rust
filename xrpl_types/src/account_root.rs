@@ -1,3 +1,4 @@
+use enumflags2::{bitflags, BitFlags};
 use serde::Deserialize;
 
 /// An account root in the ledger.
@@ -44,7 +45,7 @@ pub struct AccountRoot {
     pub first_nf_token_sequence: Option<u32>,
 
     #[serde(rename = "Flags")]
-    pub flags: u32,
+    pub flags: BitFlags<AccountRootFlags>,
 
     #[serde(rename = "MessageKey")]
     pub message_key: Option<String>,
@@ -90,6 +91,25 @@ pub struct AccountRoot {
     pub wallet_size: Option<u32>,
 
     pub index: Option<String>,
+}
+
+#[bitflags]
+#[repr(u32)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum AccountRootFlags {
+    DefaultRipple = 0x00800000,
+    DepositAuth = 0x01000000,
+    DisableMaster = 0x00100000,
+    DisallowIncomingCheck = 0x08000000,
+    DisallowIncomingNFTokenOffer = 0x04000000,
+    DisallowIncomingPayChan = 0x10000000,
+    DisallowIncomingTrustline = 0x20000000,
+    DisallowXRP = 0x00080000,
+    GlobalFreeze = 0x00400000,
+    NoFreeze = 0x00200000,
+    PasswordSpent = 0x00010000,
+    RequireAuth = 0x00040000,
+    RequireDestTag = 0x00020000,
 }
 
 #[cfg(test)]

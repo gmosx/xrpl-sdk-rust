@@ -1,4 +1,5 @@
 use crate::Amount;
+use enumflags2::{bitflags, BitFlags};
 use serde::Deserialize;
 
 /// The object was placed as a passive offer
@@ -41,7 +42,7 @@ pub struct Offer {
     pub book_node: Option<String>,
 
     #[serde(rename = "Flags")]
-    pub flags: u32,
+    pub flags: BitFlags<OfferFlags>,
 
     #[serde(rename = "Sequence")]
     pub sequence: u32,
@@ -53,6 +54,14 @@ pub struct Offer {
     pub taker_pays: Amount,
 
     pub index: Option<String>,
+}
+
+#[bitflags]
+#[repr(u32)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum OfferFlags {
+    Passive = 0x00010000,
+    Sell = 0x00020000,
 }
 
 #[cfg(test)]
