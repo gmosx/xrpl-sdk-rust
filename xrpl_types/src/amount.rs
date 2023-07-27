@@ -20,16 +20,16 @@ impl Default for Amount {
 }
 
 impl Amount {
-    pub fn issued(value: &str, currency: &str, issuer: &str) -> Self {
+    pub fn issued(
+        value: impl Into<String>,
+        currency: impl Into<String>,
+        issuer: impl Into<String>,
+    ) -> Self {
         Self::Issued {
-            value: value.to_string(),
-            currency: currency.to_string(),
-            issuer: issuer.to_string(),
+            value: value.into(),
+            currency: currency.into(),
+            issuer: issuer.into(),
         }
-    }
-
-    pub fn iou(value: &str, currency: &str, issuer: &str) -> Self {
-        Self::issued(value, currency, issuer)
     }
 
     pub fn xrp(value: &str) -> Self {
@@ -43,7 +43,7 @@ impl Amount {
 
     pub fn with_currency(value: &str, currency: &Currency) -> Self {
         match currency {
-            Currency::Issued { name, issuer } => Self::issued(value, name, issuer),
+            Currency::Issued { currency, issuer } => Self::issued(value, currency, issuer),
             Currency::Xrp => Self::xrp(value),
         }
     }
@@ -53,5 +53,56 @@ impl Amount {
             Amount::Drops(value) => value.parse::<f64>().unwrap() / 1_000_000.0,
             Amount::Issued { value, .. } => value.parse::<f64>().unwrap(),
         }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::Amount;
+    use assert_matches::assert_matches;
+    use serde::Serialize;
+
+    #[test]
+    fn test_serialize_drops() {
+        let amount = Amount::drops(100);
+
+        let mut v = Vec::new();
+        let mut serializer = serde_json::Serializer::new(&mut v);
+        amount.serialize(&mut serializer).unwrap();
+        assert_eq!(r#""100""#, String::from_utf8(v).unwrap());
+    }
+
+    #[test]
+    fn test_serialize_issued_amount() {
+        let amount = Amount::issued("12.34", "USD", "rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq");
+
+        let mut v = Vec::new();
+        let mut serializer = serde_json::Serializer::new(&mut v);
+        amount.serialize(&mut serializer).unwrap();
+        assert_eq!(
+            r#"{"value":"12.34","currency":"USD","issuer":"rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq"}"#,
+            String::from_utf8(v).unwrap()
+        );
+    }
+
+    #[test]
+    fn test_deserialize_drops() {
+        let amount = serde_json::from_str(r#""100""#).unwrap();
+        assert_matches!(amount, Amount::Drops(drops) => {
+            assert_eq!(drops, "100");
+        });
+    }
+
+    #[test]
+    fn test_deserialize_issued_amount() {
+        let amount = serde_json::from_str(
+            r#"{"value":"12.34","currency":"USD","issuer":"rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq"}"#,
+        )
+        .unwrap();
+        assert_matches!(amount, Amount::Issued {value, currency, issuer} => {
+            assert_eq!(value, "12.34");
+            assert_eq!(currency, "USD");
+            assert_eq!(issuer, "rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq");
+        });
     }
 }

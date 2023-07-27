@@ -1,13 +1,13 @@
-use crate::{Currency, CurrencySpec};
+use crate::Currency;
 use serde::Serialize;
 
 /// A book on the ledger.
 #[derive(Default, Debug, Clone, Serialize)]
 pub struct Book {
     /// Specification of which currency the account taking the Offer would pay.
-    pub taker_gets: CurrencySpec,
+    pub taker_gets: Currency,
     /// Specification of which currency the account taking the Offer would receive.
-    pub taker_pays: CurrencySpec,
+    pub taker_pays: Currency,
     /// Unique account address to use as a perspective for viewing offers, in the XRP Ledger's base58 format.
     pub taker: String,
     /// If true, return the current state of the order book once when you subscribe before sending updates.
@@ -18,10 +18,10 @@ pub struct Book {
 }
 
 impl Book {
-    pub fn new(taker_gets: &Currency, taker_pays: &Currency, taker: &str) -> Self {
+    pub fn new(taker_gets: Currency, taker_pays: Currency, taker: &str) -> Self {
         Self {
-            taker_gets: CurrencySpec::from_currency(taker_gets),
-            taker_pays: CurrencySpec::from_currency(taker_pays),
+            taker_gets,
+            taker_pays,
             taker: taker.to_owned(),
             snapshot: None,
             both: None,
