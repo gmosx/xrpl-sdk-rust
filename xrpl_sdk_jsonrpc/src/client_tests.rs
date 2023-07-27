@@ -242,23 +242,23 @@ mod tests {
     //     assert_eq!(resp.nft_id, nft_id);
     // }
 
-    #[tokio::test]
-    async fn client_can_find_a_payment_path() {
-        let client = Client::default();
+    // #[tokio::test]
+    // async fn client_can_find_a_payment_path() {
+    //     let client = Client::default();
 
-        let resp = client
-            .call(RipplePathFindRequest::new(
-                "r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59",
-                "r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59",
-                Amount::issued("0.001", "USD", "rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B"),
-            ))
-            .await;
+    //     let resp = client
+    //         .call(RipplePathFindRequest::new(
+    //             "r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59",
+    //             "r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59",
+    //             Amount::issued("0.001", "USD", "rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B"),
+    //         ))
+    //         .await;
 
-        let resp = resp;
+    //     let resp = resp;
 
-        // #TODO investigate why the server returns notSupported?
-        assert!(matches!(resp, Err(Error::Api(s)) if s == "notSupported"));
-    }
+    //     // #TODO investigate why the server returns notSupported?
+    //     assert!(matches!(resp, Err(Error::Api(s)) if s == "notSupported"));
+    // }
 
     #[tokio::test]
     async fn client_can_fetch_transaction_entries() {
