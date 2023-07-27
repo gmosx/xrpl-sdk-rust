@@ -45,9 +45,9 @@ impl Serialize for Currency {
     {
         #[derive(Debug, Clone, Serialize)]
         struct CurrencyRaw<'a> {
-            pub currency: &'a str,
+            currency: &'a str,
             #[serde(skip_serializing_if = "Option::is_none")]
-            pub issuer: Option<&'a str>,
+            issuer: Option<&'a str>,
         }
 
         impl<'a> CurrencyRaw<'a> {
