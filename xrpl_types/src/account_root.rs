@@ -22,74 +22,39 @@ use serde::Deserialize;
 ///    "index": "13F1A95D7AAB7108D5CE7EEAF504B2894B8C674E6D68499076441C4837282BF8"
 ///}
 #[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "PascalCase")]
 pub struct AccountRoot {
-    #[serde(rename = "Account")]
     pub account: String,
-
     #[serde(rename = "AccountTxnID")]
     pub account_txn_id: Option<String>,
-
-    #[serde(rename = "Balance")]
     pub balance: Option<String>,
-
     #[serde(rename = "BurnedNFTokens")]
     pub burned_nf_tokens: Option<u32>,
-
-    #[serde(rename = "Domain")]
     pub domain: Option<String>,
-
-    #[serde(rename = "EmailHash")]
     pub email_hash: Option<String>,
-
     #[serde(rename = "FirstNFTokenSequence")]
     pub first_nf_token_sequence: Option<u32>,
-
-    #[serde(rename = "Flags")]
     pub flags: BitFlags<AccountRootFlags>,
-
-    #[serde(rename = "MessageKey")]
     pub message_key: Option<String>,
-
     #[serde(rename = "MintedNFTokens")]
     pub minted_nf_tokens: Option<u32>,
-
     #[serde(rename = "NFTokenMinter")]
     pub nf_token_minter: Option<String>,
-
-    #[serde(rename = "OwnerCount")]
     pub owner_count: u32,
-
     /// This field is mandatory on `AccountRoot` object, but we leave it optional, such
     /// that we can parse the object from `ModifiedNode` fields. See <https://xrpl.org/transaction-metadata.html#modifiednode-fields>
     #[serde(rename = "PreviousTxnID")]
     pub previous_txn_id: Option<String>,
-
     /// This field is mandatory on `AccountRoot` object, but we leave it optional, such
     /// that we can parse the object from `ModifiedNode` fields. See <https://xrpl.org/transaction-metadata.html#modifiednode-fields>
-    #[serde(rename = "PreviousTxnLgrSeq")]
     pub previous_txn_lgr_seq: Option<u32>,
-
-    #[serde(rename = "RegularKey")]
     pub regular_key: Option<String>,
-
-    #[serde(rename = "Sequence")]
     pub sequence: u32,
-
-    #[serde(rename = "TicketCount")]
     pub ticket_count: Option<u32>,
-
-    #[serde(rename = "TickSize")]
     pub tick_size: Option<u8>,
-
-    #[serde(rename = "TransferRate")]
     pub transfer_rate: Option<u32>,
-
-    #[serde(rename = "WalletLocator")]
     pub wallet_locator: Option<String>,
-
-    #[serde(rename = "WalletSize")]
     pub wallet_size: Option<u32>,
-
     pub index: Option<String>,
 }
 

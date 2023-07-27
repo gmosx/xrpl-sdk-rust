@@ -32,41 +32,22 @@ use crate::IssuedAmount;
 ///     "index": "9CA88CDEDFF9252B3DE183CE35B038F57282BC9503CDFA1923EF9A95DF0D6F7B"
 /// }
 #[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "PascalCase")]
 pub struct RippleState {
-    #[serde(rename = "Balance")]
     pub balance: IssuedAmount,
-
-    #[serde(rename = "Flags")]
     pub flags: BitFlags<RippleStateFlags>,
-
-    #[serde(rename = "HighLimit")]
     pub high_limit: IssuedAmount,
-
     /// This field is mandatory on `RippleState` object, but we leave it optional, such
     /// that we can parse the object from `CreateNode` fields where it is not set. See <https://xrpl.org/transaction-metadata.html>
-    #[serde(rename = "HighNode")]
     pub high_node: Option<String>,
-
-    #[serde(rename = "HighQualityIn")]
     pub high_quality_in: Option<u32>,
-
-    #[serde(rename = "HighQualityOut")]
     pub high_quality_out: Option<u32>,
-
-    #[serde(rename = "LowLimit")]
     pub low_limit: IssuedAmount,
-
     /// This field is mandatory on `RippleState` object, but we leave it optional, such
     /// that we can parse the object from `CreateNode` fields where it is not set. See <https://xrpl.org/transaction-metadata.html>
-    #[serde(rename = "LowNode")]
     pub low_node: Option<String>,
-
-    #[serde(rename = "LowQualityIn")]
     pub low_quality_in: Option<u32>,
-
-    #[serde(rename = "LowQualityOut")]
     pub low_quality_out: Option<u32>,
-
     pub index: Option<String>,
 }
 

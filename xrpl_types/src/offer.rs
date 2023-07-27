@@ -31,28 +31,15 @@ pub const LSF_SELL: u32 = 0x00020000;
 ///     "index": "96F76F27D8A327FC48753167EC04A46AA0E382E6F57F32FD12274144D00F1797"
 /// }
 #[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "PascalCase")]
 pub struct Offer {
-    #[serde(rename = "Account")]
     pub account: String,
-
-    #[serde(rename = "BookDirectory")]
     pub book_directory: String,
-
-    #[serde(rename = "BookNode")]
     pub book_node: Option<String>,
-
-    #[serde(rename = "Flags")]
     pub flags: BitFlags<OfferFlags>,
-
-    #[serde(rename = "Sequence")]
     pub sequence: u32,
-
-    #[serde(rename = "TakerGets")]
     pub taker_gets: Amount,
-
-    #[serde(rename = "TakerPays")]
     pub taker_pays: Amount,
-
     pub index: Option<String>,
 }
 
