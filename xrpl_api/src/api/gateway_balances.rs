@@ -3,10 +3,7 @@
 //!
 //! <https://xrpl.org/gateway_balances>
 
-use crate::{
-    Request, RetrieveDataLedgerSpecFragment, ReturnDataLedgerSpecFragment,
-    WithRetrieveDataLedgerSpec,
-};
+use crate::{Request, RetrieveLedgerSpec, ReturnLedgerSpec, WithLedgerSpec};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use xrpl_types::Amount;
@@ -22,7 +19,7 @@ pub struct GatewayBalancesRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub strict: Option<bool>,
     #[serde(flatten)]
-    pub ledger_spec: RetrieveDataLedgerSpecFragment,
+    pub ledger_spec: RetrieveLedgerSpec,
 }
 
 impl Request for GatewayBalancesRequest {
@@ -33,12 +30,12 @@ impl Request for GatewayBalancesRequest {
     }
 }
 
-impl WithRetrieveDataLedgerSpec for GatewayBalancesRequest {
-    fn as_ledger_spec(&self) -> &RetrieveDataLedgerSpecFragment {
+impl WithLedgerSpec for GatewayBalancesRequest {
+    fn as_ledger_spec(&self) -> &RetrieveLedgerSpec {
         &self.ledger_spec
     }
 
-    fn as_ledger_spec_mut(&mut self) -> &mut RetrieveDataLedgerSpecFragment {
+    fn as_ledger_spec_mut(&mut self) -> &mut RetrieveLedgerSpec {
         &mut self.ledger_spec
     }
 }
@@ -69,5 +66,5 @@ pub struct GatewayBalancesResponse {
     pub balances: Option<HashMap<String, Vec<Amount>>>,
     pub assets: Option<HashMap<String, Vec<Amount>>>,
     #[serde(flatten)]
-    pub ledger_spec: ReturnDataLedgerSpecFragment,
+    pub ledger_spec: ReturnLedgerSpec,
 }

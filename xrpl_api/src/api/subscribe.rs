@@ -5,7 +5,7 @@
 
 use crate::{
     types::{Meta, Transaction},
-    Request, ReturnDataLedgerSpecFragment,
+    Request, ReturnLedgerSpec,
 };
 use serde::{Deserialize, Serialize};
 use xrpl_types::Book;
@@ -127,5 +127,5 @@ pub struct TransactionEvent {
     pub transaction: Transaction,
     pub meta: Meta,
     #[serde(flatten)]
-    pub ledger_spec: ReturnDataLedgerSpecFragment,
+    pub ledger_spec: ReturnLedgerSpec,
 }

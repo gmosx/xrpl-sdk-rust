@@ -1,9 +1,8 @@
 //! <https://xrpl.org/account_objects.html>
 
 use crate::{
-    types::LedgerObject, Request, RequestPaginationFragment, RequestWithPagination,
-    ResponsePaginationFragment, ResponseWithPagination, RetrieveDataLedgerSpecFragment,
-    ReturnDataLedgerSpecFragment, WithRetrieveDataLedgerSpec,
+    types::LedgerObject, Request, RequestPagination, ResponsePagination, RetrieveLedgerSpec,
+    ReturnLedgerSpec, WithLedgerSpec, WithRequestPagination, WithResponsePagination,
 };
 use serde::{Deserialize, Serialize};
 
@@ -13,9 +12,9 @@ pub struct AccountObjectsRequest {
     #[serde(rename = "type", skip_serializing_if = "Option::is_none")]
     pub object_type: Option<AccountObjectType>,
     #[serde(flatten)]
-    pub ledger_spec: RetrieveDataLedgerSpecFragment,
+    pub ledger_spec: RetrieveLedgerSpec,
     #[serde(flatten)]
-    pub pagination: RequestPaginationFragment,
+    pub pagination: RequestPagination,
 }
 
 impl Request for AccountObjectsRequest {
@@ -26,22 +25,22 @@ impl Request for AccountObjectsRequest {
     }
 }
 
-impl WithRetrieveDataLedgerSpec for AccountObjectsRequest {
-    fn as_ledger_spec(&self) -> &crate::RetrieveDataLedgerSpecFragment {
+impl WithLedgerSpec for AccountObjectsRequest {
+    fn as_ledger_spec(&self) -> &crate::RetrieveLedgerSpec {
         &self.ledger_spec
     }
 
-    fn as_ledger_spec_mut(&mut self) -> &mut crate::RetrieveDataLedgerSpecFragment {
+    fn as_ledger_spec_mut(&mut self) -> &mut crate::RetrieveLedgerSpec {
         &mut self.ledger_spec
     }
 }
 
-impl RequestWithPagination for AccountObjectsRequest {
-    fn as_pagination(&self) -> &RequestPaginationFragment {
+impl WithRequestPagination for AccountObjectsRequest {
+    fn as_pagination(&self) -> &RequestPagination {
         &self.pagination
     }
 
-    fn as_pagination_mut(&mut self) -> &mut RequestPaginationFragment {
+    fn as_pagination_mut(&mut self) -> &mut RequestPagination {
         &mut self.pagination
     }
 }
@@ -82,13 +81,13 @@ pub struct AccountObjectsResponse {
     pub account: String,
     pub account_objects: Vec<LedgerObject>,
     #[serde(flatten)]
-    pub ledger_spec: ReturnDataLedgerSpecFragment,
+    pub ledger_spec: ReturnLedgerSpec,
     #[serde(flatten)]
-    pub pagination: ResponsePaginationFragment,
+    pub pagination: ResponsePagination,
 }
 
-impl ResponseWithPagination for AccountObjectsResponse {
-    fn as_pagination(&self) -> &ResponsePaginationFragment {
+impl WithResponsePagination for AccountObjectsResponse {
+    fn as_pagination(&self) -> &ResponsePagination {
         &self.pagination
     }
 }

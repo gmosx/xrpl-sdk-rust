@@ -1,9 +1,6 @@
 //! <https://xrpl.org/account_info.html>
 
-use crate::{
-    Request, RetrieveDataLedgerSpecFragment, ReturnDataLedgerSpecFragment,
-    WithRetrieveDataLedgerSpec,
-};
+use crate::{Request, RetrieveLedgerSpec, ReturnLedgerSpec, WithLedgerSpec};
 use serde::{Deserialize, Serialize};
 
 #[derive(Default, Debug, Clone, Serialize)]
@@ -16,7 +13,7 @@ pub struct AccountInfoRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub strict: Option<bool>,
     #[serde(flatten)]
-    pub ledger_spec: RetrieveDataLedgerSpecFragment,
+    pub ledger_spec: RetrieveLedgerSpec,
 }
 
 impl Request for AccountInfoRequest {
@@ -27,12 +24,12 @@ impl Request for AccountInfoRequest {
     }
 }
 
-impl WithRetrieveDataLedgerSpec for AccountInfoRequest {
-    fn as_ledger_spec(&self) -> &RetrieveDataLedgerSpecFragment {
+impl WithLedgerSpec for AccountInfoRequest {
+    fn as_ledger_spec(&self) -> &RetrieveLedgerSpec {
         &self.ledger_spec
     }
 
-    fn as_ledger_spec_mut(&mut self) -> &mut RetrieveDataLedgerSpecFragment {
+    fn as_ledger_spec_mut(&mut self) -> &mut RetrieveLedgerSpec {
         &mut self.ledger_spec
     }
 }
@@ -72,5 +69,5 @@ pub struct AccountInfoResponse {
     // #TODO add missing fields!
     pub account_data: AccountData,
     #[serde(flatten)]
-    pub ledger_spec: ReturnDataLedgerSpecFragment,
+    pub ledger_spec: ReturnLedgerSpec,
 }
