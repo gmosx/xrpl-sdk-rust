@@ -9,7 +9,7 @@
 use crate::Request;
 use serde::{Deserialize, Serialize};
 
-#[derive(Default, Clone, Serialize)]
+#[derive(Default, Debug, Clone, Serialize)]
 pub struct AccountChannelsRequest {
     /// The unique identifier of an account, typically the account's Address.
     /// The request returns channels where this account is the channel's owner/source.

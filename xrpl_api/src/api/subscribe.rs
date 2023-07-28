@@ -3,11 +3,14 @@
 //!
 //! <https://xrpl.org/subscribe.html>
 
-use crate::Request;
+use crate::{
+    types::{Meta, Transaction},
+    Request, ReturnLedgerSpec,
+};
 use serde::{Deserialize, Serialize};
 use xrpl_types::Book;
 
-#[derive(Default, Clone, Serialize)]
+#[derive(Default, Debug, Clone, Serialize)]
 pub struct SubscribeRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     streams: Option<Vec<String>>,
@@ -94,25 +97,21 @@ pub struct SubscribeResponse {}
 
 // Streaming Events
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Deserialize)]
 pub struct LedgerClosedEvent {
-    #[serde(rename = "type")]
-    pub event_type: String,
     pub fee_base: u32,
     pub fee_ref: u32,
     pub ledger_hash: String,
-    pub ledger_index: u64,
-    pub ledger_time: i64,
+    pub ledger_index: u32,
+    pub ledger_time: u64,
     pub reserve_base: u32,
     pub reserve_inc: u32,
     pub txn_count: u32,
     pub validated_ledgers: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Deserialize)]
 pub struct ValidationReceivedEvent {
-    #[serde(rename = "type")]
-    pub event_type: String,
     pub base_fee: u32,
     pub cookie: Option<String>,
     pub flags: u32,
@@ -122,10 +121,11 @@ pub struct ValidationReceivedEvent {
     // #TODO add missing fields
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Deserialize)]
 pub struct TransactionEvent {
-    #[serde(rename = "type")]
-    pub event_type: String,
     pub engine_result: String,
-    // #TODO add missing fields
+    pub transaction: Transaction,
+    pub meta: Meta,
+    #[serde(flatten)]
+    pub ledger_spec: ReturnLedgerSpec,
 }
