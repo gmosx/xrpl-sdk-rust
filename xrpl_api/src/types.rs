@@ -194,7 +194,7 @@ pub struct NFTokenOffer {
     pub owner: String,
 }
 
-#[derive(Default, Clone, Serialize)]
+#[derive(Default, Debug, Clone, Serialize)]
 pub struct OfferParams {
     pub account: String,
     pub seq: u32,
