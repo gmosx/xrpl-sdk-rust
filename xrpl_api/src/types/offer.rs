@@ -1,6 +1,6 @@
-use crate::Amount;
 use enumflags2::{bitflags, BitFlags};
 use serde::Deserialize;
+use xrpl_types::Amount;
 
 /// The object was placed as a passive offer
 pub const LSF_PASSIVE: u32 = 0x00010000;

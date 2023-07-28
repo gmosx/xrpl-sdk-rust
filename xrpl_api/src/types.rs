@@ -1,5 +1,15 @@
 use serde::Deserialize;
-use xrpl_types::{ripple_state::RippleState, AccountRoot, Amount, Offer, TransactionType};
+use xrpl_types::{Amount, TransactionType};
+
+// Submodules defining ledger objects: (https://xrpl.org/ledger-object-types.html)
+
+mod account_root;
+mod offer;
+mod ripple_state;
+
+pub use account_root::*;
+pub use offer::*;
+pub use ripple_state::*;
 
 pub trait Request {
     type Response;

@@ -2,8 +2,8 @@
 //!
 //! <https://xrpl.org/ledger_entry.html#get-offer-object>
 
+use crate::Offer;
 use serde::{Deserialize, Serialize};
-use xrpl_types::Offer;
 
 use crate::Request;
 

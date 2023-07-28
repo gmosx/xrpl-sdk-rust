@@ -1,7 +1,7 @@
 use enumflags2::{bitflags, BitFlags};
 use serde::Deserialize;
 
-use crate::IssuedAmount;
+use xrpl_types::IssuedAmount;
 
 /// An ripple state in the ledger.
 ///
