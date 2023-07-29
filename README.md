@@ -54,7 +54,6 @@ if let Some(msg) = client.messages.next().await {
 }
 ```
 
-
 ## Links
 
 - [Github Repository](https://github.com/gmosx/xrpl_sdk_rust)
