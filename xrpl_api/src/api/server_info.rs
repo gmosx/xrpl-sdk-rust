@@ -24,9 +24,6 @@ impl ServerInfoRequest {
     }
 }
 
-/// <https://xrpl.org/rippled-server-states.html>
-pub type ServerState = String;
-
 /// Information about the time the server spends in server state. This can be
 /// useful for tracking the long-term health of your server's connectivity to
 /// the network.
@@ -45,8 +42,9 @@ pub struct ServerInfo {
     pub build_version: String,
     pub peers: u32,
     pub hostid: String,
-    pub server_state: ServerState,
-    pub state_accounting: HashMap<ServerState, StateAccountingInfo>,
+    /// <https://xrpl.org/rippled-server-states.html>
+    pub server_state: String,
+    pub state_accounting: HashMap<String, StateAccountingInfo>,
     pub time: String,
     pub uptime: u32,
     // #TODO add more fields

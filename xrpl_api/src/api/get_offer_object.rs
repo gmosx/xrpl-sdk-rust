@@ -5,15 +5,9 @@
 use crate::Offer;
 use serde::{Deserialize, Serialize};
 
-use crate::Request;
+use crate::{types::OfferParams, Request};
 
 #[derive(Default, Debug, Clone, Serialize)]
-pub struct OfferParams {
-    account: String,
-    seq: u32,
-}
-
-#[derive(Default, Clone, Serialize)]
 pub struct GetOfferObjectRequest {
     ledger_hash: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
