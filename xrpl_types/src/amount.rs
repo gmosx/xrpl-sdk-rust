@@ -1,15 +1,11 @@
 use crate::Currency;
 use serde::{Deserialize, Serialize};
 
-/// <https://xrpl.org/serialization.html#amount-fields>
+/// Amount of XRP or issued token. See <https://xrpl.org/currency-formats.html#specifying-currency-amounts>
 #[derive(Debug, Eq, PartialEq, Serialize, Deserialize, Clone)]
 #[serde(untagged)]
 pub enum Amount {
-    Issued {
-        value: String,
-        currency: String,
-        issuer: String,
-    },
+    Issued(IssuedAmount),
     Drops(String),
 }
 
@@ -25,11 +21,7 @@ impl Amount {
         currency: impl Into<String>,
         issuer: impl Into<String>,
     ) -> Self {
-        Self::Issued {
-            value: value.into(),
-            currency: currency.into(),
-            issuer: issuer.into(),
-        }
+        Self::Issued(IssuedAmount::new(value, currency, issuer))
     }
 
     pub fn xrp(value: &str) -> Self {
@@ -51,13 +43,39 @@ impl Amount {
     pub fn size(&self) -> f64 {
         match self {
             Amount::Drops(value) => value.parse::<f64>().unwrap() / 1_000_000.0,
-            Amount::Issued { value, .. } => value.parse::<f64>().unwrap(),
+            Amount::Issued(IssuedAmount { value, .. }) => value.parse::<f64>().unwrap(),
+        }
+    }
+}
+
+/// Amount of issued token. See <https://xrpl.org/currency-formats.html#token-amounts>
+#[derive(Debug, Eq, PartialEq, Serialize, Deserialize, Clone)]
+pub struct IssuedAmount {
+    /// Decimal representation of token amount, see <https://xrpl.org/currency-formats.html#token-amounts>
+    pub value: String,
+    /// Currency code, see <https://xrpl.org/currency-formats.html#currency-codes>
+    pub currency: String,
+    /// Issuer of token, see <https://xrpl.org/currency-formats.html#token-amounts>
+    pub issuer: String,
+}
+
+impl IssuedAmount {
+    pub fn new(
+        value: impl Into<String>,
+        currency: impl Into<String>,
+        issuer: impl Into<String>,
+    ) -> Self {
+        Self {
+            value: value.into(),
+            currency: currency.into(),
+            issuer: issuer.into(),
         }
     }
 }
 
 #[cfg(test)]
 mod test {
+    use super::*;
     use crate::Amount;
     use assert_matches::assert_matches;
     use serde::Serialize;
@@ -99,7 +117,7 @@ mod test {
             r#"{"value":"12.34","currency":"USD","issuer":"rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq"}"#,
         )
         .unwrap();
-        assert_matches!(amount, Amount::Issued {value, currency, issuer} => {
+        assert_matches!(amount, Amount::Issued(IssuedAmount{value, currency, issuer}) => {
             assert_eq!(value, "12.34");
             assert_eq!(currency, "USD");
             assert_eq!(issuer, "rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq");

@@ -7,7 +7,7 @@
 use crate::Request;
 use serde::{Deserialize, Serialize};
 
-#[derive(Default, Clone, Serialize)]
+#[derive(Default, Debug, Clone, Serialize)]
 pub struct LedgerCurrentRequest {}
 
 impl Request for LedgerCurrentRequest {

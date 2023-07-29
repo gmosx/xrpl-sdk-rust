@@ -26,7 +26,7 @@
 use crate::Request;
 use serde::Serialize;
 
-#[derive(Default, Clone, Serialize)]
+#[derive(Default, Debug, Clone, Serialize)]
 pub struct SubmitRequest {
     /// Hex representation of the signed transaction to submit. This can be a
     /// multi-signed transaction.

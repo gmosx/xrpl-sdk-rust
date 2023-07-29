@@ -1,6 +1,16 @@
 use serde::{Deserialize, Serialize};
 use xrpl_types::{Amount, TransactionType};
 
+// Submodules defining ledger objects: (https://xrpl.org/ledger-object-types.html)
+
+mod account_root;
+mod offer;
+mod ripple_state;
+
+pub use account_root::*;
+pub use offer::*;
+pub use ripple_state::*;
+
 pub trait Request {
     type Response;
 
@@ -45,7 +55,7 @@ pub trait Request {
 // #[derive(Debug, Deserialize)]
 // pub struct NewFields {}
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub enum AffectedNode {
     // CreateNode {},
     // CreatedNode(serde_json::Value),
@@ -85,7 +95,7 @@ pub enum AffectedNode {
     },
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct Meta {
     #[serde(rename = "AffectedNodes")]
     pub affected_nodes: Vec<AffectedNode>,
@@ -104,7 +114,7 @@ pub struct Meta {
 // }
 
 // TODO: rename to `Tx`? nah...
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct Transaction {
     #[serde(rename = "Account")]
     pub account: String,
@@ -156,6 +166,18 @@ pub struct Transaction {
     pub meta: Option<Meta>,
 }
 
+/// Ledger object. See <https://xrpl.org/ledger-object-types.html>
+#[derive(Debug, Clone, Deserialize)]
+#[serde(tag = "LedgerEntryType")]
+pub enum LedgerObject {
+    RippleState(RippleState),
+    Offer(Offer),
+    AccountRoot(AccountRoot),
+    // TODO: add the rest of the entry types and remove Other variant
+    #[serde(other)]
+    Other,
+}
+
 // #TODO add Marker (https://xrpl.org/markers-and-pagination.html)
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -172,7 +194,7 @@ pub struct NFTokenOffer {
     pub owner: String,
 }
 
-#[derive(Default, Clone, Serialize)]
+#[derive(Default, Debug, Clone, Serialize)]
 pub struct OfferParams {
     pub account: String,
     pub seq: u32,

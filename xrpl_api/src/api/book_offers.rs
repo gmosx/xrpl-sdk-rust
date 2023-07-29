@@ -4,11 +4,11 @@
 //! <https://xrpl.org/book_offers.html>
 
 use serde::{Deserialize, Serialize};
-use xrpl_types::{Currency, Offer};
+use xrpl_types::Currency;
 
-use crate::Request;
+use crate::{Offer, Request};
 
-#[derive(Default, Clone, Serialize)]
+#[derive(Default, Debug, Clone, Serialize)]
 pub struct BookOffersRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     ledger_hash: Option<String>,

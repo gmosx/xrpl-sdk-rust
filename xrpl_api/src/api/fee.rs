@@ -6,7 +6,7 @@
 use crate::Request;
 use serde::{Deserialize, Serialize};
 
-#[derive(Default, Clone, Serialize)]
+#[derive(Default, Debug, Clone, Serialize)]
 pub struct FeeRequest {}
 
 impl Request for FeeRequest {

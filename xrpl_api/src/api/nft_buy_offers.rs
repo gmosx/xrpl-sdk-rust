@@ -6,7 +6,7 @@
 use crate::{types::NFTokenOffer, Request};
 use serde::{Deserialize, Serialize};
 
-#[derive(Default, Clone, Serialize)]
+#[derive(Default, Debug, Clone, Serialize)]
 pub struct NftBuyOffersRequest {
     /// The unique identifier of a NFToken object.
     nft_id: String,

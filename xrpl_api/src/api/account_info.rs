@@ -1,21 +1,19 @@
 //! <https://xrpl.org/account_info.html>
 
-use crate::Request;
+use crate::{Request, RetrieveLedgerSpec, ReturnLedgerSpec, WithLedgerSpec};
 use serde::{Deserialize, Serialize};
 
-#[derive(Default, Clone, Serialize)]
+#[derive(Default, Debug, Clone, Serialize)]
 pub struct AccountInfoRequest {
     pub account: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub queue: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub ledger_hash: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub ledger_index: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub signer_lists: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub strict: Option<bool>,
+    #[serde(flatten)]
+    pub ledger_spec: RetrieveLedgerSpec,
 }
 
 impl Request for AccountInfoRequest {
@@ -23,6 +21,16 @@ impl Request for AccountInfoRequest {
 
     fn method(&self) -> String {
         "account_info".to_owned()
+    }
+}
+
+impl WithLedgerSpec for AccountInfoRequest {
+    fn as_ledger_spec(&self) -> &RetrieveLedgerSpec {
+        &self.ledger_spec
+    }
+
+    fn as_ledger_spec_mut(&mut self) -> &mut RetrieveLedgerSpec {
+        &mut self.ledger_spec
     }
 }
 
@@ -40,14 +48,6 @@ impl AccountInfoRequest {
             ..self
         }
     }
-
-    pub fn ledger_index(self, ledger_index: &str) -> Self {
-        Self {
-            ledger_index: Some(ledger_index.to_owned()),
-            ..self
-        }
-    }
-
     // #TODO more builder methods
 }
 
@@ -64,10 +64,10 @@ pub struct AccountData {
     pub sequence: u32,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Deserialize)]
 pub struct AccountInfoResponse {
     // #TODO add missing fields!
     pub account_data: AccountData,
-    pub ledger_current_index: Option<u64>,
-    pub ledger_index: Option<u64>,
+    #[serde(flatten)]
+    pub ledger_spec: ReturnLedgerSpec,
 }
