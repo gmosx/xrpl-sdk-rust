@@ -2,14 +2,8 @@
 //!
 //! TIP: Better use the more specialized methods, like `get_offer_object`.
 
-use crate::Request;
+use crate::{OfferParams, Request};
 use serde::{Deserialize, Serialize};
-
-#[derive(Default, Debug, Clone, Serialize)]
-pub struct OfferParams {
-    account: String,
-    seq: u32,
-}
 
 #[derive(Default, Debug, Clone, Serialize)]
 pub struct LedgerEntryRequest {
