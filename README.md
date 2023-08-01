@@ -60,7 +60,7 @@ if let Some(msg) = client.messages.next().await {
 
 ## Status
 
-The software is under active development (pre-alpha) and the API is expected to
+This work is under active development (pre-alpha) and the API is expected to
 change. It's not considered ready for use in production.
 
 ### Roadmap
@@ -72,34 +72,10 @@ change. It's not considered ready for use in production.
 
 Pull requests, issues and comments are welcome! Make sure to add tests for new features and bug fixes.
 
-## Contact
-
-For questions, suggestions, etc, you can reach the maintainer on [Twitter](https://twitter.com/gmosx).
-
 ## License
 
-Each component of the XRPL SDK is individually licensed. Please check the corresponding directories for more details.
-
-- xrpl_sdk_jsonrpc: [LICENSE-MIT](xrpl_sdk_jsonrpc/LICENSE-MIT), [LICENSE-APACHE](xrpl_sdk_jspnrpc/LICENSE-APACHE)
-- xrpl_sdk_ws: [LICENSE-MIT](xrpl_sdk_ws/LICENSE-MIT), [LICENSE-APACHE](xrpl_sdk_ws/LICENSE-APACHE)
-- xrpl_types: [LICENSE-MIT](xrpl_types/LICENSE-MIT), [LICENSE-APACHE](xrpl_types/LICENSE-APACHE)
-- xrpl_api: [LICENSE-MIT](xrpl_types/LICENSE-MIT), [LICENSE-APACHE](xrpl_types/LICENSE-APACHE)
-- xrpl_address_codec: [LICENSE-MIT](xrpl_address_codec/LICENSE-MIT), [LICENSE-APACHE](xrpl_address_codec/LICENSE-APACHE)
-- xrpl_binary_codec: [LICENSE-MIT](xrpl_binary_codec/LICENSE-MIT), [LICENSE-APACHE](xrpl_binary_codec/LICENSE-APACHE)
-- xrpl_cli: [LICENSE-MIT](xrpl_cli/LICENSE-MIT), [LICENSE-APACHE](xrpl_cli/LICENSE-APACHE)
-
-## Disclaimer
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
-ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
-TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
-PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
-SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
-IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-DEALINGS IN THE SOFTWARE.
+This work is licensed under the Apache-2.0 License. See [LICENSE.txt](LICENSE.txt) or <https://spdx.org/licenses/Apache-2.0.html> for details.
 
 ## Copyright
 
-Copyright © 2021-2022 [George Moschovitis](https://gmosx.ninja).
+Copyright © 2022 [Georgios Moschovitis](https://gmosx.ninja).

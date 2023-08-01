@@ -1,8 +1,8 @@
 [package]
 name = "xrpl_sdk_jsonrpc"
 description = "A strongly-typed client for the XRP Ledger JSONRPC API"
-version = "0.10.0"
-license = "MIT OR Apache-2.0"
+version = "0.11.0"
+license = "Apache-2.0"
 repository = "https://github.com/gmosx/xrpl_sdk_rust/tree/main/xrpl_sdk_jsonrpc"
 keywords = ["xrpl", "ledger", "client", "jsonrpc", "api"]
 authors = ["George Moschovitis <gmosx@reizu.org>"]
@@ -10,13 +10,13 @@ edition = "2021"
 
 [dependencies]
 thiserror = "1"
-serde = { version = "1", features = ["derive"]}
+serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 tokio = { version = "1", features = ["full"] }
 reqwest = { version = "0.11", features = ["json"] }
 sha2 = "0.9"
 libsecp256k1 = "0.5"
 tracing = "0.1"
-xrpl_types = { path = "../xrpl_types", version = "0.10" }
-xrpl_api = { path = "../xrpl_api", version = "0.10" }
-xrpl_binary_codec = { path = "../xrpl_binary_codec", version = "0.10" }
+xrpl_types = { path = "../xrpl_types", version = "0.11" }
+xrpl_api = { path = "../xrpl_api", version = "0.11" }
+xrpl_binary_codec = { path = "../xrpl_binary_codec", version = "0.11" }
