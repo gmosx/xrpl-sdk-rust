@@ -3,7 +3,7 @@ use thiserror::Error;
 
 // #TODO: Connection
 
-#[derive(Error, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Error, Debug)]
 pub enum Error {
     #[error("internal error: {0}")]
     Internal(String),

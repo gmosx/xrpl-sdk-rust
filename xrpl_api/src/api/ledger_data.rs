@@ -9,13 +9,7 @@ use serde::{Deserialize, Serialize};
 
 // TIP: Better use the more specialized methods, like `get_offer_object`.
 
-#[derive(Default, Clone, Serialize)]
-pub struct OfferParams {
-    account: String,
-    seq: u32,
-}
-
-#[derive(Default, Clone, Serialize)]
+#[derive(Default, Debug, Clone, Serialize)]
 pub struct LedgerDataRequest {
     /// A 20-byte hex string for the ledger version to use.
     #[serde(skip_serializing_if = "Option::is_none")]

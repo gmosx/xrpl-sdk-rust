@@ -5,13 +5,7 @@
 use crate::Request;
 use serde::{Deserialize, Serialize};
 
-#[derive(Default, Clone, Serialize)]
-pub struct OfferParams {
-    account: String,
-    seq: u32,
-}
-
-#[derive(Default, Clone, Serialize)]
+#[derive(Default, Debug, Clone, Serialize)]
 pub struct LedgerEntryRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     ledger_hash: Option<String>,
@@ -21,6 +15,12 @@ pub struct LedgerEntryRequest {
     binary: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     offer: Option<OfferParams>,
+}
+
+#[derive(Default, Debug, Clone, Serialize)]
+pub struct OfferParams {
+    pub account: String,
+    pub seq: u32,
 }
 
 impl Request for LedgerEntryRequest {

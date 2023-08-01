@@ -3,11 +3,10 @@
 //!
 //! <https://xrpl.org/account_offers.html>
 
-use crate::Request;
+use crate::{Amount, Request};
 use serde::{Deserialize, Serialize};
-use xrpl_types::Amount;
 
-#[derive(Default, Clone, Serialize)]
+#[derive(Default, Debug, Clone, Serialize)]
 pub struct AccountOffersRequest {
     account: String,
     #[serde(skip_serializing_if = "Option::is_none")]

@@ -24,7 +24,7 @@ pub const DEFAULT_WS_URL: &str = XRPL_CLUSTER_MAINNET_WS_URL;
 
 // #TODO extract Connection
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Deserialize, Debug)]
 pub enum TypedMessage {
     AccountInfo(AccountInfoResponse),
     LedgerClosed(LedgerClosedEvent),

@@ -1,6 +1,5 @@
 use super::{AccountId, Amount};
 use serde::{Deserialize, Serialize};
-use crate::Error;
 
 // https://github.com/XRPLF/xrpl.js/blob/main/packages/ripple-binary-codec/src/enums/definitions.json
 #[repr(u8)]

@@ -34,7 +34,7 @@ pub fn sign(data: &[u8], secret_key: &[u8]) -> Vec<u8> {
 
 #[cfg(test)]
 mod tests {
-    use xrpl_types::{Amount, Transaction, TransactionType};
+    use xrpl_types::{AccountId, Amount, Transaction, TransactionType};
 
     use crate::{
         sign::{sign, sign_transaction},
@@ -49,9 +49,11 @@ mod tests {
 
         let tx = Transaction {
             transaction_type: TransactionType::Payment,
-            account: "rB48JG388ovDA9fmPJbqgnSK3tnndSxgAe".to_string(),
+            account: AccountId::from_address("rB48JG388ovDA9fmPJbqgnSK3tnndSxgAe").unwrap(),
             amount: Some(Amount::drops(22_000_000)),
-            destination: Some("rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe".to_string()),
+            destination: Some(
+                AccountId::from_address("rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe").unwrap(),
+            ),
             flags: Some(2147483648),
             last_ledger_sequence: Some(18311743),
             fee: Some(12),
@@ -83,9 +85,11 @@ mod tests {
 
         let tx = Transaction {
             transaction_type: TransactionType::Payment,
-            account: "rB48JG388ovDA9fmPJbqgnSK3tnndSxgAe".to_string(),
+            account: AccountId::from_address("rB48JG388ovDA9fmPJbqgnSK3tnndSxgAe").unwrap(),
             amount: Some(Amount::drops(22_000_000)),
-            destination: Some("rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe".to_string()),
+            destination: Some(
+                AccountId::from_address("rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe").unwrap(),
+            ),
             flags: Some(2147483648),
             last_ledger_sequence: Some(18311743),
             fee: Some(12),

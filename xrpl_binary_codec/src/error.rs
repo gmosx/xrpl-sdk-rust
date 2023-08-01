@@ -1,20 +1,10 @@
-use std::{fmt, num::ParseIntError};
+use std::num::ParseIntError;
+use thiserror::Error;
 
-#[derive(Debug)]
+#[derive(Error, Debug)]
 pub enum BinaryCodecError {
+    #[error("Error when parsing field: {0}")]
     ParseError(String),
-}
-
-impl std::error::Error for BinaryCodecError {}
-
-impl fmt::Display for BinaryCodecError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            BinaryCodecError::ParseError(reason) => {
-                write!(f, "Error when parsing field {}", reason)
-            }
-        }
-    }
 }
 
 impl From<bs58::decode::Error> for BinaryCodecError {

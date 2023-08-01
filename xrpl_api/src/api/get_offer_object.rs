@@ -2,18 +2,12 @@
 //!
 //! <https://xrpl.org/ledger_entry.html#get-offer-object>
 
+use crate::{Offer, OfferParams};
 use serde::{Deserialize, Serialize};
-use xrpl_types::Offer;
 
 use crate::Request;
 
-#[derive(Default, Clone, Serialize)]
-pub struct OfferParams {
-    account: String,
-    seq: u32,
-}
-
-#[derive(Default, Clone, Serialize)]
+#[derive(Default, Debug, Clone, Serialize)]
 pub struct GetOfferObjectRequest {
     ledger_hash: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]

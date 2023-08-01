@@ -2,7 +2,9 @@
 
 mod error;
 pub mod parser;
+pub mod serialize;
 pub mod serializer;
 pub mod sign;
 pub mod util;
-pub mod serialize;
+
+pub use error::*;

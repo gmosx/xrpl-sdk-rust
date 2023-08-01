@@ -1,7 +1,10 @@
 use super::util::internal_number_from_string;
-use xrpl_types::{AccountId, Amount, Blob, Hash128, Hash160, Hash256, Memo, Transaction, UInt16, UInt32, UInt8};
-use xrpl_types::field_id::FieldId;
 use crate::error::BinaryCodecError;
+use xrpl_types::FieldId;
+use xrpl_types::{
+    AccountId, Amount, Blob, Hash128, Hash160, Hash256, IssuedAmount, Memo, Transaction, UInt16,
+    UInt32, UInt8,
+};
 
 // https://xrpl.org/serialization.html
 // https://github.com/ripple/ripple-binary-codec/blob/master/src/enums/definitions.json
@@ -22,31 +25,62 @@ impl Serializer {
         Self::default()
     }
 
-    pub fn serialize_account_id(&mut self, field_id: FieldId, account_id: &AccountId) -> Result<(), BinaryCodecError> {
+    pub fn serialize_account_id(
+        &mut self,
+        field_id: FieldId,
+        account_id: &AccountId,
+    ) -> Result<(), BinaryCodecError> {
         todo!()
     }
-    pub fn serialize_blob(&mut self, field_id: FieldId, blob: &Blob) -> Result<(), BinaryCodecError> {
+    pub fn serialize_blob(
+        &mut self,
+        field_id: FieldId,
+        blob: &Blob,
+    ) -> Result<(), BinaryCodecError> {
         todo!()
     }
-    pub fn serialize_hash128(&mut self, field_id: FieldId, hash128: Hash128) -> Result<(), BinaryCodecError> {
+    pub fn serialize_hash128(
+        &mut self,
+        field_id: FieldId,
+        hash128: Hash128,
+    ) -> Result<(), BinaryCodecError> {
         todo!()
     }
-    pub fn serialize_hash160(&mut self, field_id: FieldId, hash160: Hash160) -> Result<(), BinaryCodecError> {
+    pub fn serialize_hash160(
+        &mut self,
+        field_id: FieldId,
+        hash160: Hash160,
+    ) -> Result<(), BinaryCodecError> {
         todo!()
     }
-    pub fn serialize_hash256(&mut self, field_id: FieldId, hash256: Hash256) -> Result<(), BinaryCodecError> {
+    pub fn serialize_hash256(
+        &mut self,
+        field_id: FieldId,
+        hash256: Hash256,
+    ) -> Result<(), BinaryCodecError> {
         todo!()
     }
-    pub fn serialize_uint8(&mut self, field_id: FieldId, uint8: UInt8) -> Result<(), BinaryCodecError> {
+    pub fn serialize_uint8(
+        &mut self,
+        field_id: FieldId,
+        uint8: UInt8,
+    ) -> Result<(), BinaryCodecError> {
         todo!()
     }
-    pub fn serialize_uint16(&mut self, field_id: FieldId, uint16: UInt16) -> Result<(), BinaryCodecError> {
+    pub fn serialize_uint16(
+        &mut self,
+        field_id: FieldId,
+        uint16: UInt16,
+    ) -> Result<(), BinaryCodecError> {
         todo!()
     }
-    pub fn serialize_uint32(&mut self, field_id: FieldId, uint32: UInt32) -> Result<(), BinaryCodecError> {
+    pub fn serialize_uint32(
+        &mut self,
+        field_id: FieldId,
+        uint32: UInt32,
+    ) -> Result<(), BinaryCodecError> {
         todo!()
     }
-
 
     pub fn push(&mut self, value: u8) {
         self.buf.push(value);
@@ -136,11 +170,11 @@ impl Serializer {
     pub fn push_amount(&mut self, amount: &Amount) {
         match amount {
             Amount::Drops(value) => self.push_drops_amount(value.parse::<u64>().unwrap()),
-            Amount::Issued {
+            Amount::Issued(IssuedAmount {
                 value,
                 currency,
                 issuer,
-            } => self.push_issued_amount(value, currency, issuer),
+            }) => self.push_issued_amount(value, currency, issuer),
         }
     }
 
@@ -176,18 +210,8 @@ impl Serializer {
         }
     }
 
-    pub fn push_account_id(&mut self, id: &str) {
-        // https://xrpl.org/serialization.html#accountid-fields
-        // https://xrpl.org/accounts.html#address-encoding
-        let decoded = bs58::decode(id)
-            .with_alphabet(bs58::Alphabet::RIPPLE)
-            .into_vec()
-            .unwrap();
-
-        // Skip the 0x00 ('r') version prefix, skip the 4-byte checksum postfix.
-        let decoded = &decoded[1..21];
-
-        self.push_slice(decoded);
+    pub fn push_account_id(&mut self, id: AccountId) {
+        self.push_slice(&id.0);
     }
 
     // TODO: implement generic `push_array`
@@ -338,9 +362,9 @@ impl Serializer {
 
         self.push_field_id(8, 1);
         self.push_vl_prefix(160 / 8);
-        self.push_account_id(&tx.account);
+        self.push_account_id(tx.account);
 
-        if let Some(destination) = &tx.destination {
+        if let Some(destination) = tx.destination {
             self.push_field_id(8, 3);
             self.push_vl_prefix(160 / 8);
             self.push_account_id(destination);

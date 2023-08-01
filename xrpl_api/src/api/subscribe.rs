@@ -3,11 +3,10 @@
 //!
 //! <https://xrpl.org/subscribe.html>
 
-use crate::Request;
+use crate::{Currency, Request};
 use serde::{Deserialize, Serialize};
-use xrpl_types::Book;
 
-#[derive(Default, Clone, Serialize)]
+#[derive(Default, Debug, Clone, Serialize)]
 pub struct SubscribeRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     streams: Option<Vec<String>>,
@@ -23,6 +22,48 @@ pub struct SubscribeRequest {
     url_username: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     url_password: Option<String>,
+}
+
+/// A book on the ledger.
+#[derive(Debug, Clone, Serialize)]
+pub struct Book {
+    /// Specification of which currency the account taking the Offer would pay.
+    pub taker_gets: Currency,
+    /// Specification of which currency the account taking the Offer would receive.
+    pub taker_pays: Currency,
+    /// Unique account address to use as a perspective for viewing offers, in the XRP Ledger's base58 format.
+    pub taker: String,
+    /// If true, return the current state of the order book once when you subscribe before sending updates.
+    /// The default is false.
+    pub snapshot: Option<bool>,
+    /// If true, return both sides of the order book. The default is false.
+    pub both: Option<bool>,
+}
+
+impl Book {
+    pub fn new(taker_gets: Currency, taker_pays: Currency, taker: &str) -> Self {
+        Self {
+            taker_gets,
+            taker_pays,
+            taker: taker.to_owned(),
+            snapshot: None,
+            both: None,
+        }
+    }
+
+    pub fn snapshot(self, snapshot: bool) -> Self {
+        Self {
+            snapshot: Some(snapshot),
+            ..self
+        }
+    }
+
+    pub fn both(self, both: bool) -> Self {
+        Self {
+            both: Some(both),
+            ..self
+        }
+    }
 }
 
 impl Request for SubscribeRequest {
@@ -93,39 +134,3 @@ impl SubscribeRequest {
 pub struct SubscribeResponse {}
 
 // Streaming Events
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct LedgerClosedEvent {
-    #[serde(rename = "type")]
-    pub event_type: String,
-    pub fee_base: u32,
-    pub fee_ref: u32,
-    pub ledger_hash: String,
-    pub ledger_index: u64,
-    pub ledger_time: i64,
-    pub reserve_base: u32,
-    pub reserve_inc: u32,
-    pub txn_count: u32,
-    pub validated_ledgers: String,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct ValidationReceivedEvent {
-    #[serde(rename = "type")]
-    pub event_type: String,
-    pub base_fee: u32,
-    pub cookie: Option<String>,
-    pub flags: u32,
-    pub ledger_hash: String,
-    pub ledger_index: String,
-    pub signature: String,
-    // #TODO add missing fields
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct TransactionEvent {
-    #[serde(rename = "type")]
-    pub event_type: String,
-    pub engine_result: String,
-    // #TODO add missing fields
-}
