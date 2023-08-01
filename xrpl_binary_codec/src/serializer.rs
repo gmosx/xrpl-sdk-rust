@@ -1,5 +1,7 @@
 use super::util::internal_number_from_string;
-use xrpl_types::{Amount, Memo, Transaction};
+use xrpl_types::{AccountId, Amount, Blob, Hash128, Hash160, Hash256, Memo, Transaction, UInt16, UInt32, UInt8};
+use xrpl_types::field_id::FieldId;
+use crate::error::BinaryCodecError;
 
 // https://xrpl.org/serialization.html
 // https://github.com/ripple/ripple-binary-codec/blob/master/src/enums/definitions.json
@@ -19,6 +21,32 @@ impl Serializer {
     pub fn new() -> Self {
         Self::default()
     }
+
+    pub fn serialize_account_id(&mut self, field_id: FieldId, account_id: &AccountId) -> Result<(), BinaryCodecError> {
+        todo!()
+    }
+    pub fn serialize_blob(&mut self, field_id: FieldId, blob: &Blob) -> Result<(), BinaryCodecError> {
+        todo!()
+    }
+    pub fn serialize_hash128(&mut self, field_id: FieldId, hash128: Hash128) -> Result<(), BinaryCodecError> {
+        todo!()
+    }
+    pub fn serialize_hash160(&mut self, field_id: FieldId, hash160: Hash160) -> Result<(), BinaryCodecError> {
+        todo!()
+    }
+    pub fn serialize_hash256(&mut self, field_id: FieldId, hash256: Hash256) -> Result<(), BinaryCodecError> {
+        todo!()
+    }
+    pub fn serialize_uint8(&mut self, field_id: FieldId, uint8: UInt8) -> Result<(), BinaryCodecError> {
+        todo!()
+    }
+    pub fn serialize_uint16(&mut self, field_id: FieldId, uint16: UInt16) -> Result<(), BinaryCodecError> {
+        todo!()
+    }
+    pub fn serialize_uint32(&mut self, field_id: FieldId, uint32: UInt32) -> Result<(), BinaryCodecError> {
+        todo!()
+    }
+
 
     pub fn push(&mut self, value: u8) {
         self.buf.push(value);

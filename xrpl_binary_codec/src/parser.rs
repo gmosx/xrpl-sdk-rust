@@ -1,14 +1,42 @@
-use xrpl_types::{Amount, Memo, Transaction, TransactionType};
+use xrpl_types::{AccountId, Amount, Memo, Transaction, TransactionType};
 
 use crate::{
     error::BinaryCodecError,
     serializer::{HASH_PREFIX_TRANSACTION, HASH_PREFIX_UNSIGNED_TRANSACTION_SINGLE},
 };
 
-#[derive(Default)]
 pub struct Parser {
     bytes: Vec<u8>,
     transaction: Transaction,
+}
+
+impl Parser {
+    pub fn new() -> {
+        let transaction = -        Transaction {
+                        transaction_type: TransactionType::Payment,
+                        account: AccountId([0u8; 20]),
+                        flags: None,
+                        last_ledger_sequence: None,
+                        fee: None,
+                        sequence: None,
+                        signing_public_key: None,
+                        signature: None,
+                        memos: None,
+                        amount: None,
+                        destination: None,
+                        offer_sequence: None,
+                        taker_pays: None,
+                        taker_gets: None,
+                        expiration: None,
+                        limit_amount: None,
+                        quality_in: None,
+                        quality_out: None,
+                    };
+        Self {
+            bytes: Vec::new(),
+            transaction,
+        }
+    }
 }
 
 #[derive(Debug)]

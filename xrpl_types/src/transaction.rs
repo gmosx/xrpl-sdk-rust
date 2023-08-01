@@ -1,5 +1,6 @@
 use super::{AccountId, Amount};
 use serde::{Deserialize, Serialize};
+use crate::Error;
 
 // https://github.com/XRPLF/xrpl.js/blob/main/packages/ripple-binary-codec/src/enums/definitions.json
 #[repr(u8)]
@@ -104,11 +105,11 @@ impl Transaction {
     // TODO: Synthetic offer_replace constructor?
 
     /// <https://xrpl.org/offercreate.html>
-    pub fn offer_create(account: &str, taker_pays: Amount, taker_gets: Amount) -> Self {
+    pub fn offer_create(account: AccountId, taker_pays: Amount, taker_gets: Amount) -> Self {
         // TODO: Add support for expiration, offer_sequence
         Self {
             transaction_type: TransactionType::OfferCreate,
-            account: account.to_string(),
+            account,
             flags: None,
             last_ledger_sequence: None,
             fee: None,
@@ -129,10 +130,10 @@ impl Transaction {
     }
 
     /// <https://xrpl.org/offercancel.html>
-    pub fn offer_cancel(account: &str, offer_sequence: u32) -> Self {
+    pub fn offer_cancel(account: AccountId, offer_sequence: u32) -> Self {
         Self {
             transaction_type: TransactionType::OfferCancel,
-            account: account.to_string(),
+            account: account,
             flags: None,
             last_ledger_sequence: None,
             fee: None,
@@ -153,10 +154,10 @@ impl Transaction {
     }
 
     /// <https://xrpl.org/payment.html>
-    pub fn payment(account: &str, destination: &str, amount: Amount) -> Self {
+    pub fn payment(account: AccountId, destination: AccountId, amount: Amount) -> Self {
         Self {
             transaction_type: TransactionType::Payment,
-            account: account.to_string(),
+            account: account,
             flags: None,
             last_ledger_sequence: None,
             fee: None,
@@ -165,7 +166,7 @@ impl Transaction {
             signature: None,
             memos: None,
             amount: Some(amount),
-            destination: Some(destination.to_string()),
+            destination: Some(destination),
             offer_sequence: None,
             taker_pays: None,
             taker_gets: None,
@@ -179,14 +180,14 @@ impl Transaction {
     // TODO: make sure we add the NO RIPPLE flag!!!!
     /// <https://xrpl.org/trustset.html>
     pub fn trust_set(
-        account: &str,
+        account: AccountId,
         limit_amount: Amount,
         quality_in: Option<u32>,
         quality_out: Option<u32>,
     ) -> Self {
         Self {
             transaction_type: TransactionType::TrustSet,
-            account: account.to_string(),
+            account: account,
             flags: None,
             last_ledger_sequence: None,
             fee: None,
@@ -208,14 +209,14 @@ impl Transaction {
 
     /// <https://xrpl.org/trustset.html>
     pub fn trust_set_no_ripple(
-        account: &str,
+        account: AccountId,
         limit_amount: Amount,
         quality_in: Option<u32>,
         quality_out: Option<u32>,
     ) -> Self {
         Self {
             transaction_type: TransactionType::TrustSet,
-            account: account.to_string(),
+            account: account,
             // TODO: remove TF_FULLY_CANONICAL_SIG, it's deprecated!
             flags: Some(TF_SET_NO_RIPPLE | TF_FULLY_CANONICAL_SIG),
             last_ledger_sequence: None,
@@ -233,31 +234,6 @@ impl Transaction {
             limit_amount: Some(limit_amount),
             quality_in,
             quality_out,
-        }
-    }
-}
-
-impl Default for Transaction {
-    fn default() -> Self {
-        Transaction {
-            transaction_type: TransactionType::Payment,
-            account: String::from(""),
-            flags: None,
-            last_ledger_sequence: None,
-            fee: None,
-            sequence: None,
-            signing_public_key: None,
-            signature: None,
-            memos: None,
-            amount: None,
-            destination: None,
-            offer_sequence: None,
-            taker_pays: None,
-            taker_gets: None,
-            expiration: None,
-            limit_amount: None,
-            quality_in: None,
-            quality_out: None,
         }
     }
 }

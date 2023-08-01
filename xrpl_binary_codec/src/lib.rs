@@ -5,3 +5,4 @@ pub mod parser;
 pub mod serializer;
 pub mod sign;
 pub mod util;
+pub mod serialize;
