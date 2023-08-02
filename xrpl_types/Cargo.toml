@@ -13,6 +13,8 @@ serde = { version = "1", features = ["derive"]}
 serde_json = "1"
 thiserror = "1.0.44"
 bs58 = {version = "0.5.0", features = ["check"]}
+ascii = "1.1.0"
+hex = "0.4.3"
 
 [dev-dependencies]
 assert_matches = "1.5.0"

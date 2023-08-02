@@ -118,6 +118,35 @@ impl Serializer {
         self.push_slice(&value.0);
     }
 
+    fn push_blob(&mut self, blob: Blob) -> Result<(), BinaryCodecError> {
+        self.push_vl_prefix(blob.0.len())?;
+        self.push_slice(&blob.0);
+        Ok(())
+    }
+
+    /// - <https://xrpl.org/serialization.html#field-ids>
+    /// - <https://github.com/seelabs/rippled/blob/cecc0ad75849a1d50cc573188ad301ca65519a5b/src/ripple/protocol/impl/Serializer.cpp#L117-L148>
+    fn push_field_id(&mut self, type_code: u8, field_code: u8) {
+        if type_code < 16 {
+            if field_code < 16 {
+                self.push(type_code << 4 | field_code);
+            } else {
+                self.push(type_code << 4);
+                self.push(field_code);
+            }
+        } else if field_code < 16 {
+            self.push(field_code);
+            self.push(type_code);
+        } else {
+            self.push(0);
+            self.push(type_code);
+            self.push(field_code);
+        }
+    }
+
+
+
+
     /// Push length prefix according to <https://xrpl.org/serialization.html#length-prefixing>
     fn push_vl_prefix(&mut self, length: usize) -> Result<(), BinaryCodecError> {
         if length <= 192 {
@@ -142,25 +171,6 @@ impl Serializer {
         }
     }
 
-    /// - <https://xrpl.org/serialization.html#field-ids>
-    /// - <https://github.com/seelabs/rippled/blob/cecc0ad75849a1d50cc573188ad301ca65519a5b/src/ripple/protocol/impl/Serializer.cpp#L117-L148>
-    fn push_field_id(&mut self, type_code: u8, field_code: u8) {
-        if type_code < 16 {
-            if field_code < 16 {
-                self.push(type_code << 4 | field_code);
-            } else {
-                self.push(type_code << 4);
-                self.push(field_code);
-            }
-        } else if field_code < 16 {
-            self.push(field_code);
-            self.push(type_code);
-        } else {
-            self.push(0);
-            self.push(type_code);
-            self.push(field_code);
-        }
-    }
 
     fn push_drops_amount(&mut self, value: u64) {
         self.push_uint64(value | 0x4000000000000000);
@@ -221,28 +231,23 @@ impl Serializer {
     }
 
     fn push_account_id(&mut self, id: AccountId) {
+        self.push_vl_prefix(20).expect("20 is within valid range");
         self.push_slice(&id.0);
     }
 
     // TODO: implement generic `push_array`
     // https://xrpl.org/serialization.html#array-fields
 
-    fn push_blob(&mut self, field_code: u8, blob: &[u8]) {
-        self.push_field_id(7, field_code);
-        self.push_vl_prefix(blob.len());
-        self.push_slice(blob);
-    }
-
     fn push_memo(&mut self, memo: &Memo) {
         // https://xrpl.org/serialization.html#object-fields
 
         self.push_field_id(14, 10);
 
-        self.push_blob(12, &memo.memo_type);
-        self.push_blob(13, &memo.memo_data);
+        // self.push_blob(12, &memo.memo_type);// todo allan
+        // self.push_blob(13, &memo.memo_data);
 
         if let Some(memo_format) = &memo.memo_format {
-            self.push_blob(14, memo_format);
+            // self.push_blob(14, memo_format); // todo allan
         }
 
         self.push(0xe1); // Object end
@@ -346,6 +351,24 @@ mod tests {
             ]
         );
     }
+
+    #[test]
+    fn test_push_blob() {
+        let mut s = Serializer::new();
+        let value = Blob(vec![0x34, 0x00, 0x12]);
+        s.push_blob(value).unwrap();
+        assert_eq!(s.buf, [3, 0x34, 0x00, 0x12]);
+    }
+
+    #[test]
+    fn test_push_account_id() {
+        let mut s = Serializer::new();
+        let value = AccountId([0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x12]);
+        s.push_account_id(value);
+        assert_eq!(s.buf, [20, 0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x12]);
+    }
+
+
 
     /// Tests length prefix according to <https://xrpl.org/serialization.html#length-prefixing>
     #[test]

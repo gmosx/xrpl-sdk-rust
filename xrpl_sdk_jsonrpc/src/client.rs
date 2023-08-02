@@ -176,7 +176,7 @@ impl Client {
         let mut tx = tx;
 
         if tx.sequence.is_none() {
-            let resp = self.call(AccountInfoRequest::new(&tx.account)).await?;
+            let resp = self.call(AccountInfoRequest::new(&tx.account.to_address())).await?;
 
             tx.sequence = Some(resp.account_data.sequence);
         }

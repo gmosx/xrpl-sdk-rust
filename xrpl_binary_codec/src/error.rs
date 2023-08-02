@@ -5,7 +5,7 @@ use thiserror::Error;
 pub enum BinaryCodecError {
     #[error("Error when parsing field: {0}")]
     ParseError(String),
-    #[error("Value not within the required range")]
+    #[error("Value not within the required range: {0}")]
     OutOfRange(String),
 }
 

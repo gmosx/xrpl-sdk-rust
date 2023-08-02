@@ -3,9 +3,7 @@ mod tests {
     use crate::client::Client;
     use crate::client::DEFAULT_WS_URL;
     use futures_util::StreamExt;
-    use xrpl_api::{AccountInfoRequest, SubscribeRequest};
-    use xrpl_types::Book;
-    use xrpl_types::Currency;
+    use xrpl_api::{AccountInfoRequest, Book, Currency, SubscribeRequest};
 
     #[tokio::test]
     async fn client_can_request_account_info() {

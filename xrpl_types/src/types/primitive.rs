@@ -58,7 +58,7 @@ pub type Uint64 = u64;
 
 #[cfg(test)]
 mod test {
-    use crate::AccountId;
+    use super::*;
 
     #[test]
     fn test_account_id_from_address() {
