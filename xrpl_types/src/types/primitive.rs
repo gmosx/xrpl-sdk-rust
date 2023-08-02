@@ -54,6 +54,7 @@ pub struct Hash256(pub [u8; 32]);
 pub type UInt8 = u8;
 pub type UInt16 = u16;
 pub type UInt32 = u32;
+pub type Uint64 = u64;
 
 #[cfg(test)]
 mod test {

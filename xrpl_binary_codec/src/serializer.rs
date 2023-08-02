@@ -1,10 +1,10 @@
 use super::util::internal_number_from_string;
 use crate::error::BinaryCodecError;
-use xrpl_types::FieldId;
 use xrpl_types::{
     AccountId, Amount, Blob, Hash128, Hash160, Hash256, IssuedAmount, Memo, Transaction, UInt16,
     UInt32, UInt8,
 };
+use xrpl_types::{FieldId, Uint64};
 
 // https://xrpl.org/serialization.html
 // https://github.com/ripple/ripple-binary-codec/blob/master/src/enums/definitions.json
@@ -82,36 +82,69 @@ impl Serializer {
         todo!()
     }
 
-    pub fn push(&mut self, value: u8) {
+    fn push(&mut self, value: u8) {
         self.buf.push(value);
     }
 
-    pub fn push_u16(&mut self, value: u16) {
-        self.push((value >> 8) as u8);
-        self.push((value & 0xff) as u8);
+    fn push_slice(&mut self, bytes: &[u8]) {
+        self.buf.extend(bytes);
     }
 
-    pub fn push_u32(&mut self, value: u32) {
-        self.push((value >> 24) as u8);
-        self.push(((value >> 16) & 0xff) as u8);
-        self.push(((value >> 8) & 0xff) as u8);
-        self.push((value & 0xff) as u8);
+    fn push_uint8(&mut self, value: UInt8) {
+        self.push(value);
     }
 
-    pub fn push_u64(&mut self, value: u64) {
-        self.push((value >> 56) as u8);
-        self.push(((value >> 48) & 0xff) as u8);
-        self.push(((value >> 40) & 0xff) as u8);
-        self.push(((value >> 32) & 0xff) as u8);
-        self.push(((value >> 24) & 0xff) as u8);
-        self.push(((value >> 16) & 0xff) as u8);
-        self.push(((value >> 8) & 0xff) as u8);
-        self.push((value & 0xff) as u8);
+    fn push_uint16(&mut self, value: UInt16) {
+        self.push_slice(&value.to_be_bytes());
+    }
+
+    fn push_uint32(&mut self, value: UInt32) {
+        self.push_slice(&value.to_be_bytes());
+    }
+
+    fn push_uint64(&mut self, value: Uint64) {
+        self.push_slice(&value.to_be_bytes());
+    }
+
+    fn push_hash128(&mut self, value: Hash128) {
+        self.push_slice(&value.0);
+    }
+
+    fn push_hash160(&mut self, value: Hash160) {
+        self.push_slice(&value.0);
+    }
+
+    fn push_hash256(&mut self, value: Hash256) {
+        self.push_slice(&value.0);
+    }
+
+    /// Push length prefix according to <https://xrpl.org/serialization.html#length-prefixing>
+    fn push_vl_prefix(&mut self, length: usize) -> Result<(), BinaryCodecError> {
+        if length <= 192 {
+            self.push(length as u8);
+            Ok(())
+        } else if length <= 12480 {
+            let length = length - 193;
+            self.push(193 + (length >> 8) as u8);
+            self.push((length & 0xff) as u8);
+            Ok(())
+        } else if length <= 918744 {
+            let length = length - 12481;
+            self.push(241 + (length >> 16) as u8);
+            self.push(((length >> 8) & 0xff) as u8);
+            self.push((length & 0xff) as u8);
+            Ok(())
+        } else {
+            Err(BinaryCodecError::OutOfRange(format!(
+                "Variable length out of range: {}",
+                length
+            )))
+        }
     }
 
     /// - <https://xrpl.org/serialization.html#field-ids>
     /// - <https://github.com/seelabs/rippled/blob/cecc0ad75849a1d50cc573188ad301ca65519a5b/src/ripple/protocol/impl/Serializer.cpp#L117-L148>
-    pub fn push_field_id(&mut self, type_code: u8, field_code: u8) {
+    fn push_field_id(&mut self, type_code: u8, field_code: u8) {
         if type_code < 16 {
             if field_code < 16 {
                 self.push(type_code << 4 | field_code);
@@ -129,57 +162,34 @@ impl Serializer {
         }
     }
 
-    /// <https://xrpl.org/serialization.html#length-prefixing>
-    pub fn push_vl_prefix(&mut self, length: u32) {
-        if length < 192 {
-            self.push(length as u8);
-        } else if length <= 12480 {
-            let length = length - 192;
-            self.push(193 + (length >> 8) as u8);
-            self.push((length & 0xff) as u8);
-        } else if length <= 918744 {
-            let length = length - 12481;
-            self.push(241 + (length >> 16) as u8);
-            self.push(((length >> 8) & 0xff) as u8);
-            self.push((length & 0xff) as u8);
-        } else {
-            todo!()
-        }
-    }
-
-    // TODO: use more descriptive name.
-    pub fn push_slice(&mut self, bytes: &[u8]) {
-        for byte in bytes {
-            self.push(*byte);
-        }
-    }
-
-    pub fn push_drops_amount(&mut self, value: u64) {
-        self.push_u64(value | 0x4000000000000000);
+    fn push_drops_amount(&mut self, value: u64) {
+        self.push_uint64(value | 0x4000000000000000);
     }
 
     /// - <https://xrpl.org/serialization.html#issued-currency-amount-format>
     /// - <https://github.com/ripple/ripple-binary-codec/blob/master/src/types/amount.ts>
     /// - <https://github.com/ripple/rippled/blob/develop/src/ripple/protocol/impl/STAmount.cpp>
-    pub fn push_issued_amount(&mut self, value: &str, currency: &str, issuer: &str) {
-        self.push_u64(internal_number_from_string(value));
-        self.push_currency(currency);
-        self.push_account_id(issuer);
+    fn push_issued_amount(&mut self, value: &str, currency: &str, issuer: &str) {
+        // self.push_u64(internal_number_from_string(value));
+        // self.push_currency(currency);
+        // self.push_account_id(issuer);
+        todo!()
     }
 
-    pub fn push_amount(&mut self, amount: &Amount) {
-        match amount {
-            Amount::Drops(value) => self.push_drops_amount(value.parse::<u64>().unwrap()),
-            Amount::Issued(IssuedAmount {
-                value,
-                currency,
-                issuer,
-            }) => self.push_issued_amount(value, currency, issuer),
-        }
+    fn push_amount(&mut self, amount: &Amount) {
+        // match amount {
+        //     Amount::Drops(value) => self.push_drops_amount(value.parse::<u64>().unwrap()),
+        //     Amount::Issued(IssuedAmount {
+        //         value,
+        //         currency,
+        //         issuer,
+        //     }) => self.push_issued_amount(value, currency, issuer),
+        // }
+        todo!()
     }
 
     /// <https://xrpl.org/serialization.html#currency-codes>
-    pub fn push_currency(&mut self, currency: &str) {
+    fn push_currency(&mut self, currency: &str) {
         // Non-standard currency codes are 160 bits = 20 bytes in hex (40 chars).
 
         if currency.len() == 40 {
@@ -210,20 +220,20 @@ impl Serializer {
         }
     }
 
-    pub fn push_account_id(&mut self, id: AccountId) {
+    fn push_account_id(&mut self, id: AccountId) {
         self.push_slice(&id.0);
     }
 
     // TODO: implement generic `push_array`
     // https://xrpl.org/serialization.html#array-fields
 
-    pub fn push_blob(&mut self, field_code: u8, blob: &[u8]) {
+    fn push_blob(&mut self, field_code: u8, blob: &[u8]) {
         self.push_field_id(7, field_code);
-        self.push_vl_prefix(blob.len() as u32);
+        self.push_vl_prefix(blob.len());
         self.push_slice(blob);
     }
 
-    pub fn push_memo(&mut self, memo: &Memo) {
+    fn push_memo(&mut self, memo: &Memo) {
         // https://xrpl.org/serialization.html#object-fields
 
         self.push_field_id(14, 10);
@@ -238,149 +248,8 @@ impl Serializer {
         self.push(0xe1); // Object end
     }
 
-    /// ## Serialization order
-    ///
-    /// <https://github.com/ripple/rippled/blob/master/src/ripple/protocol/impl/SField.cpp>
-    ///
-    /// 16 bit integers (common)
-    ///
-    /// transaction_type: u16,      UInt16, 1, 2 "TransactionType"
-    ///
-    /// 32 bit integers (common)
-    ///
-    /// flags: u32,                 UInt32, 2, 2 "Flags"
-    /// sequence: u32,              UInt32, 2, 4 "Sequence"
-    ///
-    /// 32 bit integers (uncommon)
-    ///
-    /// quality_in: u32,            UInt32, 2, 20 "QualityIn"
-    /// quality_out: u32,           UInt32, 2, 21 "QualityOut"
-    /// offer_sequence: u32,        UInt32, 2, 25 "OfferSequence"
-    /// last_ledger_sequence: u32,  UInt32, 2, 27
-    ///
-    /// currency amount (common)
-    ///
-    /// amount: String,             Amount, 6, 1 "Amount"
-    /// limit_amount: String,       Amount, 6, 3 "LimitAmount"
-    /// taker_pays: String,         Amount, 6, 4 "TakerPays"
-    /// taker_gets: String,         Amount, 6, 5 "TakerGets"
-    /// fee: String,                Amount, 6, 8 "Fee"
-    ///
-    /// variable length (common)
-    ///
-    /// signing_public_key,         SigningPubKey Blob, VL, 7, 3
-    /// signature,                  TxnSignature Blob, VL, 7, 4
-    ///
-    /// account
-    ///
-    /// account: String,            AccountID, VL, 8, 1 "Account"
-    /// destination: String,        AccountID, VL, 8, 3 "Destination"
-    ///
-    /// array of objects
-    ///
-    /// memos: Vec<Memo>,           STArray, 15, 9 "Memos"
     pub fn push_transaction(&mut self, tx: &Transaction, prefix: Option<&[u8]>) {
-        if let Some(prefix) = prefix {
-            self.push_slice(prefix);
-        }
-
-        // 16 bit integers (common)
-
-        self.push_field_id(1, 2);
-        self.push_u16(tx.transaction_type as u16);
-
-        // 32 bit integers (common)
-
-        if let Some(flags) = tx.flags {
-            self.push_field_id(2, 2);
-            self.push_u32(flags);
-        }
-
-        self.push_field_id(2, 4);
-        self.push_u32(tx.sequence.unwrap());
-
-        // 32 bit integers (uncommon)
-
-        if let Some(quality_in) = tx.quality_in {
-            self.push_field_id(2, 20);
-            self.push_u32(quality_in);
-        }
-
-        if let Some(quality_out) = tx.quality_out {
-            self.push_field_id(2, 21);
-            self.push_u32(quality_out);
-        }
-
-        if let Some(offer_sequence) = tx.offer_sequence {
-            self.push_field_id(2, 25);
-            self.push_u32(offer_sequence);
-        }
-
-        self.push_field_id(2, 27);
-        self.push_u32(tx.last_ledger_sequence.unwrap());
-
-        // currency amount (common)
-
-        if let Some(amount) = &tx.amount {
-            self.push_field_id(6, 1);
-            self.push_amount(amount);
-        }
-
-        if let Some(limit_amount) = &tx.limit_amount {
-            self.push_field_id(6, 3);
-            self.push_amount(limit_amount);
-        }
-
-        if let Some(taker_pays) = &tx.taker_pays {
-            self.push_field_id(6, 4);
-            self.push_amount(taker_pays);
-        }
-
-        if let Some(taker_gets) = &tx.taker_gets {
-            self.push_field_id(6, 5);
-            self.push_amount(taker_gets);
-        }
-
-        self.push_field_id(6, 8);
-        self.push_drops_amount(tx.fee.unwrap());
-
-        // variable length (common)
-
-        if let Some(signing_public_key) = &tx.signing_public_key {
-            self.push_field_id(7, 3);
-            self.push_vl_prefix(signing_public_key.len() as u32);
-            self.push_slice(signing_public_key);
-        }
-
-        if let Some(signature) = &tx.signature {
-            self.push_field_id(7, 4);
-            self.push_vl_prefix(signature.len() as u32);
-            self.push_slice(signature);
-        }
-
-        // account
-
-        self.push_field_id(8, 1);
-        self.push_vl_prefix(160 / 8);
-        self.push_account_id(tx.account);
-
-        if let Some(destination) = tx.destination {
-            self.push_field_id(8, 3);
-            self.push_vl_prefix(160 / 8);
-            self.push_account_id(destination);
-        }
-
-        // array of objects
-
-        if let Some(memos) = &tx.memos {
-            // https://xrpl.org/serialization.html#array-fields
-            self.push_field_id(15, 9);
-            for memo in memos {
-                self.push_memo(memo);
-            }
-            // self.push_field_id(15, 1);
-            self.push(0xf1); // Array end
-        }
+        todo!()
     }
 
     pub fn to_vec(&self) -> Vec<u8> {
@@ -391,6 +260,136 @@ impl Serializer {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use assert_matches::assert_matches;
+
+    #[test]
+    fn test_push_uint8() {
+        let mut s = Serializer::new();
+        let value = 0x12;
+        s.push_uint8(value);
+        assert_eq!(s.buf, [0x12u8]);
+    }
+
+    #[test]
+    fn test_push_uint16() {
+        let mut s = Serializer::new();
+        let value = 0x12 + (0x34 << 8);
+        s.push_uint16(value);
+        assert_eq!(s.buf, [0x34, 0x12]);
+    }
+
+    #[test]
+    fn test_push_uint32() {
+        let mut s = Serializer::new();
+        let value = 0x12 + (0x34 << 24);
+        s.push_uint32(value);
+        assert_eq!(s.buf, [0x34, 0x00, 0x00, 0x12]);
+    }
+
+    #[test]
+    fn test_push_uint64() {
+        let mut s = Serializer::new();
+        let value = 0x12 + (0x34 << 56);
+        s.push_uint64(value);
+        assert_eq!(s.buf, [0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x12]);
+    }
+
+    #[test]
+    fn test_push_h128() {
+        let mut s = Serializer::new();
+        let value = Hash128([
+            0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x12,
+        ]);
+        s.push_hash128(value);
+        assert_eq!(
+            s.buf,
+            [
+                0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x12
+            ]
+        );
+    }
+
+    #[test]
+    fn test_push_h160() {
+        let mut s = Serializer::new();
+        let value = Hash160([
+            0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x12,
+        ]);
+        s.push_hash160(value);
+        assert_eq!(
+            s.buf,
+            [
+                0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x12
+            ]
+        );
+    }
+
+    #[test]
+    fn test_push_h256() {
+        let mut s = Serializer::new();
+        let value = Hash256([
+            0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x12,
+        ]);
+        s.push_hash256(value);
+        assert_eq!(
+            s.buf,
+            [
+                0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x12
+            ]
+        );
+    }
+
+    /// Tests length prefix according to <https://xrpl.org/serialization.html#length-prefixing>
+    #[test]
+    fn test_push_vl_prefix() {
+        // test range 0 to 192
+        let mut s = Serializer::new();
+        s.push_vl_prefix(0).unwrap();
+        s.push_vl_prefix(1).unwrap();
+        s.push_vl_prefix(192).unwrap();
+        assert_eq!(s.buf, [0, 1, 192]);
+
+        // test range 193 to 12480
+        let mut s = Serializer::new();
+        s.push_vl_prefix(193 + ((193 - 193) * 256) + 0).unwrap();
+        s.push_vl_prefix(193 + ((193 - 193) * 256) + 1).unwrap();
+        assert_eq!(193 + ((240 - 193) * 256) + 255, 12480);
+        s.push_vl_prefix(193 + ((240 - 193) * 256) + 255).unwrap();
+        assert_eq!(s.buf, [193, 0, 193, 1, 240, 255]);
+
+        // test range 12481 to 918744
+        let mut s = Serializer::new();
+        s.push_vl_prefix(12481 + ((241 - 241) * 65536) + (0 * 256) + 0)
+            .unwrap();
+        s.push_vl_prefix(12481 + ((241 - 241) * 65536) + (0 * 256) + 1)
+            .unwrap();
+        s.push_vl_prefix(12481 + ((241 - 241) * 65536) + (1 * 256) + 0)
+            .unwrap();
+        s.push_vl_prefix(12481 + ((241 - 241) * 65536) + (255 * 256) + 255)
+            .unwrap();
+        assert_eq!(12481 + ((254 - 241) * 65536) + (212 * 256) + 23, 918744);
+        s.push_vl_prefix(12481 + ((254 - 241) * 65536) + (212 * 256) + 23)
+            .unwrap();
+        assert_eq!(
+            s.buf,
+            [241, 0, 0, 241, 0, 1, 241, 1, 0, 241, 255, 255, 254, 212, 23]
+        );
+
+        // test out of range
+        let mut s = Serializer::new();
+        let result = s.push_vl_prefix(918745);
+        assert_matches!(result, Err(BinaryCodecError::OutOfRange(message)) => {
+            assert!(message.contains("Variable length out of range"), "message: {}", message);
+        });
+    }
 
     #[test]
     fn test_push_currency() {
