@@ -1,7 +1,14 @@
 #[cfg(test)]
 mod tests {
     use crate::client::{Client, NFT_DEVNET_URL};
-    use xrpl_api::{AccountChannelsRequest, AccountCurrenciesRequest, AccountInfoRequest, AccountLinesRequest, AccountNftsRequest, AccountOffersRequest, AccountTxRequest, BookOffersRequest, Currency, DepositAuthorizedRequest, FeeRequest, GatewayBalancesRequest, GetOfferObjectRequest, LedgerClosedRequest, LedgerCurrentRequest, LedgerDataRequest, LedgerEntryRequest, LedgerRequest, ManifestRequest, PingRequest, RandomRequest, ServerInfoRequest, ServerStateRequest, TransactionEntryRequest, TxRequest};
+    use xrpl_api::{
+        AccountChannelsRequest, AccountCurrenciesRequest, AccountInfoRequest, AccountLinesRequest,
+        AccountNftsRequest, AccountOffersRequest, AccountTxRequest, BookOffersRequest, Currency,
+        DepositAuthorizedRequest, FeeRequest, GatewayBalancesRequest, GetOfferObjectRequest,
+        LedgerClosedRequest, LedgerCurrentRequest, LedgerDataRequest, LedgerEntryRequest,
+        LedgerRequest, ManifestRequest, PingRequest, RandomRequest, ServerInfoRequest,
+        ServerStateRequest, TransactionEntryRequest, TxRequest,
+    };
 
     #[tokio::test]
     async fn client_can_fetch_account_currencies() {

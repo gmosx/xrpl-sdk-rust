@@ -1,8 +1,8 @@
 use super::util::internal_number_from_string;
 use crate::error::BinaryCodecError;
 use xrpl_types::{
-    AccountId, Amount, Blob, Hash128, Hash160, Hash256, IssuedAmount, Memo, Transaction, UInt16,
-    UInt32, UInt8,
+    AccountId, Amount, Blob, CurrencyCode, Hash128, Hash160, Hash256, IssuedAmount, Memo,
+    Transaction, UInt16, UInt32, UInt8,
 };
 use xrpl_types::{FieldId, Uint64};
 
@@ -144,9 +144,6 @@ impl Serializer {
         }
     }
 
-
-
-
     /// Push length prefix according to <https://xrpl.org/serialization.html#length-prefixing>
     fn push_vl_prefix(&mut self, length: usize) -> Result<(), BinaryCodecError> {
         if length <= 192 {
@@ -170,7 +167,6 @@ impl Serializer {
             )))
         }
     }
-
 
     fn push_drops_amount(&mut self, value: u64) {
         self.push_uint64(value | 0x4000000000000000);
@@ -199,34 +195,15 @@ impl Serializer {
     }
 
     /// <https://xrpl.org/serialization.html#currency-codes>
-    fn push_currency(&mut self, currency: &str) {
-        // Non-standard currency codes are 160 bits = 20 bytes in hex (40 chars).
-
-        if currency.len() == 40 {
-            // Non-standard currency code.
-            let currency_bytes = hex::decode(currency).unwrap();
-            // if currency_bytes[0] == 0x00 {
-            self.push_slice(&currency_bytes);
-            return;
-            // }
-        }
-
-        // Standard currency code.
-
-        // 8 bits
-        self.push(0x00);
-
-        // 88 bits
-        for _ in 0..11 {
-            self.push(0x00);
-        }
-
-        // 24 bits
-        self.push_slice(currency.as_bytes());
-
-        // 40 bits
-        for _ in 0..5 {
-            self.push(0x00);
+    fn push_currency_code(&mut self, currency_code: CurrencyCode) {
+        match currency_code {
+            CurrencyCode::Xrp => self.push_slice(&[0u8; 20]),
+            CurrencyCode::Standard(code) => {
+                self.push_slice(&[0u8; 12]);
+                self.push_slice(&code.as_bytes());
+                self.push_slice(&[0u8; 5]);
+            }
+            CurrencyCode::NonStandard(code) => self.push_slice(code.as_bytes()),
         }
     }
 
@@ -265,6 +242,7 @@ impl Serializer {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use ascii::AsciiChar;
     use assert_matches::assert_matches;
 
     #[test]
@@ -363,12 +341,19 @@ mod tests {
     #[test]
     fn test_push_account_id() {
         let mut s = Serializer::new();
-        let value = AccountId([0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x12]);
+        let value = AccountId([
+            0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x12,
+        ]);
         s.push_account_id(value);
-        assert_eq!(s.buf, [20, 0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x12]);
+        assert_eq!(
+            s.buf,
+            [
+                20, 0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x12
+            ]
+        );
     }
-
-
 
     /// Tests length prefix according to <https://xrpl.org/serialization.html#length-prefixing>
     #[test]
@@ -415,11 +400,46 @@ mod tests {
     }
 
     #[test]
-    fn test_push_currency() {
+    fn test_push_currency_code_xrp() {
         let mut s = Serializer::new();
-        s.push_currency("XRP");
-        let h = hex::encode(s.to_vec());
-        assert_eq!(h, "0000000000000000000000005852500000000000");
+        let code = CurrencyCode::xrp();
+        s.push_currency_code(code);
+        assert_eq!(s.buf, [0u8; 20]);
+    }
+
+    #[test]
+    fn test_push_currency_code_standard() {
+        let mut s = Serializer::new();
+        let code = CurrencyCode::standard([AsciiChar::U, AsciiChar::S, AsciiChar::D]).unwrap();
+        s.push_currency_code(code);
+        assert_eq!(s.buf[0..12], [0u8; 12]);
+        assert_eq!(
+            s.buf[12..15],
+            [
+                AsciiChar::U.as_byte(),
+                AsciiChar::S.as_byte(),
+                AsciiChar::D.as_byte()
+            ]
+        );
+        assert_eq!(s.buf[15..20], [0u8; 5]);
+    }
+
+    #[test]
+    fn test_push_currency_code_non_standard() {
+        let mut s = Serializer::new();
+        let code = CurrencyCode::non_standard([
+            0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x02,
+        ])
+        .unwrap();
+        s.push_currency_code(code);
+        assert_eq!(
+            s.buf,
+            [
+                0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x02,
+            ]
+        );
     }
 
     #[test]

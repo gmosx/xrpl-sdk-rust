@@ -17,6 +17,7 @@ sha2 = "0.9"
 libsecp256k1 = "0.5"
 xrpl_types = { path = "../xrpl_types", version = "0.10" }
 thiserror = "1.0.44"
+ascii = "1.1.0"
 
 [dev-dependencies]
 assert_matches = "1.5.0"
