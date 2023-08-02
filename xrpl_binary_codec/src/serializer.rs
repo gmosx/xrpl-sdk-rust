@@ -212,23 +212,14 @@ impl Serializer {
         self.push_slice(&id.0);
     }
 
+    fn push_account_id_no_length_prefix(&mut self, id: AccountId) {
+        self.push_slice(&id.0);
+    }
+
     // TODO: implement generic `push_array`
     // https://xrpl.org/serialization.html#array-fields
 
-    fn push_memo(&mut self, memo: &Memo) {
-        // https://xrpl.org/serialization.html#object-fields
 
-        self.push_field_id(14, 10);
-
-        // self.push_blob(12, &memo.memo_type);// todo allan
-        // self.push_blob(13, &memo.memo_data);
-
-        if let Some(memo_format) = &memo.memo_format {
-            // self.push_blob(14, memo_format); // todo allan
-        }
-
-        self.push(0xe1); // Object end
-    }
 
     pub fn push_transaction(&mut self, tx: &Transaction, prefix: Option<&[u8]>) {
         todo!()
@@ -355,6 +346,23 @@ mod tests {
         );
     }
 
+    #[test]
+    fn test_push_account_id_no_length_prefix() {
+        let mut s = Serializer::new();
+        let value = AccountId([
+            0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x12,
+        ]);
+        s.push_account_id_no_length_prefix(value);
+        assert_eq!(
+            s.buf,
+            [
+                0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x12
+            ]
+        );
+    }
+
     /// Tests length prefix according to <https://xrpl.org/serialization.html#length-prefixing>
     #[test]
     fn test_push_vl_prefix() {
@@ -451,3 +459,4 @@ mod tests {
         assert_eq!(h, "d54443b3ef4f480000000000000000000000000055534400000000002adb0b3959d60a6e6991f729e1918b7163925230");
     }
 }
+

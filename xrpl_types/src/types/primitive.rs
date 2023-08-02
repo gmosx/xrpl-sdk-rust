@@ -8,34 +8,26 @@ impl AccountId {
     pub fn from_address(address: &str) -> Result<Self, Error> {
         let decoded = bs58::decode(address)
             .with_alphabet(bs58::Alphabet::RIPPLE)
+            .with_check(Some(0u8))
             .into_vec()
-            .unwrap(); // TODO allan
+            .map_err(|err| Error::InvalidData(format!("Invalid address: {}", err)))?;
 
-        // TODO check checksum
+        // Skip the 0x00 ('r') version prefix
+        let decoded = &decoded[1..];
 
-        // Skip the 0x00 ('r') version prefix, skip the 4-byte checksum postfix.
-        let decoded = &decoded[1..21];
+        let bytes: [u8; 20] = decoded
+            .try_into()
+            .map_err(|_| Error::InvalidData(format!("Address does not encode exactly 20 bytes")))?;
 
-        Ok(Self(decoded.try_into().unwrap())) // TODO allan
+        Ok(Self(bytes))
     }
 
     /// Encodes account id to address, see <https://xrpl.org/accounts.html#address-encoding>
     pub fn to_address(&self) -> String {
-        let encoded = bs58::encode(&self.0)
+        bs58::encode(&self.0)
             .with_alphabet(bs58::Alphabet::RIPPLE)
-            .into_string();
-        // When serializing we skipped the ('r') version prefix and the 4-byte checksum postfix.
-        let account_id = format!("{}{}", String::from("r"), encoded);
-        // TODO allan
-        let re_decoded = bs58::decode(account_id)
-            .with_alphabet(bs58::Alphabet::RIPPLE)
-            .into_vec()
-            .expect("decoding encoded with prefix from alphabet");
-        let re_encoded = bs58::encode(re_decoded)
-            .with_alphabet(bs58::Alphabet::RIPPLE)
-            .with_check()
-            .into_string();
-        re_encoded
+            .with_check_version(0u8) // Add the 0x00 ('r') version prefix
+            .into_string()
     }
 }
 
@@ -59,6 +51,7 @@ pub type Uint64 = u64;
 #[cfg(test)]
 mod test {
     use super::*;
+    use assert_matches::assert_matches;
 
     #[test]
     fn test_account_id_from_address() {
@@ -67,6 +60,30 @@ mod test {
             hex::encode(&account_id.0),
             "4b4e9c06f24296074f7bc48f92a97916c6dc5ea9"
         );
+    }
+
+    #[test]
+    fn test_account_id_from_address_invalid_checksum() {
+        let result = AccountId::from_address("rf1BiGeXwwQoi8Z2ueFYTEXSwuJYfV2Jpm");
+        assert_matches!(result, Err(Error::InvalidData(message)) => {
+           assert!(message.contains("invalid checksum"), "message: {message}")
+        });
+    }
+
+    #[test]
+    fn test_account_id_from_address_invalid_type_prefix() {
+        let result = AccountId::from_address("XU8q4Ao1L1ggD6CAn9iA4oDoQZ7mXntZy");
+        assert_matches!(result, Err(Error::InvalidData(message)) => {
+           assert!(message.contains("invalid version"), "message: {message}")
+        });
+    }
+
+    #[test]
+    fn test_account_id_from_address_invalid_length() {
+        let result = AccountId::from_address("r3wVnsK");
+        assert_matches!(result, Err(Error::InvalidData(message)) => {
+           assert!(message.contains("Address does not encode exactly 20 bytes"), "message: {message}")
+        });
     }
 
     #[test]
