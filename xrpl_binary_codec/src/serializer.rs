@@ -1,4 +1,3 @@
-use super::util::internal_number_from_string;
 use crate::error::BinaryCodecError;
 use xrpl_types::{
     AccountId, Amount, Blob, CurrencyCode, DropsAmount, Hash128, Hash160, Hash256, IssuedAmount,
@@ -6,9 +5,8 @@ use xrpl_types::{
 };
 use xrpl_types::{FieldId, Uint64};
 
-// https://xrpl.org/serialization.html
-// https://github.com/ripple/ripple-binary-codec/blob/master/src/enums/definitions.json
-// https://xrpl.org/basic-data-types.html#hash-prefixes
+
+
 
 pub const HASH_PREFIX_TRANSACTION: [u8; 4] = [0x53, 0x4E, 0x44, 0x00];
 pub const HASH_PREFIX_UNSIGNED_TRANSACTION_SINGLE: [u8; 4] = [0x53, 0x54, 0x58, 0x00];
@@ -230,6 +228,8 @@ impl Serializer {
     // https://xrpl.org/serialization.html#array-fields
 
     pub fn push_transaction(&mut self, tx: &Transaction, prefix: Option<&[u8]>) {
+        // https://xrpl.org/basic-data-types.html#hash-prefixes
+        // https://github.com/ripple/ripple-binary-codec/blob/master/src/enums/definitions.json
         todo!()
     }
 
