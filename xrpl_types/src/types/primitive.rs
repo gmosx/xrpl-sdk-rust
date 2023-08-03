@@ -15,9 +15,9 @@ impl AccountId {
         // Skip the 0x00 ('r') version prefix
         let decoded = &decoded[1..];
 
-        let bytes: [u8; 20] = decoded
-            .try_into()
-            .map_err(|_| Error::InvalidData(format!("Address does not encode exactly 20 bytes")))?;
+        let bytes: [u8; 20] = decoded.try_into().map_err(|_| {
+            Error::InvalidData("Address does not encode exactly 20 bytes".to_string())
+        })?;
 
         Ok(Self(bytes))
     }
@@ -57,7 +57,7 @@ mod test {
     fn test_account_id_from_address() {
         let account_id = AccountId::from_address("rf1BiGeXwwQoi8Z2ueFYTEXSwuJYfV2Jpn").unwrap();
         assert_eq!(
-            hex::encode(&account_id.0),
+            hex::encode(account_id.0),
             "4b4e9c06f24296074f7bc48f92a97916c6dc5ea9"
         );
     }

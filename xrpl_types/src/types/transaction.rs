@@ -1,4 +1,5 @@
 use super::{AccountId, Amount};
+use crate::DropsAmount;
 use serde::{Deserialize, Serialize};
 
 // https://github.com/XRPLF/xrpl.js/blob/main/packages/ripple-binary-codec/src/enums/definitions.json
@@ -37,8 +38,6 @@ pub enum TransactionType {
     SetFee = 101,
     UNLModify = 102,
 }
-
-pub type DropsAmount = u64;
 
 #[derive(Debug)]
 pub struct Memo {

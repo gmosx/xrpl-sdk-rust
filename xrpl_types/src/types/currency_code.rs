@@ -1,6 +1,6 @@
-use crate::{AccountId, Error};
+use crate::Error;
 use ascii::{AsciiChar, AsciiStr, AsciiString};
-use std::fmt::{Display, Formatter, Write};
+use std::fmt::{Display, Formatter};
 use std::str::FromStr;
 
 /// Currency code <https://xrpl.org/currency-formats.html#currency-codes>
@@ -30,6 +30,18 @@ impl CurrencyCode {
             NonStandardCurrencyCode::from_bytes(bytes)?,
         ))
     }
+
+    pub fn is_xrp(&self) -> bool {
+        matches!(self, CurrencyCode::Xrp)
+    }
+
+    pub fn is_standard(&self) -> bool {
+        matches!(self, CurrencyCode::Standard(_))
+    }
+
+    pub fn is_non_standard(&self) -> bool {
+        matches!(self, CurrencyCode::NonStandard(_))
+    }
 }
 
 impl FromStr for CurrencyCode {
@@ -42,7 +54,7 @@ impl FromStr for CurrencyCode {
             let ascii_chars = to_3_ascii_chars(s)?;
             CurrencyCode::standard(ascii_chars)
         } else {
-            let bytes = hex::decode(s).map_err(|err| {
+            let bytes = hex::decode(s).map_err(|_| {
                 Error::InvalidData(format!(
                     "Currency code is neither three letter symbol neither hex string: {}",
                     s
@@ -68,7 +80,7 @@ impl Display for CurrencyCode {
 
 /// Iso style currency code <https://xrpl.org/currency-formats.html#standard-currency-codes>
 #[derive(Debug, Eq, PartialEq, Clone, Copy)]
-// tuple is private since it is validated when the NonStandardCurrencyCode value is created
+// tuple is private since it is validated when the StandardCurrencyCode value is created
 pub struct StandardCurrencyCode([AsciiChar; 3]);
 
 impl StandardCurrencyCode {
@@ -159,7 +171,6 @@ fn to_3_ascii_chars(str: &str) -> Result<[AsciiChar; 3], Error> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use ascii::{AsAsciiStr, AsciiString};
     use assert_matches::assert_matches;
     use std::str::FromStr;
 
@@ -223,6 +234,7 @@ mod test {
         let code = CurrencyCode::from_str("XRP").unwrap();
         assert_matches!(code, CurrencyCode::Xrp);
         assert_eq!(code.to_string(), "XRP");
+        assert!(code.is_xrp());
     }
 
     /// Test parsing standard currency code from string and converting back to string
@@ -238,6 +250,7 @@ mod test {
             ]))
         );
         assert_eq!(code.to_string(), "USD");
+        assert!(code.is_standard());
     }
 
     /// Test parsing standard currency code from string and converting back to string
@@ -252,5 +265,6 @@ mod test {
             ]))
         );
         assert_eq!(code.to_string(), "434F524500000000000000000000000000000000");
+        assert!(code.is_non_standard());
     }
 }

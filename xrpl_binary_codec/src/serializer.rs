@@ -1,8 +1,8 @@
 use super::util::internal_number_from_string;
 use crate::error::BinaryCodecError;
 use xrpl_types::{
-    AccountId, Amount, Blob, CurrencyCode, Hash128, Hash160, Hash256, IssuedAmount, Memo,
-    Transaction, UInt16, UInt32, UInt8,
+    AccountId, Amount, Blob, CurrencyCode, DropsAmount, Hash128, Hash160, Hash256, IssuedAmount,
+    IssuedValue, Memo, Transaction, UInt16, UInt32, UInt8,
 };
 use xrpl_types::{FieldId, Uint64};
 
@@ -168,30 +168,40 @@ impl Serializer {
         }
     }
 
-    fn push_drops_amount(&mut self, value: u64) {
-        self.push_uint64(value | 0x4000000000000000);
+    /// <https://xrpl.org/serialization.html#amount-fields>
+    fn push_drops_amount(&mut self, drops: DropsAmount) {
+        const POSITIVE_MASK: u64 = 0x4000000000000000;
+        self.push_uint64(POSITIVE_MASK | drops.drops());
     }
 
-    /// - <https://xrpl.org/serialization.html#issued-currency-amount-format>
-    /// - <https://github.com/ripple/ripple-binary-codec/blob/master/src/types/amount.ts>
-    /// - <https://github.com/ripple/rippled/blob/develop/src/ripple/protocol/impl/STAmount.cpp>
-    fn push_issued_amount(&mut self, value: &str, currency: &str, issuer: &str) {
-        // self.push_u64(internal_number_from_string(value));
-        // self.push_currency(currency);
-        // self.push_account_id(issuer);
-        todo!()
+    /// <https://xrpl.org/serialization.html#issued-currency-amount-format>
+    fn push_issued_value(&mut self, value: IssuedValue) {
+        const ISSUED_MASK: u64 = 0x8000000000000000;
+        const POSITIVE_MASK: u64 = 0x4000000000000000;
+
+        let (mantissa, positive) = match value.mantissa() {
+            0 => {
+                self.push_uint64(ISSUED_MASK);
+                return;
+            }
+            1.. => (value.mantissa() as u64, true),
+            ..=-1 => (-value.mantissa() as u64, false),
+        };
+        let exponent = (value.exponent() + 97) as u64;
+        self.push_uint64(
+            ISSUED_MASK | (if positive { POSITIVE_MASK } else { 0 }) | mantissa | (exponent << 54),
+        );
     }
 
-    fn push_amount(&mut self, amount: &Amount) {
-        // match amount {
-        //     Amount::Drops(value) => self.push_drops_amount(value.parse::<u64>().unwrap()),
-        //     Amount::Issued(IssuedAmount {
-        //         value,
-        //         currency,
-        //         issuer,
-        //     }) => self.push_issued_amount(value, currency, issuer),
-        // }
-        todo!()
+    fn push_amount(&mut self, amount: Amount) {
+        match amount {
+            Amount::Drops(drops) => self.push_drops_amount(drops),
+            Amount::Issued(issued) => {
+                self.push_issued_value(issued.value());
+                self.push_currency_code(issued.currency());
+                self.push_account_id_no_length_prefix(issued.issuer());
+            }
+        }
     }
 
     /// <https://xrpl.org/serialization.html#currency-codes>
@@ -219,8 +229,6 @@ impl Serializer {
     // TODO: implement generic `push_array`
     // https://xrpl.org/serialization.html#array-fields
 
-
-
     pub fn push_transaction(&mut self, tx: &Transaction, prefix: Option<&[u8]>) {
         todo!()
     }
@@ -234,6 +242,7 @@ impl Serializer {
 mod tests {
     use super::*;
     use ascii::AsciiChar;
+    use ascii::AsciiChar::i;
     use assert_matches::assert_matches;
 
     #[test]
@@ -357,8 +366,8 @@ mod tests {
         assert_eq!(
             s.buf,
             [
-                0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x12
+                0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x12
             ]
         );
     }
@@ -451,12 +460,83 @@ mod tests {
     }
 
     #[test]
-    fn test_push_issued_amount() {
+    fn test_push_drops_amount() {
         let mut s = Serializer::new();
-        s.push_issued_amount("1200.34", "USD", "rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq");
-        let h = hex::encode(s.to_vec());
-        // println!("{}", h);
-        assert_eq!(h, "d54443b3ef4f480000000000000000000000000055534400000000002adb0b3959d60a6e6991f729e1918b7163925230");
+        let value = DropsAmount::from_drops(10_000).unwrap();
+        s.push_drops_amount(value);
+        assert_eq!(s.buf, [0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x27, 0x10]);
+    }
+
+    /// Test serializing zero issued value
+    #[test]
+    fn test_push_issued_value_zero() {
+        let mut s = Serializer::new();
+        let value = IssuedValue::zero();
+        s.push_issued_value(value);
+        assert_eq!(s.buf, [0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
+    }
+
+    /// Test serializing positive issued value
+    #[test]
+    fn test_push_issued_value_positive() {
+        let mut s = Serializer::new();
+        let value = IssuedValue::from_mantissa_exponent(1_000_000_000_000_000, -10).unwrap();
+        s.push_issued_value(value);
+        assert_eq!(
+            s.buf,
+            [0xD5, 0xC3, 0x8D, 0x7E, 0xA4, 0xC6, 0x80, 0x00,],
+            "actual: {}",
+            hex::encode(&s.buf),
+        );
+    }
+
+    /// Test serializing negative issued value
+    #[test]
+    fn test_push_issued_value_negative() {
+        let mut s = Serializer::new();
+        let value = IssuedValue::from_mantissa_exponent(-1_000_000_000_000_000, -10).unwrap();
+        s.push_issued_value(value);
+        assert_eq!(
+            s.buf,
+            [0x95, 0xC3, 0x8D, 0x7E, 0xA4, 0xC6, 0x80, 0x00,],
+            "actual: {}",
+            hex::encode(&s.buf),
+        );
+    }
+
+    #[test]
+    fn test_push_amount_drops() {
+        let mut s = Serializer::new();
+        let value = Amount::drops(10_000).unwrap();
+        s.push_amount(value);
+        assert_eq!(s.buf, [0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x27, 0x10]);
+    }
+
+    #[test]
+    fn test_push_amount_issued() {
+        let mut s = Serializer::new();
+        let value = IssuedValue::from_mantissa_exponent(1_000_000_000_000_000, -10).unwrap();
+        let currency = CurrencyCode::non_standard([
+            0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x02,
+        ])
+        .unwrap();
+        let issuer = AccountId([
+            0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x12,
+        ]);
+        let amount = Amount::issued(value, currency, issuer).unwrap();
+        s.push_amount(amount);
+        assert_eq!(
+            s.buf,
+            [
+                0xD5, 0xC3, 0x8D, 0x7E, 0xA4, 0xC6, 0x80, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02,
+                0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x12
+            ],
+            "actual: {}",
+            hex::encode(&s.buf),
+        );
     }
 }
-
