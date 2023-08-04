@@ -1,10 +1,10 @@
-use xrpl_types::Transaction;
-use crate::BinaryCodecError;
 use crate::serialize::Serialize;
-use crate::serializer::Serializer;
+use crate::serializer::SerializerT;
+use crate::BinaryCodecError;
+use xrpl_types::TrustSetTransaction;
 
-impl Serialize for Transaction {
-    fn serialize(&self, serializer: &mut Serializer) -> Result<(), BinaryCodecError> {
+impl Serialize for TrustSetTransaction {
+    fn serialize<S: SerializerT>(&self, serializer: &mut S) -> Result<(), BinaryCodecError> {
         todo!()
     }
 }

@@ -7,6 +7,10 @@ pub enum BinaryCodecError {
     ParseError(String),
     #[error("Value not within the required range: {0}")]
     OutOfRange(String),
+    #[error("Field order is wrong: {0}")]
+    FieldOrder(String),
+    #[error("IO error: {0}")]
+    IO(String),
 }
 
 impl From<bs58::decode::Error> for BinaryCodecError {
@@ -18,5 +22,11 @@ impl From<bs58::decode::Error> for BinaryCodecError {
 impl From<ParseIntError> for BinaryCodecError {
     fn from(_: ParseIntError) -> Self {
         BinaryCodecError::ParseError("Unable to parse integer from string".to_string())
+    }
+}
+
+impl From<std::io::Error> for BinaryCodecError {
+    fn from(error: std::io::Error) -> Self {
+        BinaryCodecError::IO(format!("IO error: {}", error))
     }
 }

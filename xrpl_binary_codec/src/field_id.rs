@@ -1,15 +1,19 @@
+pub type TypeCode = u8;
+
 /// Field data type codes <https://xrpl.org/serialization.html#type-list>
 pub mod type_code {
-    pub const ACCOUNT_ID: u8 = 8;
-    pub const AMOUNT: u8 = 6;
-    pub const BLOB: u8 = 7;
-    pub const HASH128: u8 = 4;
-    pub const HASH160: u8 = 17;
-    pub const HASH256: u8 = 5;
-    pub const UINT8: u8 = 16;
-    pub const UINT16: u8 = 1;
-    pub const UINT32: u8 = 2;
-    pub const UINT64: u8 = 3;
+    use crate::field_id::TypeCode;
+
+    pub const ACCOUNT_ID_8: TypeCode = 8;
+    pub const AMOUNT_6: TypeCode = 6;
+    pub const BLOB_7: TypeCode = 7;
+    pub const HASH128_4: TypeCode = 4;
+    pub const HASH160_17: TypeCode = 17;
+    pub const HASH256_5: TypeCode = 5;
+    pub const UINT8_16: TypeCode = 16;
+    pub const UINT16_1: TypeCode = 1;
+    pub const UINT32_2: TypeCode = 2;
+    pub const UINT64_3: TypeCode = 3;
 }
 
 // /// Field data type codes <https://xrpl.org/serialization.html#type-list>
@@ -36,71 +40,70 @@ pub mod type_code {
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub struct FieldCode(pub u8);
 
-#[derive(Debug, Clone, Copy, Eq, PartialEq)]
-pub struct FieldId<const TC: u8>(
+#[derive(Debug, Clone, Copy)]
+pub struct FieldId<const TC: TypeCode>(
     /// Field code <https://xrpl.org/serialization.html#field-codes>
     pub FieldCode,
 );
 
 use type_code::*;
 
-impl FieldId<ACCOUNT_ID> {
-    pub fn account_id(field_code: FieldCode) -> Self {
+impl FieldId<ACCOUNT_ID_8> {
+    pub fn account_id_8(field_code: FieldCode) -> Self {
         Self(field_code)
     }
 }
 
-impl FieldId<AMOUNT> {
-    pub fn amount(field_code: FieldCode) -> Self {
+impl FieldId<AMOUNT_6> {
+    pub fn amount_6(field_code: FieldCode) -> Self {
         Self(field_code)
     }
 }
 
-impl FieldId<BLOB> {
-    pub fn blob(field_code: FieldCode) -> Self {
+impl FieldId<BLOB_7> {
+    pub fn blob_7(field_code: FieldCode) -> Self {
         Self(field_code)
     }
 }
 
-impl FieldId<HASH128> {
-    pub fn hash128(field_code: FieldCode) -> Self {
+impl FieldId<HASH128_4> {
+    pub fn hash128_4(field_code: FieldCode) -> Self {
         Self(field_code)
     }
 }
 
-impl FieldId<HASH160> {
-    pub fn hash160(field_code: FieldCode) -> Self {
+impl FieldId<HASH160_17> {
+    pub fn hash160_17(field_code: FieldCode) -> Self {
         Self(field_code)
     }
 }
 
-impl FieldId<HASH256> {
-    pub fn hash256(field_code: FieldCode) -> Self {
+impl FieldId<HASH256_5> {
+    pub fn hash256_5(field_code: FieldCode) -> Self {
         Self(field_code)
     }
 }
 
-impl FieldId<UINT8> {
-    pub fn uint8(field_code: FieldCode) -> Self {
+impl FieldId<UINT8_16> {
+    pub fn uint8_16(field_code: FieldCode) -> Self {
         Self(field_code)
     }
 }
 
-impl FieldId<UINT16> {
-    pub fn uint16(field_code: FieldCode) -> Self {
+impl FieldId<UINT16_1> {
+    pub fn uint16_1(field_code: FieldCode) -> Self {
         Self(field_code)
     }
 }
 
-impl FieldId<UINT32> {
-    pub fn uint32(field_code: FieldCode) -> Self {
+impl FieldId<UINT32_2> {
+    pub fn uint32_2(field_code: FieldCode) -> Self {
         Self(field_code)
     }
 }
 
-impl FieldId<UINT64> {
-    pub fn uint64(field_code: FieldCode) -> Self {
+impl FieldId<UINT64_3> {
+    pub fn uint64_3(field_code: FieldCode) -> Self {
         Self(field_code)
     }
 }
-

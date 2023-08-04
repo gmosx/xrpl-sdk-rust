@@ -1,7 +1,11 @@
-use enumflags2::{bitflags, BitFlags};
-use super::{AccountId, Amount};
+use super::AccountId;
 use crate::{Blob, DropsAmount, Hash256, UInt32};
+use enumflags2::{bitflags, BitFlags};
 use serde::{Deserialize, Serialize};
+
+mod trust_set;
+
+pub use trust_set::*;
 
 #[repr(u16)]
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize, Deserialize)]
@@ -47,18 +51,6 @@ pub struct Memo {
     pub memo_format: Option<Vec<u8>>,
 }
 
-// Universal Flags.
-
-pub const TF_FULLY_CANONICAL_SIG: u32 = 0x8000_0000;
-
-// TrustSet Transaction Flags.
-
-pub const TF_SETF_AUTH: u32 = 0x0001_0000;
-pub const TF_SET_NO_RIPPLE: u32 = 0x0002_0000;
-pub const TF_CLEAR_NO_RIPPLE: u32 = 0x0004_0000;
-
-// TODO: consider separate structs per TransactionType?
-
 /// A ledger transaction <https://xrpl.org/transaction-formats.html>
 #[derive(Debug, Clone)]
 pub struct Transaction {
@@ -76,23 +68,17 @@ pub struct Transaction {
     pub signing_pub_key: Option<Blob>,
     pub ticket_sequence: Option<UInt32>,
     pub txn_signature: Option<Blob>,
-
-    // Payment
-    pub amount: Option<Amount>,
-    pub destination: Option<AccountId>,
-
-    // OfferCancel/OfferCreate
-    pub offer_sequence: Option<u32>,
-
-    // OfferCreate
-    pub taker_pays: Option<Amount>,
-    pub taker_gets: Option<Amount>,
-    pub expiration: Option<u32>,
-
-    // TrustSet
-    pub limit_amount: Option<Amount>,
-    pub quality_in: Option<u32>,
-    pub quality_out: Option<u32>,
+    // // Payment
+    // pub amount: Option<Amount>,
+    // pub destination: Option<AccountId>,
+    //
+    // // OfferCancel/OfferCreate
+    // pub offer_sequence: Option<u32>,
+    //
+    // // OfferCreate
+    // pub taker_pays: Option<Amount>,
+    // pub taker_gets: Option<Amount>,
+    // pub expiration: Option<u32>,
 }
 
 /// Flags that apply to all transaction types <https://xrpl.org/transaction-common-fields.html#global-flags>
