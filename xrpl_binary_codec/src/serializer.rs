@@ -1,8 +1,9 @@
+use std::fs::FileType;
 use crate::error::BinaryCodecError;
-use crate::field_id::FieldId;
+use crate::field_id::{FieldId, type_code, TypeCode};
 use xrpl_types::Uint64;
 use xrpl_types::{
-    AccountId, Amount, Blob, CurrencyCode, DropsAmount, Hash128, Hash160, Hash256, IssuedAmount,
+    AccountId, Amount, Blob, CurrencyCode, DropsAmount, Hash128, Hash160, Hash256,
     IssuedValue, UInt16, UInt32, UInt8,
 };
 
@@ -21,59 +22,85 @@ impl Serializer {
 
     pub fn serialize_account_id(
         &mut self,
-        field_id: FieldId,
-        account_id: &AccountId,
+        field_id: FieldId<type_code::ACCOUNT_ID>,
+        account_id: AccountId,
     ) -> Result<(), BinaryCodecError> {
-        todo!()
+        self.push_field_id(field_id);
+        self.push_account_id(account_id);
+        Ok(())
     }
     pub fn serialize_blob(
         &mut self,
-        field_id: FieldId,
+        field_id: FieldId<type_code::BLOB>,
         blob: &Blob,
     ) -> Result<(), BinaryCodecError> {
-        todo!()
+        self.push_field_id(field_id);
+        self.push_blob(blob)?;
+        Ok(())
     }
     pub fn serialize_hash128(
         &mut self,
-        field_id: FieldId,
+        field_id: FieldId<type_code::HASH128>,
         hash128: Hash128,
     ) -> Result<(), BinaryCodecError> {
-        todo!()
+        self.push_field_id(field_id);
+        self.push_hash128(hash128);
+        Ok(())
     }
     pub fn serialize_hash160(
         &mut self,
-        field_id: FieldId,
+        field_id: FieldId<type_code::HASH160>,
         hash160: Hash160,
     ) -> Result<(), BinaryCodecError> {
-        todo!()
+        self.push_field_id(field_id);
+        self.push_hash160(hash160);
+        Ok(())
     }
     pub fn serialize_hash256(
         &mut self,
-        field_id: FieldId,
+        field_id: FieldId<type_code::HASH256>,
         hash256: Hash256,
     ) -> Result<(), BinaryCodecError> {
-        todo!()
+        self.push_field_id(field_id);
+        self.push_hash256(hash256);
+        Ok(())
     }
     pub fn serialize_uint8(
         &mut self,
-        field_id: FieldId,
+        field_id: FieldId<type_code::UINT8>,
         uint8: UInt8,
     ) -> Result<(), BinaryCodecError> {
-        todo!()
+        self.push_field_id(field_id);
+        self.push_uint8(uint8);
+        Ok(())
     }
     pub fn serialize_uint16(
         &mut self,
-        field_id: FieldId,
+        field_id: FieldId<type_code::UINT16>,
         uint16: UInt16,
     ) -> Result<(), BinaryCodecError> {
-        todo!()
+        self.push_field_id(field_id);
+        self.push_uint16(uint16);
+        Ok(())
     }
     pub fn serialize_uint32(
         &mut self,
-        field_id: FieldId,
+        field_id: FieldId<type_code::UINT32>,
         uint32: UInt32,
     ) -> Result<(), BinaryCodecError> {
-        todo!()
+        self.push_field_id(field_id);
+        self.push_uint32(uint32);
+        Ok(())
+    }
+
+    pub fn serialize_uint64(
+        &mut self,
+        field_id: FieldId<type_code::UINT64>,
+        uint64: Uint64,
+    ) -> Result<(), BinaryCodecError> {
+        self.push_field_id(field_id);
+        self.push_uint64(uint64);
+        Ok(())
     }
 
     fn push(&mut self, value: u8) {
@@ -112,7 +139,7 @@ impl Serializer {
         self.push_slice(&value.0);
     }
 
-    fn push_blob(&mut self, blob: Blob) -> Result<(), BinaryCodecError> {
+    fn push_blob(&mut self, blob: &Blob) -> Result<(), BinaryCodecError> {
         self.push_vl_prefix(blob.0.len())?;
         self.push_slice(&blob.0);
         Ok(())
@@ -230,7 +257,6 @@ impl Serializer {
 mod tests {
     use super::*;
     use ascii::AsciiChar;
-    use ascii::AsciiChar::i;
     use assert_matches::assert_matches;
     use crate::field_id::{FieldCode, TypeCode};
 
@@ -323,7 +349,7 @@ mod tests {
     fn test_push_blob() {
         let mut s = Serializer::new();
         let value = Blob(vec![0x34, 0x00, 0x12]);
-        s.push_blob(value).unwrap();
+        s.push_blob(&value).unwrap();
         assert_eq!(s.buf, [3, 0x34, 0x00, 0x12]);
     }
 
