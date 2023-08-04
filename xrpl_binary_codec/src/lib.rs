@@ -7,5 +7,6 @@ pub mod serialize;
 pub mod serializer;
 pub mod sign;
 pub mod util;
+pub mod field_id;
 
 pub use error::*;

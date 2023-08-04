@@ -1,17 +1,13 @@
 use crate::error::BinaryCodecError;
+use crate::field_id::FieldId;
+use xrpl_types::Uint64;
 use xrpl_types::{
     AccountId, Amount, Blob, CurrencyCode, DropsAmount, Hash128, Hash160, Hash256, IssuedAmount,
-    IssuedValue, Memo, Transaction, UInt16, UInt32, UInt8,
+    IssuedValue, UInt16, UInt32, UInt8,
 };
-use xrpl_types::{FieldId, Uint64};
-
-
-
 
 pub const HASH_PREFIX_TRANSACTION: [u8; 4] = [0x53, 0x4E, 0x44, 0x00];
 pub const HASH_PREFIX_UNSIGNED_TRANSACTION_SINGLE: [u8; 4] = [0x53, 0x54, 0x58, 0x00];
-
-// TODO: Define type_code constants / enum
 
 #[derive(Default)]
 pub struct Serializer {
@@ -122,23 +118,24 @@ impl Serializer {
         Ok(())
     }
 
-    /// - <https://xrpl.org/serialization.html#field-ids>
-    /// - <https://github.com/seelabs/rippled/blob/cecc0ad75849a1d50cc573188ad301ca65519a5b/src/ripple/protocol/impl/Serializer.cpp#L117-L148>
-    fn push_field_id(&mut self, type_code: u8, field_code: u8) {
-        if type_code < 16 {
-            if field_code < 16 {
-                self.push(type_code << 4 | field_code);
-            } else {
-                self.push(type_code << 4);
-                self.push(field_code);
-            }
+    /// Push field id <https://xrpl.org/serialization.html#field-ids>
+    fn push_field_id(&mut self, field_id: FieldId) {
+        // rippled implementation: https://github.com/seelabs/rippled/blob/cecc0ad75849a1d50cc573188ad301ca65519a5b/src/ripple/protocol/impl/Serializer.cpp#L117-L148
+
+        let type_code = field_id.type_code as u8;
+        let field_code = field_id.field_code.0;
+        if type_code < 16 && field_code < 16 {
+            self.push(type_code << 4 | field_code);
+        } else if type_code < 16 {
+            self.push(type_code << 4);
+            self.push(field_code);
         } else if field_code < 16 {
             self.push(field_code);
             self.push(type_code);
         } else {
             self.push(0);
-            self.push(type_code);
-            self.push(field_code);
+            self.push(field_id.type_code as u8);
+            self.push(field_id.field_code.0);
         }
     }
 
@@ -224,15 +221,6 @@ impl Serializer {
         self.push_slice(&id.0);
     }
 
-    // TODO: implement generic `push_array`
-    // https://xrpl.org/serialization.html#array-fields
-
-    pub fn push_transaction(&mut self, tx: &Transaction, prefix: Option<&[u8]>) {
-        // https://xrpl.org/basic-data-types.html#hash-prefixes
-        // https://github.com/ripple/ripple-binary-codec/blob/master/src/enums/definitions.json
-        todo!()
-    }
-
     pub fn to_vec(&self) -> Vec<u8> {
         self.buf.clone()
     }
@@ -244,6 +232,7 @@ mod tests {
     use ascii::AsciiChar;
     use ascii::AsciiChar::i;
     use assert_matches::assert_matches;
+    use crate::field_id::{FieldCode, TypeCode};
 
     #[test]
     fn test_push_uint8() {
@@ -538,5 +527,38 @@ mod tests {
             "actual: {}",
             hex::encode(&s.buf),
         );
+    }
+
+
+    #[test]
+    fn test_push_field_id_4bit_type_4bit_field() {
+        let mut s = Serializer::new();
+        let field_id = FieldId::new(TypeCode::UInt32, FieldCode(0b0100));
+        s.push_field_id(field_id);
+        assert_eq!(s.buf, [0b0010_0100]);
+    }
+
+    #[test]
+    fn test_push_field_id_4bit_type_8bit_field() {
+        let mut s = Serializer::new();
+        let field_id = FieldId::new(TypeCode::UInt32, FieldCode(0b0001_0100));
+        s.push_field_id(field_id);
+        assert_eq!(s.buf, [0b0010_0000, 0b0001_0100]);
+    }
+
+    #[test]
+    fn test_push_field_id_8bit_type_8bit_field() {
+        let mut s = Serializer::new();
+        let field_id = FieldId::new(TypeCode::Hash160, FieldCode(0b0001_0100));
+        s.push_field_id(field_id);
+        assert_eq!(s.buf, [0, 0b0001_0001, 0b0001_0100]);
+    }
+
+    #[test]
+    fn test_push_field_id_8bit_type_4bit_field() {
+        let mut s = Serializer::new();
+        let field_id = FieldId::new(TypeCode::Hash160, FieldCode(0b0100));
+        s.push_field_id(field_id);
+        assert_eq!(s.buf, [0b0000_0100, 0b0001_0001]);
     }
 }

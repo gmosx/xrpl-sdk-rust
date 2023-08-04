@@ -133,6 +133,8 @@ impl IssuedValue {
     }
 
     fn normalize(self) -> Result<Self, Error> {
+        // rippled implementation: https://github.com/seelabs/rippled/blob/cecc0ad75849a1d50cc573188ad301ca65519a5b/src/ripple/protocol/impl/IOUAmount.cpp#L38
+
         const MANTISSA_MIN: i64 = 1000000000000000;
         const MANTISSA_MAX: i64 = 9999999999999999;
         const EXPONENT_MIN: i8 = -96;
