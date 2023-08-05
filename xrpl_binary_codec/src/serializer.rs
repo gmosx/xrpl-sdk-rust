@@ -1,6 +1,6 @@
 use crate::error::BinaryCodecError;
-use crate::field_id::{type_code, FieldCode, FieldId, FieldIdOrd, TypeCode};
 use std::io::Write;
+use xrpl_types::serialize::{type_code, FieldId, FieldIdOrd};
 use xrpl_types::Uint64;
 use xrpl_types::{
     AccountId, Amount, Blob, CurrencyCode, DropsAmount, Hash128, Hash160, Hash256, IssuedValue,
@@ -30,69 +30,9 @@ impl<W> Serializer<W> {
     }
 }
 
-pub trait SerializerT {
-    fn serialize_account_id(
-        &mut self,
-        field_id: FieldId<{ type_code::ACCOUNT_ID_8 }>,
-        account_id: AccountId,
-    ) -> Result<(), BinaryCodecError>;
+impl<W: Write> xrpl_types::serialize::Serializer for Serializer<W> {
+    type Error = BinaryCodecError;
 
-    fn serialize_amount(
-        &mut self,
-        field_id: FieldId<{ type_code::AMOUNT_6 }>,
-        amount: Amount,
-    ) -> Result<(), BinaryCodecError>;
-
-    fn serialize_blob(
-        &mut self,
-        field_id: FieldId<{ type_code::BLOB_7 }>,
-        blob: &Blob,
-    ) -> Result<(), BinaryCodecError>;
-
-    fn serialize_hash128(
-        &mut self,
-        field_id: FieldId<{ type_code::HASH128_4 }>,
-        hash128: Hash128,
-    ) -> Result<(), BinaryCodecError>;
-
-    fn serialize_hash160(
-        &mut self,
-        field_id: FieldId<{ type_code::HASH160_17 }>,
-        hash160: Hash160,
-    ) -> Result<(), BinaryCodecError>;
-
-    fn serialize_hash256(
-        &mut self,
-        field_id: FieldId<{ type_code::HASH256_5 }>,
-        hash256: Hash256,
-    ) -> Result<(), BinaryCodecError>;
-
-    fn serialize_uint8(
-        &mut self,
-        field_id: FieldId<{ type_code::UINT8_16 }>,
-        uint8: UInt8,
-    ) -> Result<(), BinaryCodecError>;
-
-    fn serialize_uint16(
-        &mut self,
-        field_id: FieldId<{ type_code::UINT16_1 }>,
-        uint16: UInt16,
-    ) -> Result<(), BinaryCodecError>;
-
-    fn serialize_uint32(
-        &mut self,
-        field_id: FieldId<{ type_code::UINT32_2 }>,
-        uint32: UInt32,
-    ) -> Result<(), BinaryCodecError>;
-
-    fn serialize_uint64(
-        &mut self,
-        field_id: FieldId<{ type_code::UINT64_3 }>,
-        uint64: Uint64,
-    ) -> Result<(), BinaryCodecError>;
-}
-
-impl<W: Write> SerializerT for Serializer<W> {
     fn serialize_account_id(
         &mut self,
         field_id: FieldId<{ type_code::ACCOUNT_ID_8 }>,
@@ -363,12 +303,14 @@ impl<W: Write> Serializer<W> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::field_id::FieldCode;
     use ascii::AsciiChar;
     use assert_matches::assert_matches;
+    use enumflags2::BitFlags;
+    use xrpl_types::serialize::{FieldCode, Serialize, Serializer};
+    use xrpl_types::{OfferCreateTransaction, Transaction, TransactionType};
 
-    fn serializer() -> Serializer<Vec<u8>> {
-        Serializer::new(Vec::new())
+    fn serializer() -> super::Serializer<Vec<u8>> {
+        super::Serializer::new(Vec::new())
     }
 
     #[test]
@@ -787,5 +729,39 @@ mod tests {
         assert_matches!(result, Err(BinaryCodecError::FieldOrder(message)) => {
             assert!(message.contains("Order of serialized fields is wrong"), "message: {}", message);
         });
+    }
+
+    /// Tests the example <https://xrpl.org/serialization.html#examples>
+    #[test]
+    fn test_serialize_offer_create() {
+        let mut s = serializer();
+        let tx = OfferCreateTransaction {
+            common: Transaction {
+                account: AccountId::from_address("rMBzp8CgpE441cp5PVyA9rpVV7oT8hP3ys").unwrap(),
+                transaction_type: TransactionType::OfferCreate,
+                fee: Some(DropsAmount::from_drops(10).unwrap()),
+                sequence: Some(1752792),
+                account_txn_id: None,
+                flags: BitFlags::default(),
+                last_ledger_sequence: None,
+                network_id: None,
+                source_tag: None,
+                signing_pub_key: Some(Blob(hex::decode("03EE83BB432547885C219634A1BC407A9DB0474145D69737D09CCDC63E1DEE7FE3").unwrap())),
+                ticket_sequence: None,
+                txn_signature: Some(Blob(hex::decode("30440220143759437C04F7B61F012563AFE90D8DAFC46E86035E1D965A9CED282C97D4CE02204CFD241E86F17E011298FC1A39B63386C74306A5DE047E213B0F29EFA4571C2C").unwrap())),
+            },
+            expiration: Some(595640108),
+            flags: BitFlags::from_bits(524288).unwrap(),
+            offer_sequence: Some(1752791),
+            taker_gets: Amount::drops(15000000000).unwrap(),
+            taker_pays: Amount::issued(
+                IssuedValue::from_mantissa_exponent(70728, -1).unwrap(),
+                CurrencyCode::standard([AsciiChar::U, AsciiChar::S, AsciiChar::D]).unwrap(),
+                AccountId::from_address("rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B").unwrap(),
+            ).unwrap(),
+        };
+
+        tx.serialize(&mut s).unwrap();
+        assert_eq!(hex::encode_upper(s.into_inner()), "120007220008000024001ABED82A2380BF2C2019001ABED764D55920AC9391400000000000000000000000000055534400000000000A20B3C85F482532A9578DBB3950B85CA06594D165400000037E11D60068400000000000000A732103EE83BB432547885C219634A1BC407A9DB0474145D69737D09CCDC63E1DEE7FE3744630440220143759437C04F7B61F012563AFE90D8DAFC46E86035E1D965A9CED282C97D4CE02204CFD241E86F17E011298FC1A39B63386C74306A5DE047E213B0F29EFA4571C2C8114DD76483FACDEE26E60D8A586BB58D09F27045C46");
     }
 }

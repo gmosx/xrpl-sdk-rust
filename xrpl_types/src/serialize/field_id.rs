@@ -2,7 +2,7 @@ pub type TypeCode = u8;
 
 /// Field data type codes <https://xrpl.org/serialization.html#type-list>
 pub mod type_code {
-    use crate::field_id::TypeCode;
+    use super::TypeCode;
 
     pub const ACCOUNT_ID_8: TypeCode = 8;
     pub const AMOUNT_6: TypeCode = 6;
