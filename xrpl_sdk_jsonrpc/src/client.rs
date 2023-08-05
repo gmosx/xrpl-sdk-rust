@@ -3,7 +3,7 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use std::time::Duration;
 use tracing::debug;
 use xrpl_api::{AccountInfoRequest, Request, ServerStateRequest};
-use xrpl_types::{DropsAmount, Transaction};
+use xrpl_types::{DropsAmount, TransactionCommon};
 
 pub const GENERAL_PURPOSE_MAINNET_URL: &str = "https://s1.ripple.com:51234";
 pub const FULL_HISTORY_MAINNET_URL: &str = "https://s2.ripple.com:51234";
@@ -172,7 +172,7 @@ impl Client {
     /// auto-filling required fields.
     ///
     /// <https://xrpl.org/reliable-transaction-submission.html>
-    pub async fn prepare_transaction(&self, tx: Transaction) -> Result<Transaction> {
+    pub async fn prepare_transaction(&self, tx: TransactionCommon) -> Result<TransactionCommon> {
         let mut tx = tx;
 
         if tx.sequence.is_none() {

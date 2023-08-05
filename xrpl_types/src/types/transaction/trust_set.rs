@@ -1,10 +1,10 @@
-use crate::{IssuedAmount, Transaction, UInt32};
+use crate::{IssuedAmount, TransactionCommon, UInt32};
 use enumflags2::{bitflags, BitFlags};
 
 /// A `TrustSet` transaction <https://xrpl.org/trustset.html>
 #[derive(Debug, Clone)]
 pub struct TrustSetTransaction {
-    pub common: Transaction,
+    pub common: TransactionCommon,
     pub flags: BitFlags<TrustSetFlags>,
     pub limit_amount: IssuedAmount,
     pub quality_in: Option<UInt32>,

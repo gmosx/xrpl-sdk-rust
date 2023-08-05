@@ -304,7 +304,7 @@ mod tests {
     use assert_matches::assert_matches;
     use enumflags2::BitFlags;
     use xrpl_types::serialize::{FieldCode, Serialize, Serializer};
-    use xrpl_types::{OfferCreateTransaction, Transaction, TransactionType};
+    use xrpl_types::{OfferCreateTransaction, TransactionCommon, TransactionType};
 
     fn serializer() -> super::Serializer<Vec<u8>> {
         super::Serializer::new(Vec::new())
@@ -724,7 +724,7 @@ mod tests {
     fn test_serialize_offer_create() {
         let mut s = serializer();
         let tx = OfferCreateTransaction {
-            common: Transaction {
+            common: TransactionCommon {
                 account: AccountId::from_address("rMBzp8CgpE441cp5PVyA9rpVV7oT8hP3ys").unwrap(),
                 transaction_type: TransactionType::OfferCreate,
                 fee: Some(DropsAmount::from_drops(10).unwrap()),
