@@ -1,6 +1,6 @@
 use crate::error::BinaryCodecError;
 use std::io::Write;
-use xrpl_types::serialize::{type_code, FieldId, FieldIdOrd};
+use xrpl_types::serialize::{FieldCode, FieldId, TypeCode};
 use xrpl_types::Uint64;
 use xrpl_types::{
     AccountId, Amount, Blob, CurrencyCode, DropsAmount, Hash128, Hash160, Hash256, IssuedValue,
@@ -14,7 +14,7 @@ pub const HASH_PREFIX_UNSIGNED_TRANSACTION_SINGLE: [u8; 4] = [0x53, 0x54, 0x58, 
 pub struct Serializer<W> {
     writer: W,
     /// Previously serialized field id
-    prev_field_id: Option<FieldIdOrd>,
+    prev_field_id: Option<FieldId>,
 }
 
 impl<W> Serializer<W> {
@@ -35,100 +35,100 @@ impl<W: Write> xrpl_types::serialize::Serializer for Serializer<W> {
 
     fn serialize_account_id(
         &mut self,
-        field_id: FieldId<{ type_code::ACCOUNT_ID_8 }>,
+        field_code: FieldCode,
         account_id: AccountId,
     ) -> Result<(), BinaryCodecError> {
-        self.push_field_id(field_id)?;
+        self.push_field_id(FieldId::from_type_field(TypeCode::AccountId, field_code))?;
         self.push_account_id(account_id)?;
         Ok(())
     }
 
     fn serialize_amount(
         &mut self,
-        field_id: FieldId<{ type_code::AMOUNT_6 }>,
+        field_code: FieldCode,
         amount: Amount,
     ) -> Result<(), BinaryCodecError> {
-        self.push_field_id(field_id)?;
+        self.push_field_id(FieldId::from_type_field(TypeCode::Amount, field_code))?;
         self.push_amount(amount)?;
         Ok(())
     }
 
     fn serialize_blob(
         &mut self,
-        field_id: FieldId<{ type_code::BLOB_7 }>,
+        field_code: FieldCode,
         blob: &Blob,
     ) -> Result<(), BinaryCodecError> {
-        self.push_field_id(field_id)?;
+        self.push_field_id(FieldId::from_type_field(TypeCode::Blob, field_code))?;
         self.push_blob(blob)?;
         Ok(())
     }
 
     fn serialize_hash128(
         &mut self,
-        field_id: FieldId<{ type_code::HASH128_4 }>,
+        field_code: FieldCode,
         hash128: Hash128,
     ) -> Result<(), BinaryCodecError> {
-        self.push_field_id(field_id)?;
+        self.push_field_id(FieldId::from_type_field(TypeCode::Hash128, field_code))?;
         self.push_hash128(hash128)?;
         Ok(())
     }
 
     fn serialize_hash160(
         &mut self,
-        field_id: FieldId<{ type_code::HASH160_17 }>,
+        field_code: FieldCode,
         hash160: Hash160,
     ) -> Result<(), BinaryCodecError> {
-        self.push_field_id(field_id)?;
+        self.push_field_id(FieldId::from_type_field(TypeCode::Hash160, field_code))?;
         self.push_hash160(hash160)?;
         Ok(())
     }
 
     fn serialize_hash256(
         &mut self,
-        field_id: FieldId<{ type_code::HASH256_5 }>,
+        field_code: FieldCode,
         hash256: Hash256,
     ) -> Result<(), BinaryCodecError> {
-        self.push_field_id(field_id)?;
+        self.push_field_id(FieldId::from_type_field(TypeCode::Hash256, field_code))?;
         self.push_hash256(hash256)?;
         Ok(())
     }
 
     fn serialize_uint8(
         &mut self,
-        field_id: FieldId<{ type_code::UINT8_16 }>,
+        field_code: FieldCode,
         uint8: UInt8,
     ) -> Result<(), BinaryCodecError> {
-        self.push_field_id(field_id)?;
+        self.push_field_id(FieldId::from_type_field(TypeCode::UInt8, field_code))?;
         self.push_uint8(uint8)?;
         Ok(())
     }
 
     fn serialize_uint16(
         &mut self,
-        field_id: FieldId<{ type_code::UINT16_1 }>,
+        field_code: FieldCode,
         uint16: UInt16,
     ) -> Result<(), BinaryCodecError> {
-        self.push_field_id(field_id)?;
+        self.push_field_id(FieldId::from_type_field(TypeCode::UInt16, field_code))?;
         self.push_uint16(uint16)?;
         Ok(())
     }
 
     fn serialize_uint32(
         &mut self,
-        field_id: FieldId<{ type_code::UINT32_2 }>,
+        field_code: FieldCode,
         uint32: UInt32,
     ) -> Result<(), BinaryCodecError> {
-        self.push_field_id(field_id)?;
+        self.push_field_id(FieldId::from_type_field(TypeCode::UInt32, field_code))?;
         self.push_uint32(uint32)?;
         Ok(())
     }
 
     fn serialize_uint64(
         &mut self,
-        field_id: FieldId<{ type_code::UINT64_3 }>,
+        field_code: FieldCode,
         uint64: Uint64,
     ) -> Result<(), BinaryCodecError> {
-        self.push_field_id(field_id)?;
+        self.push_field_id(FieldId::from_type_field(TypeCode::UInt64, field_code))?;
         self.push_uint64(uint64)?;
         Ok(())
     }
@@ -179,24 +179,21 @@ impl<W: Write> Serializer<W> {
     }
 
     /// Push field id <https://xrpl.org/serialization.html#field-ids>
-    fn push_field_id<const TC: u8>(
-        &mut self,
-        field_id: FieldId<TC>,
-    ) -> Result<(), BinaryCodecError> {
+    fn push_field_id(&mut self, field_id: FieldId) -> Result<(), BinaryCodecError> {
         // rippled implementation: https://github.com/seelabs/rippled/blob/cecc0ad75849a1d50cc573188ad301ca65519a5b/src/ripple/protocol/impl/Serializer.cpp#L117-L148
 
-        let type_code = field_id.type_code();
-        let field_code = field_id.field_code().0;
+        let type_code = field_id.type_code as u8;
+        let field_code = field_id.field_code.0;
 
         if let Some(prev_field_id) = self.prev_field_id {
-            if field_id.ord() <= prev_field_id {
+            if field_id <= prev_field_id {
                 return Err(BinaryCodecError::FieldOrder(
                     "Order of serialized fields is wrong".to_string(),
                 ));
             }
         }
 
-        self.prev_field_id = Some(field_id.ord());
+        self.prev_field_id = Some(field_id);
 
         if type_code < 16 && field_code < 16 {
             self.push(type_code << 4 | field_code)?;
@@ -627,7 +624,7 @@ mod tests {
     #[test]
     fn test_push_field_id_4bit_type_4bit_field() {
         let mut s = serializer();
-        let field_id = FieldId::uint32_2(FieldCode(0b0100));
+        let field_id = FieldId::from_type_field(TypeCode::UInt32, FieldCode(0b0100));
         s.push_field_id(field_id).unwrap();
         assert_eq!(s.into_inner(), [0b0010_0100]);
     }
@@ -635,7 +632,7 @@ mod tests {
     #[test]
     fn test_push_field_id_4bit_type_8bit_field() {
         let mut s = serializer();
-        let field_id = FieldId::uint32_2(FieldCode(0b0001_0100));
+        let field_id = FieldId::from_type_field(TypeCode::UInt32, FieldCode(0b0001_0100));
         s.push_field_id(field_id).unwrap();
         assert_eq!(s.into_inner(), [0b0010_0000, 0b0001_0100]);
     }
@@ -643,7 +640,7 @@ mod tests {
     #[test]
     fn test_push_field_id_8bit_type_8bit_field() {
         let mut s = serializer();
-        let field_id = FieldId::hash160_17(FieldCode(0b0001_0100));
+        let field_id = FieldId::from_type_field(TypeCode::Hash160, FieldCode(0b0001_0100));
         s.push_field_id(field_id).unwrap();
         assert_eq!(s.into_inner(), [0, 0b0001_0001, 0b0001_0100]);
     }
@@ -651,7 +648,7 @@ mod tests {
     #[test]
     fn test_push_field_id_8bit_type_4bit_field() {
         let mut s = serializer();
-        let field_id = FieldId::hash160_17(FieldCode(0b0100));
+        let field_id = FieldId::from_type_field(TypeCode::Hash160, FieldCode(0b0100));
         s.push_field_id(field_id).unwrap();
         assert_eq!(s.into_inner(), [0b0000_0100, 0b0001_0001]);
     }
@@ -660,12 +657,9 @@ mod tests {
     #[test]
     fn test_serialize_fields() {
         let mut s = serializer();
-        let field_id = FieldId::uint32_2(FieldCode(1));
-        s.serialize_uint32(field_id, 12).unwrap();
-        let field_id = FieldId::uint32_2(FieldCode(2));
-        s.serialize_uint32(field_id, 23).unwrap();
-        let field_id = FieldId::uint64_3(FieldCode(1));
-        s.serialize_uint64(field_id, 34).unwrap();
+        s.serialize_uint32(FieldCode(1), 12).unwrap();
+        s.serialize_uint32(FieldCode(2), 23).unwrap();
+        s.serialize_uint64(FieldCode(1), 34).unwrap();
         assert_eq!(
             s.into_inner(),
             [
@@ -696,10 +690,8 @@ mod tests {
     #[test]
     fn test_serialize_fields_wrong_type_code_order() {
         let mut s = serializer();
-        let field_id = FieldId::uint64_3(FieldCode(1));
-        s.serialize_uint64(field_id, 34).unwrap();
-        let field_id = FieldId::uint32_2(FieldCode(2));
-        let result = s.serialize_uint32(field_id, 12);
+        s.serialize_uint64(FieldCode(1), 34).unwrap();
+        let result = s.serialize_uint32(FieldCode(2), 12);
         assert_matches!(result, Err(BinaryCodecError::FieldOrder(message)) => {
             assert!(message.contains("Order of serialized fields is wrong"), "message: {}", message);
         });
@@ -709,10 +701,8 @@ mod tests {
     #[test]
     fn test_serialize_fields_wrong_field_code_order() {
         let mut s = serializer();
-        let field_id = FieldId::uint32_2(FieldCode(2));
-        s.serialize_uint32(field_id, 12).unwrap();
-        let field_id = FieldId::uint32_2(FieldCode(1));
-        let result = s.serialize_uint32(field_id, 34);
+        s.serialize_uint32(FieldCode(2), 12).unwrap();
+        let result = s.serialize_uint32(FieldCode(1), 34);
         assert_matches!(result, Err(BinaryCodecError::FieldOrder(message)) => {
             assert!(message.contains("Order of serialized fields is wrong"), "message: {}", message);
         });
@@ -722,10 +712,8 @@ mod tests {
     #[test]
     fn test_serialize_fields_same_field_id() {
         let mut s = serializer();
-        let field_id = FieldId::uint32_2(FieldCode(2));
-        s.serialize_uint32(field_id, 34).unwrap();
-        let field_id = FieldId::uint32_2(FieldCode(2));
-        let result = s.serialize_uint32(field_id, 12);
+        s.serialize_uint32(FieldCode(2), 34).unwrap();
+        let result = s.serialize_uint32(FieldCode(2), 12);
         assert_matches!(result, Err(BinaryCodecError::FieldOrder(message)) => {
             assert!(message.contains("Order of serialized fields is wrong"), "message: {}", message);
         });

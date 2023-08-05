@@ -3,7 +3,7 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use std::time::Duration;
 use tracing::debug;
 use xrpl_api::{AccountInfoRequest, Request, ServerStateRequest};
-use xrpl_types::Transaction;
+use xrpl_types::{DropsAmount, Transaction};
 
 pub const GENERAL_PURPOSE_MAINNET_URL: &str = "https://s1.ripple.com:51234";
 pub const FULL_HISTORY_MAINNET_URL: &str = "https://s2.ripple.com:51234";
@@ -188,7 +188,10 @@ impl Client {
 
             // The recommendation for backend applications is to use (last validated ledger index + 4).
             tx.last_ledger_sequence = Some(resp.state.validated_ledger.seq + 4);
-            tx.fee = Some(resp.state.validated_ledger.base_fee);
+            tx.fee = Some(
+                DropsAmount::from_drops(resp.state.validated_ledger.base_fee)
+                    .map_err(|err| Error::Internal(format!("Not a valid drops value: {}", err)))?,
+            );
         }
 
         Ok(tx)
