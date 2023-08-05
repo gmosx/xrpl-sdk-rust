@@ -1,5 +1,5 @@
 use crate::error::BinaryCodecError;
-use crate::field_id::{type_code, FieldCode, FieldId, TypeCode};
+use crate::field_id::{type_code, FieldCode, FieldId, FieldIdOrd, TypeCode};
 use std::io::Write;
 use xrpl_types::Uint64;
 use xrpl_types::{
@@ -7,20 +7,21 @@ use xrpl_types::{
     UInt16, UInt32, UInt8,
 };
 
+// todo allan
 pub const HASH_PREFIX_TRANSACTION: [u8; 4] = [0x53, 0x4E, 0x44, 0x00];
 pub const HASH_PREFIX_UNSIGNED_TRANSACTION_SINGLE: [u8; 4] = [0x53, 0x54, 0x58, 0x00];
 
 pub struct Serializer<W> {
     writer: W,
     /// Previously serialized field id
-    previous_field_id: Option<(TypeCode, FieldCode)>,
+    prev_field_id: Option<FieldIdOrd>,
 }
 
 impl<W> Serializer<W> {
     pub fn new(writer: W) -> Self {
         Self {
             writer,
-            previous_field_id: None,
+            prev_field_id: None,
         }
     }
 
@@ -244,8 +245,19 @@ impl<W: Write> Serializer<W> {
     ) -> Result<(), BinaryCodecError> {
         // rippled implementation: https://github.com/seelabs/rippled/blob/cecc0ad75849a1d50cc573188ad301ca65519a5b/src/ripple/protocol/impl/Serializer.cpp#L117-L148
 
-        let type_code = TC;
-        let field_code = field_id.0 .0;
+        let type_code = field_id.type_code();
+        let field_code = field_id.field_code().0;
+
+        if let Some(prev_field_id) = self.prev_field_id {
+            if field_id.ord() <= prev_field_id {
+                return Err(BinaryCodecError::FieldOrder(
+                    "Order of serialized fields is wrong".to_string(),
+                ));
+            }
+        }
+
+        self.prev_field_id = Some(field_id.ord());
+
         if type_code < 16 && field_code < 16 {
             self.push(type_code << 4 | field_code)?;
         } else if type_code < 16 {
@@ -747,7 +759,7 @@ mod tests {
         let field_id = FieldId::uint32_2(FieldCode(2));
         let result = s.serialize_uint32(field_id, 12);
         assert_matches!(result, Err(BinaryCodecError::FieldOrder(message)) => {
-            assert!(message.contains("Variable length out of range"), "message: {}", message);
+            assert!(message.contains("Order of serialized fields is wrong"), "message: {}", message);
         });
     }
 
@@ -756,11 +768,24 @@ mod tests {
     fn test_serialize_fields_wrong_field_code_order() {
         let mut s = serializer();
         let field_id = FieldId::uint32_2(FieldCode(2));
-        let result = s.serialize_uint32(field_id, 12);
+        s.serialize_uint32(field_id, 12).unwrap();
         let field_id = FieldId::uint32_2(FieldCode(1));
-        s.serialize_uint32(field_id, 34).unwrap();
+        let result = s.serialize_uint32(field_id, 34);
         assert_matches!(result, Err(BinaryCodecError::FieldOrder(message)) => {
-            assert!(message.contains("Variable length out of range"), "message: {}", message);
+            assert!(message.contains("Order of serialized fields is wrong"), "message: {}", message);
+        });
+    }
+
+    /// Test serialize fields where field ordering is wrong
+    #[test]
+    fn test_serialize_fields_same_field_id() {
+        let mut s = serializer();
+        let field_id = FieldId::uint32_2(FieldCode(2));
+        s.serialize_uint32(field_id, 34).unwrap();
+        let field_id = FieldId::uint32_2(FieldCode(2));
+        let result = s.serialize_uint32(field_id, 12);
+        assert_matches!(result, Err(BinaryCodecError::FieldOrder(message)) => {
+            assert!(message.contains("Order of serialized fields is wrong"), "message: {}", message);
         });
     }
 }

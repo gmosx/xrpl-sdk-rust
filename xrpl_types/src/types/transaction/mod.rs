@@ -3,8 +3,10 @@ use crate::{Blob, DropsAmount, Hash256, UInt32};
 use enumflags2::{bitflags, BitFlags};
 use serde::{Deserialize, Serialize};
 
+mod offer_create;
 mod trust_set;
 
+pub use offer_create::*;
 pub use trust_set::*;
 
 #[repr(u16)]

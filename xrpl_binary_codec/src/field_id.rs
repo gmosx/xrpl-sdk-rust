@@ -37,14 +37,42 @@ pub mod type_code {
 /// Field code <https://xrpl.org/serialization.html#field-codes>. The code for a given field can be found at
 /// <https://github.com/XRPLF/xrpl.js/blob/main/packages/ripple-binary-codec/src/enums/definitions.json> or
 /// <https://github.com/XRPLF/rippled/blob/72e6005f562a8f0818bc94803d222ac9345e1e40/src/ripple/protocol/impl/SField.cpp#L72-L266>
-#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd)]
 pub struct FieldCode(pub u8);
 
+/// Type safe representation of field id <https://xrpl.org/serialization.html#canonical-field-order>
+/// where different field type codes results in different field id Rust types.
 #[derive(Debug, Clone, Copy)]
 pub struct FieldId<const TC: TypeCode>(
     /// Field code <https://xrpl.org/serialization.html#field-codes>
     pub FieldCode,
 );
+
+impl<const TC: TypeCode> FieldId<TC> {
+    pub fn field_code(self) -> FieldCode {
+        self.0
+    }
+
+    pub fn type_code(self) -> TypeCode {
+        TC
+    }
+
+    pub fn ord(self) -> FieldIdOrd {
+        FieldIdOrd {
+            type_code: TC,
+            field_code: self.0,
+        }
+    }
+}
+
+/// Ordered field id <https://xrpl.org/serialization.html#canonical-field-order>
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd)]
+pub struct FieldIdOrd {
+    /// Type code <https://xrpl.org/serialization.html#type-codes>
+    pub type_code: TypeCode,
+    /// Field code <https://xrpl.org/serialization.html#field-codes>
+    pub field_code: FieldCode,
+}
 
 use type_code::*;
 
