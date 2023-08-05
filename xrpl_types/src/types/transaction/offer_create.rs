@@ -1,10 +1,11 @@
 use crate::{Amount, Transaction, UInt32};
-use enumflags2::bitflags;
+use enumflags2::{bitflags, BitFlags};
 
 /// An `OfferCreate` transaction <https://xrpl.org/offercreate.html>
 #[derive(Debug, Clone)]
 pub struct OfferCreateTransaction {
     pub common: Transaction,
+    pub flags: BitFlags<OfferCreateFlags>,
     pub expiration: Option<UInt32>,
     pub offer_sequence: Option<UInt32>,
     pub taker_gets: Amount,
@@ -21,3 +22,4 @@ pub enum OfferCreateFlags {
     FillOrKill = 0x00040000,
     Sell = 0x00080000,
 }
+

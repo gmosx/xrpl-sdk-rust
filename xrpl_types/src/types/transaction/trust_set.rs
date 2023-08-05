@@ -5,10 +5,10 @@ use enumflags2::{bitflags, BitFlags};
 #[derive(Debug, Clone)]
 pub struct TrustSetTransaction {
     pub common: Transaction,
+    pub flags: BitFlags<TrustSetFlags>,
     pub limit_amount: IssuedAmount,
     pub quality_in: Option<UInt32>,
     pub quality_out: Option<UInt32>,
-    pub flags: BitFlags<TrustSetFlags>,
 }
 
 /// `TrustSet` flags <https://xrpl.org/trustset.html#trustset-flags>
