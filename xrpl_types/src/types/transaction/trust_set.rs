@@ -16,6 +16,7 @@ pub struct TrustSetTransaction {
 #[repr(u32)]
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum TrustSetFlags {
+    FullyCanonicalSig = 0x80000000,
     SetfAuth = 0x00010000,
     SetNoRipple = 0x00020000,
     ClearNoRipple = 0x00040000,

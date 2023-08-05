@@ -1,5 +1,4 @@
 use crate::{AccountId, Blob, DropsAmount, Hash256, UInt32};
-use enumflags2::{bitflags, BitFlags};
 use serde::{Deserialize, Serialize};
 
 #[repr(u16)]
@@ -55,7 +54,6 @@ pub struct TransactionCommon {
     pub fee: Option<DropsAmount>,
     pub sequence: Option<UInt32>,
     pub account_txn_id: Option<Hash256>,
-    pub flags: BitFlags<GlobalTransactionFlags>,
     pub last_ledger_sequence: Option<UInt32>,
     // pub memos: Option<Vec<Memo>>, // todo allan
     pub network_id: Option<UInt32>,
@@ -63,12 +61,4 @@ pub struct TransactionCommon {
     pub signing_pub_key: Option<Blob>,
     pub ticket_sequence: Option<UInt32>,
     pub txn_signature: Option<Blob>,
-}
-
-/// Flags that apply to all transaction types <https://xrpl.org/transaction-common-fields.html#global-flags>
-#[bitflags]
-#[repr(u32)]
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
-pub enum GlobalTransactionFlags {
-    FullyCanonicalSig = 0x80000000,
 }

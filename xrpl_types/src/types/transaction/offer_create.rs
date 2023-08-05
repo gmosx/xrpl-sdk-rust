@@ -18,6 +18,7 @@ pub struct OfferCreateTransaction {
 #[repr(u32)]
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum OfferCreateFlags {
+    FullyCanonicalSig = 0x80000000,
     Passive = 0x00010000,
     ImmediateOrCancel = 0x00020000,
     FillOrKill = 0x00040000,
@@ -30,7 +31,7 @@ impl Serialize for OfferCreateTransaction {
         if let Some(network_id) = self.common.network_id {
             s.serialize_uint32(FieldCode(1), network_id)?;
         }
-        s.serialize_uint32(FieldCode(2), self.common.flags.bits() | self.flags.bits())?;
+        s.serialize_uint32(FieldCode(2), self.flags.bits())?;
         if let Some(source_tag) = self.common.source_tag {
             s.serialize_uint32(FieldCode(3), source_tag)?;
         }

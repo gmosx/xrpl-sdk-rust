@@ -730,7 +730,6 @@ mod tests {
                 fee: Some(DropsAmount::from_drops(10).unwrap()),
                 sequence: Some(1752792),
                 account_txn_id: None,
-                flags: BitFlags::default(),
                 last_ledger_sequence: None,
                 network_id: None,
                 source_tag: None,
