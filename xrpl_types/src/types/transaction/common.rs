@@ -1,8 +1,8 @@
-use crate::{AccountId, Blob, DropsAmount, Hash256, UInt32};
-use serde::{Deserialize, Serialize};
+use crate::serialize::{FieldCode, Serialize, Serializer};
+use crate::{AccountId, Amount, Blob, DropsAmount, Hash256, UInt32};
 
 #[repr(u16)]
-#[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize, Deserialize)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, serde::Serialize, serde::Deserialize)]
 pub enum TransactionType {
     // Discriminant values can be found at https://github.com/XRPLF/xrpl.js/blob/main/packages/ripple-binary-codec/src/enums/definitions.json
     Payment = 0,
@@ -61,4 +61,39 @@ pub struct TransactionCommon {
     pub signing_pub_key: Option<Blob>,
     pub ticket_sequence: Option<UInt32>,
     pub txn_signature: Option<Blob>,
+}
+
+impl Serialize for TransactionCommon {
+    fn serialize<S: Serializer>(&self, s: &mut S) -> Result<(), S::Error> {
+        s.serialize_uint16(FieldCode(2), self.transaction_type as u16)?;
+        if let Some(network_id) = self.network_id {
+            s.serialize_uint32(FieldCode(1), network_id)?;
+        }
+        if let Some(source_tag) = self.source_tag {
+            s.serialize_uint32(FieldCode(3), source_tag)?;
+        }
+        if let Some(sequence) = self.sequence {
+            s.serialize_uint32(FieldCode(4), sequence)?;
+        }
+        if let Some(last_ledger_sequence) = self.last_ledger_sequence {
+            s.serialize_uint32(FieldCode(27), last_ledger_sequence)?;
+        }
+        if let Some(ticket_sequence) = self.ticket_sequence {
+            s.serialize_uint32(FieldCode(41), ticket_sequence)?;
+        }
+        if let Some(account_txn_id) = self.account_txn_id {
+            s.serialize_hash256(FieldCode(9), account_txn_id)?;
+        }
+        if let Some(fee) = self.fee {
+            s.serialize_amount(FieldCode(8), Amount::Drops(fee))?;
+        }
+        if let Some(signing_pub_key) = self.signing_pub_key.as_ref() {
+            s.serialize_blob(FieldCode(3), signing_pub_key)?;
+        }
+        if let Some(txn_signature) = self.txn_signature.as_ref() {
+            s.serialize_blob(FieldCode(4), txn_signature)?;
+        }
+        s.serialize_account_id(FieldCode(1), self.account)?;
+        Ok(())
+    }
 }

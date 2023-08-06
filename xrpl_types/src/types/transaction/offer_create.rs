@@ -27,44 +27,16 @@ pub enum OfferCreateFlags {
 
 impl Serialize for OfferCreateTransaction {
     fn serialize<S: Serializer>(&self, s: &mut S) -> Result<(), S::Error> {
-        s.serialize_uint16(FieldCode(2), self.common.transaction_type as u16)?;
-        if let Some(network_id) = self.common.network_id {
-            s.serialize_uint32(FieldCode(1), network_id)?;
-        }
+        self.common.serialize(s)?;
         s.serialize_uint32(FieldCode(2), self.flags.bits())?;
-        if let Some(source_tag) = self.common.source_tag {
-            s.serialize_uint32(FieldCode(3), source_tag)?;
-        }
-        if let Some(sequence) = self.common.sequence {
-            s.serialize_uint32(FieldCode(4), sequence)?;
-        }
         if let Some(expiration) = self.expiration {
             s.serialize_uint32(FieldCode(10), expiration)?;
         }
         if let Some(offer_sequence) = self.offer_sequence {
             s.serialize_uint32(FieldCode(25), offer_sequence)?;
         }
-        if let Some(last_ledger_sequence) = self.common.last_ledger_sequence {
-            s.serialize_uint32(FieldCode(27), last_ledger_sequence)?;
-        }
-        if let Some(ticket_sequence) = self.common.ticket_sequence {
-            s.serialize_uint32(FieldCode(41), ticket_sequence)?;
-        }
-        if let Some(account_txn_id) = self.common.account_txn_id {
-            s.serialize_hash256(FieldCode(9), account_txn_id)?;
-        }
         s.serialize_amount(FieldCode(4), self.taker_pays)?;
         s.serialize_amount(FieldCode(5), self.taker_gets)?;
-        if let Some(fee) = self.common.fee {
-            s.serialize_amount(FieldCode(8), Amount::Drops(fee))?;
-        }
-        if let Some(signing_pub_key) = self.common.signing_pub_key.as_ref() {
-            s.serialize_blob(FieldCode(3), signing_pub_key)?;
-        }
-        if let Some(txn_signature) = self.common.txn_signature.as_ref() {
-            s.serialize_blob(FieldCode(4), txn_signature)?;
-        }
-        s.serialize_account_id(FieldCode(1), self.common.account)?;
         Ok(())
     }
 }
