@@ -5,8 +5,7 @@ use enumflags2::{bitflags, BitFlags};
 /// A `TrustSet` transaction <https://xrpl.org/trustset.html>
 #[derive(Debug, Clone)]
 pub struct TrustSetTransaction {
-    // common is private such that transaction type cannot be modified to be out of sync with the transaction struct
-    common: TransactionCommon,
+    pub common: TransactionCommon,
     pub flags: BitFlags<TrustSetFlags>,
     pub limit_amount: IssuedAmount,
     pub quality_in: Option<UInt32>,
