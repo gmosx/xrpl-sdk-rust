@@ -4,7 +4,7 @@ use std::error::Error;
 
 pub trait Serializer {
     type Error: Error;
-    type SerializeArray<'a>: SerializeArray where Self: 'a;
+    type SerializeArray<'a>: SerializeArray<Error = Self::Error> where Self: 'a;
 
     fn serialize_account_id(
         &mut self,
@@ -71,7 +71,7 @@ pub trait SerializeArray {
     fn serialize_object<T: Serialize>(
         &mut self,
         field_code: FieldCode,
-        object: T,
+        object: &T,
     ) -> Result<(), Self::Error>;
 
     fn end(self) -> Result<(), Self::Error>;

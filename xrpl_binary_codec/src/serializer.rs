@@ -177,9 +177,13 @@ pub struct ArraySerializer<'a> {
 impl<'a> SerializeArray for ArraySerializer<'a> {
     type Error = BinaryCodecError;
 
-    fn serialize_object<T: Serialize>(&mut self, field_code: FieldCode, object: T) -> Result<(), Self::Error> {
+    fn serialize_object<T: Serialize>(&mut self, field_code: FieldCode, object: &T) -> Result<(), Self::Error> {
         self.serializer.push_field_id(FieldId::from_type_field(TypeCode::Object, field_code))?;
+        self.serializer.start_field_scope();
         object.serialize(self.serializer)?;
+        let mut buf = Vec::new();
+        self.serializer.end_field_scope(&mut buf);
+        self.serializer.push_slice(&buf)?;
         self.serializer.push_field_id(FieldId::from_type_field(TypeCode::Object, FieldCode(1)))?;
         Ok(())
     }
@@ -469,6 +473,32 @@ mod tests {
     
     fn buffer(serializer: &super::Serializer) -> &[u8] {
         &serializer.current_field_scope().buffer
+    }
+
+    struct TestObject {
+        field1: UInt32,
+        field2: UInt32,
+    }
+
+    impl Serialize for TestObject {
+        fn serialize<S: Serializer>(&self, serializer: &mut S) -> Result<(), S::Error> {
+            serializer.serialize_uint32(FieldCode(1), self.field1)?;
+            serializer.serialize_uint32(FieldCode(2), self.field2)?;
+            Ok(())
+        }
+    }
+
+    struct TestObjectSerializeFieldsOutOfOrder {
+        field1: UInt32,
+        field2: UInt32,
+    }
+
+    impl Serialize for TestObjectSerializeFieldsOutOfOrder {
+        fn serialize<S: Serializer>(&self, serializer: &mut S) -> Result<(), S::Error> {
+            serializer.serialize_uint32(FieldCode(2), self.field2)?;
+            serializer.serialize_uint32(FieldCode(1), self.field1)?;
+            Ok(())
+        }
     }
 
     #[test]
@@ -812,6 +842,56 @@ mod tests {
         let field_id = FieldId::from_type_field(TypeCode::Hash160, FieldCode(0b0100));
         s.push_field_id(field_id).unwrap();
         assert_eq!(buffer(&s), [0b0000_0100, 0b0001_0001]);
+    }
+
+    /// Test pushing array of objects
+    #[test]
+    fn test_push_empty_array() {
+        let mut s = serializer();
+        let array = s.serialize_array(FieldCode(2)).unwrap();
+        array.end().unwrap();
+        assert_eq!(buffer(&s), [0b1111_0010, 0b1111_0001]);
+    }
+
+
+    /// Test pushing array of objects
+    #[test]
+    fn test_push_array() {
+        let mut s = serializer();
+        let object1 = TestObject {
+            field1: 12,
+            field2: 23,
+        };
+        let object2 = TestObject {
+            field1: 34,
+            field2: 45,
+        };
+        let mut array = s.serialize_array(FieldCode(2)).unwrap();
+        array.serialize_object(FieldCode(3), &object1).unwrap();
+        array.serialize_object(FieldCode(3), &object2).unwrap();
+        array.end().unwrap();
+        assert_eq!(buffer(&s), [0b1111_0010, 0b1110_0011, 0b0010_0001, 0, 0, 0, 12, 0b0010_0010, 0, 0, 0, 23, 0b1110_0001,
+            0b1110_0011, 0b0010_0001, 0, 0, 0, 34, 0b0010_0010, 0, 0, 0, 45, 0b1110_0001, 0b1111_0001]);
+    }
+
+    /// Test pushing array of objects with out of order fields
+    #[test]
+    fn test_push_array_out_of_order_fields() {
+        let mut s = serializer();
+        let object1 = TestObjectSerializeFieldsOutOfOrder {
+            field1: 12,
+            field2: 23,
+        };
+        let object2 = TestObjectSerializeFieldsOutOfOrder {
+            field1: 34,
+            field2: 45,
+        };
+        let mut array = s.serialize_array(FieldCode(2)).unwrap();
+        array.serialize_object(FieldCode(3), &object1).unwrap();
+        array.serialize_object(FieldCode(3), &object2).unwrap();
+        array.end().unwrap();
+        assert_eq!(buffer(&s), [0b1111_0010, 0b1110_0011, 0b0010_0001, 0, 0, 0, 12, 0b0010_0010, 0, 0, 0, 23, 0b1110_0001,
+            0b1110_0011, 0b0010_0001, 0, 0, 0, 34, 0b0010_0010, 0, 0, 0, 45, 0b1110_0001, 0b1111_0001]);
     }
 
     /// Test serialize fields (in correct order)
