@@ -1,5 +1,4 @@
 use crate::error::BinaryCodecError;
-use std::io::Write;
 use xrpl_types::serialize::{FieldCode, FieldId, TypeCode};
 use xrpl_types::Uint64;
 use xrpl_types::{
@@ -11,26 +10,23 @@ use xrpl_types::{
 pub const HASH_PREFIX_TRANSACTION: [u8; 4] = [0x53, 0x4E, 0x44, 0x00];
 pub const HASH_PREFIX_UNSIGNED_TRANSACTION_SINGLE: [u8; 4] = [0x53, 0x54, 0x58, 0x00];
 
-pub struct Serializer<W> {
-    writer: W,
-    /// Previously serialized field id
-    prev_field_id: Option<FieldId>,
+pub struct Serializer {
+    buffer: Vec<u8>,
+    serialized_fields: Vec<SerializedFieldIndex>,
 }
 
-impl<W> Serializer<W> {
-    pub fn new(writer: W) -> Self {
-        Self {
-            writer,
-            prev_field_id: None,
-        }
-    }
-
-    pub fn into_inner(self) -> W {
-        self.writer
-    }
+/// Represents a field serialized to to the buffer
+struct SerializedFieldIndex {
+    /// id of the serialized field
+    field_id: FieldId,
+    /// index of serialized bytes in buffer
+    index: usize,
+    /// length of serialized bytes
+    length: usize,
 }
 
-impl<W: Write> xrpl_types::serialize::Serializer for Serializer<W> {
+
+impl xrpl_types::serialize::Serializer for Serializer {
     type Error = BinaryCodecError;
 
     fn serialize_account_id(
@@ -38,9 +34,13 @@ impl<W: Write> xrpl_types::serialize::Serializer for Serializer<W> {
         field_code: FieldCode,
         account_id: AccountId,
     ) -> Result<(), BinaryCodecError> {
-        self.push_field_id(FieldId::from_type_field(TypeCode::AccountId, field_code))?;
-        self.push_account_id(account_id)?;
-        Ok(())
+        self.push_field(
+            FieldId::from_type_field(TypeCode::AccountId, field_code),
+            |ser| {
+                ser.push_account_id(account_id)?;
+                Ok(())
+            },
+        )
     }
 
     fn serialize_amount(
@@ -48,9 +48,13 @@ impl<W: Write> xrpl_types::serialize::Serializer for Serializer<W> {
         field_code: FieldCode,
         amount: Amount,
     ) -> Result<(), BinaryCodecError> {
-        self.push_field_id(FieldId::from_type_field(TypeCode::Amount, field_code))?;
-        self.push_amount(amount)?;
-        Ok(())
+        self.push_field(
+            FieldId::from_type_field(TypeCode::Amount, field_code),
+            |ser| {
+                ser.push_amount(amount)?;
+                Ok(())
+            },
+        )
     }
 
     fn serialize_blob(
@@ -58,9 +62,13 @@ impl<W: Write> xrpl_types::serialize::Serializer for Serializer<W> {
         field_code: FieldCode,
         blob: &Blob,
     ) -> Result<(), BinaryCodecError> {
-        self.push_field_id(FieldId::from_type_field(TypeCode::Blob, field_code))?;
-        self.push_blob(blob)?;
-        Ok(())
+        self.push_field(
+            FieldId::from_type_field(TypeCode::Blob, field_code),
+            |ser| {
+                ser.push_blob(blob)?;
+                Ok(())
+            },
+        )
     }
 
     fn serialize_hash128(
@@ -68,9 +76,13 @@ impl<W: Write> xrpl_types::serialize::Serializer for Serializer<W> {
         field_code: FieldCode,
         hash128: Hash128,
     ) -> Result<(), BinaryCodecError> {
-        self.push_field_id(FieldId::from_type_field(TypeCode::Hash128, field_code))?;
-        self.push_hash128(hash128)?;
-        Ok(())
+        self.push_field(
+            FieldId::from_type_field(TypeCode::Hash128, field_code),
+            |ser| {
+                ser.push_hash128(hash128)?;
+                Ok(())
+            },
+        )
     }
 
     fn serialize_hash160(
@@ -78,9 +90,13 @@ impl<W: Write> xrpl_types::serialize::Serializer for Serializer<W> {
         field_code: FieldCode,
         hash160: Hash160,
     ) -> Result<(), BinaryCodecError> {
-        self.push_field_id(FieldId::from_type_field(TypeCode::Hash160, field_code))?;
-        self.push_hash160(hash160)?;
-        Ok(())
+        self.push_field(
+            FieldId::from_type_field(TypeCode::Hash160, field_code),
+            |ser| {
+                ser.push_hash160(hash160)?;
+                Ok(())
+            },
+        )
     }
 
     fn serialize_hash256(
@@ -88,9 +104,13 @@ impl<W: Write> xrpl_types::serialize::Serializer for Serializer<W> {
         field_code: FieldCode,
         hash256: Hash256,
     ) -> Result<(), BinaryCodecError> {
-        self.push_field_id(FieldId::from_type_field(TypeCode::Hash256, field_code))?;
-        self.push_hash256(hash256)?;
-        Ok(())
+        self.push_field(
+            FieldId::from_type_field(TypeCode::Hash256, field_code),
+            |ser| {
+                ser.push_hash256(hash256)?;
+                Ok(())
+            },
+        )
     }
 
     fn serialize_uint8(
@@ -98,9 +118,13 @@ impl<W: Write> xrpl_types::serialize::Serializer for Serializer<W> {
         field_code: FieldCode,
         uint8: UInt8,
     ) -> Result<(), BinaryCodecError> {
-        self.push_field_id(FieldId::from_type_field(TypeCode::UInt8, field_code))?;
-        self.push_uint8(uint8)?;
-        Ok(())
+        self.push_field(
+            FieldId::from_type_field(TypeCode::UInt8, field_code),
+            |ser| {
+                ser.push_uint8(uint8)?;
+                Ok(())
+            },
+        )
     }
 
     fn serialize_uint16(
@@ -108,9 +132,13 @@ impl<W: Write> xrpl_types::serialize::Serializer for Serializer<W> {
         field_code: FieldCode,
         uint16: UInt16,
     ) -> Result<(), BinaryCodecError> {
-        self.push_field_id(FieldId::from_type_field(TypeCode::UInt16, field_code))?;
-        self.push_uint16(uint16)?;
-        Ok(())
+        self.push_field(
+            FieldId::from_type_field(TypeCode::UInt16, field_code),
+            |ser| {
+                ser.push_uint16(uint16)?;
+                Ok(())
+            },
+        )
     }
 
     fn serialize_uint32(
@@ -118,9 +146,13 @@ impl<W: Write> xrpl_types::serialize::Serializer for Serializer<W> {
         field_code: FieldCode,
         uint32: UInt32,
     ) -> Result<(), BinaryCodecError> {
-        self.push_field_id(FieldId::from_type_field(TypeCode::UInt32, field_code))?;
-        self.push_uint32(uint32)?;
-        Ok(())
+        self.push_field(
+            FieldId::from_type_field(TypeCode::UInt32, field_code),
+            |ser| {
+                ser.push_uint32(uint32)?;
+                Ok(())
+            },
+        )
     }
 
     fn serialize_uint64(
@@ -128,19 +160,58 @@ impl<W: Write> xrpl_types::serialize::Serializer for Serializer<W> {
         field_code: FieldCode,
         uint64: Uint64,
     ) -> Result<(), BinaryCodecError> {
-        self.push_field_id(FieldId::from_type_field(TypeCode::UInt64, field_code))?;
-        self.push_uint64(uint64)?;
-        Ok(())
+        self.push_field(
+            FieldId::from_type_field(TypeCode::UInt64, field_code),
+            |ser| {
+                ser.push_uint64(uint64)?;
+                Ok(())
+            },
+        )
     }
 }
 
-impl<W: Write> Serializer<W> {
+impl Serializer {
+    pub fn new() -> Self {
+        let this = Self {
+            buffer: Vec::new(),
+            serialized_fields: Vec::new(),
+        };
+        this
+    }
+
+    pub fn into_bytes(self) -> Vec<u8> {
+        let mut bytes = Vec::with_capacity(self.buffer.len());
+        let mut serialized_fields = self.serialized_fields;
+        serialized_fields.sort_by_key(|f| f.field_id);
+        for field in serialized_fields {
+            bytes.extend_from_slice(&self.buffer[field.index..field.index + field.length]);
+        }
+        bytes
+    }
+
     fn push(&mut self, value: u8) -> Result<(), BinaryCodecError> {
         self.push_slice(&[value])
     }
 
     fn push_slice(&mut self, bytes: &[u8]) -> Result<(), BinaryCodecError> {
-        self.writer.write_all(bytes)?;
+        self.buffer.extend_from_slice(bytes);
+        Ok(())
+    }
+
+    fn push_field(
+        &mut self,
+        field_id: FieldId,
+        serialize_closure: impl FnOnce(&mut Serializer) -> Result<(), BinaryCodecError>,
+    ) -> Result<(), BinaryCodecError> {
+        let index = self.buffer.len();
+        self.push_field_id(field_id)?;
+        serialize_closure(self)?;
+        let length = self.buffer.len() - index;
+        self.serialized_fields.push(SerializedFieldIndex {
+            field_id,
+            index,
+            length,
+        });
         Ok(())
     }
 
@@ -184,16 +255,6 @@ impl<W: Write> Serializer<W> {
 
         let type_code = field_id.type_code as u8;
         let field_code = field_id.field_code.0;
-
-        if let Some(prev_field_id) = self.prev_field_id {
-            if field_id <= prev_field_id {
-                return Err(BinaryCodecError::FieldOrder(
-                    "Order of serialized fields is wrong".to_string(),
-                ));
-            }
-        }
-
-        self.prev_field_id = Some(field_id);
 
         if type_code < 16 && field_code < 16 {
             self.push(type_code << 4 | field_code)?;
@@ -306,8 +367,8 @@ mod tests {
     use xrpl_types::serialize::{FieldCode, Serialize, Serializer};
     use xrpl_types::OfferCreateTransaction;
 
-    fn serializer() -> super::Serializer<Vec<u8>> {
-        super::Serializer::new(Vec::new())
+    fn serializer() -> super::Serializer {
+        super::Serializer::new()
     }
 
     #[test]
@@ -315,7 +376,7 @@ mod tests {
         let mut s = serializer();
         let value = 0x12;
         s.push_uint8(value).unwrap();
-        assert_eq!(s.into_inner(), [0x12u8]);
+        assert_eq!(s.buffer, [0x12u8]);
     }
 
     #[test]
@@ -323,7 +384,7 @@ mod tests {
         let mut s = serializer();
         let value = 0x12 + (0x34 << 8);
         s.push_uint16(value).unwrap();
-        assert_eq!(s.into_inner(), [0x34, 0x12]);
+        assert_eq!(s.buffer, [0x34, 0x12]);
     }
 
     #[test]
@@ -331,7 +392,7 @@ mod tests {
         let mut s = serializer();
         let value = 0x12 + (0x34 << 24);
         s.push_uint32(value).unwrap();
-        assert_eq!(s.into_inner(), [0x34, 0x00, 0x00, 0x12]);
+        assert_eq!(s.buffer, [0x34, 0x00, 0x00, 0x12]);
     }
 
     #[test]
@@ -340,7 +401,7 @@ mod tests {
         let value = 0x12 + (0x34 << 56);
         s.push_uint64(value).unwrap();
         assert_eq!(
-            s.into_inner(),
+            s.buffer,
             [0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x12]
         );
     }
@@ -354,7 +415,7 @@ mod tests {
         ]);
         s.push_hash128(value).unwrap();
         assert_eq!(
-            s.into_inner(),
+            s.buffer,
             [
                 0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 0x00, 0x12
@@ -371,7 +432,7 @@ mod tests {
         ]);
         s.push_hash160(value).unwrap();
         assert_eq!(
-            s.into_inner(),
+            s.buffer,
             [
                 0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x12
@@ -389,7 +450,7 @@ mod tests {
         ]);
         s.push_hash256(value).unwrap();
         assert_eq!(
-            s.into_inner(),
+            s.buffer,
             [
                 0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -403,7 +464,7 @@ mod tests {
         let mut s = serializer();
         let value = Blob(vec![0x34, 0x00, 0x12]);
         s.push_blob(&value).unwrap();
-        assert_eq!(s.into_inner(), [3, 0x34, 0x00, 0x12]);
+        assert_eq!(s.buffer, [3, 0x34, 0x00, 0x12]);
     }
 
     #[test]
@@ -415,7 +476,7 @@ mod tests {
         ]);
         s.push_account_id(value).unwrap();
         assert_eq!(
-            s.into_inner(),
+            s.buffer,
             [
                 20, 0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x12
@@ -432,7 +493,7 @@ mod tests {
         ]);
         s.push_account_id_no_length_prefix(value).unwrap();
         assert_eq!(
-            s.into_inner(),
+            s.buffer,
             [
                 0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x12
@@ -448,7 +509,7 @@ mod tests {
         s.push_vl_prefix(0).unwrap();
         s.push_vl_prefix(1).unwrap();
         s.push_vl_prefix(192).unwrap();
-        assert_eq!(s.into_inner(), [0, 1, 192]);
+        assert_eq!(s.buffer, [0, 1, 192]);
 
         // test range 193 to 12480
         let mut s = serializer();
@@ -456,7 +517,7 @@ mod tests {
         s.push_vl_prefix(193 + ((193 - 193) * 256) + 1).unwrap();
         assert_eq!(193 + ((240 - 193) * 256) + 255, 12480);
         s.push_vl_prefix(193 + ((240 - 193) * 256) + 255).unwrap();
-        assert_eq!(s.into_inner(), [193, 0, 193, 1, 240, 255]);
+        assert_eq!(s.buffer, [193, 0, 193, 1, 240, 255]);
 
         // test range 12481 to 918744
         let mut s = serializer();
@@ -472,7 +533,7 @@ mod tests {
         s.push_vl_prefix(12481 + ((254 - 241) * 65536) + (212 * 256) + 23)
             .unwrap();
         assert_eq!(
-            s.into_inner(),
+            s.buffer,
             [241, 0, 0, 241, 0, 1, 241, 1, 0, 241, 255, 255, 254, 212, 23]
         );
 
@@ -489,7 +550,7 @@ mod tests {
         let mut s = serializer();
         let code = CurrencyCode::xrp();
         s.push_currency_code(code).unwrap();
-        assert_eq!(s.into_inner(), [0u8; 20]);
+        assert_eq!(s.buffer, [0u8; 20]);
     }
 
     #[test]
@@ -497,7 +558,7 @@ mod tests {
         let mut s = serializer();
         let code = CurrencyCode::standard([AsciiChar::U, AsciiChar::S, AsciiChar::D]).unwrap();
         s.push_currency_code(code).unwrap();
-        let bytes = s.into_inner();
+        let bytes = s.buffer;
         assert_eq!(bytes[0..12], [0u8; 12]);
         assert_eq!(
             bytes[12..15],
@@ -520,7 +581,7 @@ mod tests {
         .unwrap();
         s.push_currency_code(code).unwrap();
         assert_eq!(
-            s.into_inner(),
+            s.buffer,
             [
                 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x02,
@@ -534,7 +595,7 @@ mod tests {
         let value = DropsAmount::from_drops(10_000).unwrap();
         s.push_drops_amount(value).unwrap();
         assert_eq!(
-            s.into_inner(),
+            s.buffer,
             [0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x27, 0x10]
         );
     }
@@ -546,7 +607,7 @@ mod tests {
         let value = IssuedValue::zero();
         s.push_issued_value(value).unwrap();
         assert_eq!(
-            s.into_inner(),
+            s.buffer,
             [0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
         );
     }
@@ -557,7 +618,7 @@ mod tests {
         let mut s = serializer();
         let value = IssuedValue::from_mantissa_exponent(1_000_000_000_000_000, -10).unwrap();
         s.push_issued_value(value).unwrap();
-        let bytes = s.into_inner();
+        let bytes = s.buffer;
         assert_eq!(
             bytes,
             [0xD5, 0xC3, 0x8D, 0x7E, 0xA4, 0xC6, 0x80, 0x00,],
@@ -572,7 +633,7 @@ mod tests {
         let mut s = serializer();
         let value = IssuedValue::from_mantissa_exponent(-1_000_000_000_000_000, -10).unwrap();
         s.push_issued_value(value).unwrap();
-        let bytes = s.into_inner();
+        let bytes = s.buffer;
         assert_eq!(
             bytes,
             [0x95, 0xC3, 0x8D, 0x7E, 0xA4, 0xC6, 0x80, 0x00,],
@@ -587,7 +648,7 @@ mod tests {
         let value = Amount::drops(10_000).unwrap();
         s.push_amount(value).unwrap();
         assert_eq!(
-            s.into_inner(),
+            s.buffer,
             [0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x27, 0x10]
         );
     }
@@ -607,7 +668,7 @@ mod tests {
         ]);
         let amount = Amount::issued(value, currency, issuer).unwrap();
         s.push_amount(amount).unwrap();
-        let bytes = s.into_inner();
+        let bytes = s.buffer;
         assert_eq!(
             bytes,
             [
@@ -626,7 +687,7 @@ mod tests {
         let mut s = serializer();
         let field_id = FieldId::from_type_field(TypeCode::UInt32, FieldCode(0b0100));
         s.push_field_id(field_id).unwrap();
-        assert_eq!(s.into_inner(), [0b0010_0100]);
+        assert_eq!(s.buffer, [0b0010_0100]);
     }
 
     #[test]
@@ -634,7 +695,7 @@ mod tests {
         let mut s = serializer();
         let field_id = FieldId::from_type_field(TypeCode::UInt32, FieldCode(0b0001_0100));
         s.push_field_id(field_id).unwrap();
-        assert_eq!(s.into_inner(), [0b0010_0000, 0b0001_0100]);
+        assert_eq!(s.buffer, [0b0010_0000, 0b0001_0100]);
     }
 
     #[test]
@@ -642,7 +703,7 @@ mod tests {
         let mut s = serializer();
         let field_id = FieldId::from_type_field(TypeCode::Hash160, FieldCode(0b0001_0100));
         s.push_field_id(field_id).unwrap();
-        assert_eq!(s.into_inner(), [0, 0b0001_0001, 0b0001_0100]);
+        assert_eq!(s.buffer, [0, 0b0001_0001, 0b0001_0100]);
     }
 
     #[test]
@@ -650,7 +711,7 @@ mod tests {
         let mut s = serializer();
         let field_id = FieldId::from_type_field(TypeCode::Hash160, FieldCode(0b0100));
         s.push_field_id(field_id).unwrap();
-        assert_eq!(s.into_inner(), [0b0000_0100, 0b0001_0001]);
+        assert_eq!(s.buffer, [0b0000_0100, 0b0001_0001]);
     }
 
     /// Test serialize fields (in correct order)
@@ -661,7 +722,7 @@ mod tests {
         s.serialize_uint32(FieldCode(2), 23).unwrap();
         s.serialize_uint64(FieldCode(1), 34).unwrap();
         assert_eq!(
-            s.into_inner(),
+            s.into_bytes(),
             [
                 0b0010_0001,
                 0,
@@ -686,26 +747,54 @@ mod tests {
         );
     }
 
-    /// Test serialize fields where field ordering is wrong
+    /// Test serialize fields out of order
     #[test]
-    fn test_serialize_fields_wrong_type_code_order() {
+    fn test_serialize_fields_type_code_order() {
         let mut s = serializer();
         s.serialize_uint64(FieldCode(1), 34).unwrap();
-        let result = s.serialize_uint32(FieldCode(2), 12);
-        assert_matches!(result, Err(BinaryCodecError::FieldOrder(message)) => {
-            assert!(message.contains("Order of serialized fields is wrong"), "message: {}", message);
-        });
+        s.serialize_uint32(FieldCode(1), 12).unwrap();
+        assert_eq!(
+            s.into_bytes(),
+            [
+                0b0010_0001,
+                0,
+                0,
+                0,
+                12,
+                0b0011_0001,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                34
+            ]
+        );
     }
 
-    /// Test serialize fields where field ordering is wrong
+    /// Test serialize fields out of order
     #[test]
-    fn test_serialize_fields_wrong_field_code_order() {
+    fn test_serialize_fields_field_code_order() {
         let mut s = serializer();
-        s.serialize_uint32(FieldCode(2), 12).unwrap();
-        let result = s.serialize_uint32(FieldCode(1), 34);
-        assert_matches!(result, Err(BinaryCodecError::FieldOrder(message)) => {
-            assert!(message.contains("Order of serialized fields is wrong"), "message: {}", message);
-        });
+        s.serialize_uint32(FieldCode(2), 23).unwrap();
+        s.serialize_uint32(FieldCode(1), 12).unwrap();
+        assert_eq!(
+            s.into_bytes(),
+            [
+                0b0010_0001,
+                0,
+                0,
+                0,
+                12,
+                0b0010_0010,
+                0,
+                0,
+                0,
+                23,
+            ]
+        );
     }
 
     /// Test serialize fields where field ordering is wrong
@@ -745,6 +834,6 @@ mod tests {
         tx.offer_sequence = Some(1752791);
 
         tx.serialize(&mut s).unwrap();
-        assert_eq!(hex::encode_upper(s.into_inner()), "120007220008000024001ABED82A2380BF2C2019001ABED764D55920AC9391400000000000000000000000000055534400000000000A20B3C85F482532A9578DBB3950B85CA06594D165400000037E11D60068400000000000000A732103EE83BB432547885C219634A1BC407A9DB0474145D69737D09CCDC63E1DEE7FE3744630440220143759437C04F7B61F012563AFE90D8DAFC46E86035E1D965A9CED282C97D4CE02204CFD241E86F17E011298FC1A39B63386C74306A5DE047E213B0F29EFA4571C2C8114DD76483FACDEE26E60D8A586BB58D09F27045C46");
+        assert_eq!(hex::encode_upper(s.into_bytes()), "120007220008000024001ABED82A2380BF2C2019001ABED764D55920AC9391400000000000000000000000000055534400000000000A20B3C85F482532A9578DBB3950B85CA06594D165400000037E11D60068400000000000000A732103EE83BB432547885C219634A1BC407A9DB0474145D69737D09CCDC63E1DEE7FE3744630440220143759437C04F7B61F012563AFE90D8DAFC46E86035E1D965A9CED282C97D4CE02204CFD241E86F17E011298FC1A39B63386C74306A5DE047E213B0F29EFA4571C2C8114DD76483FACDEE26E60D8A586BB58D09F27045C46");
     }
 }
