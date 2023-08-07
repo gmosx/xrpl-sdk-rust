@@ -4,7 +4,9 @@ use std::error::Error;
 
 pub trait Serializer {
     type Error: Error;
-    type SerializeArray<'a>: SerializeArray<Error = Self::Error> where Self: 'a;
+    type SerializeArray<'a>: SerializeArray<Error = Self::Error>
+    where
+        Self: 'a;
 
     fn serialize_account_id(
         &mut self,
@@ -58,12 +60,11 @@ pub trait Serializer {
         uint64: Uint64,
     ) -> Result<(), Self::Error>;
 
-    fn serialize_array<>(
+    fn serialize_array(
         &mut self,
         field_code: FieldCode,
     ) -> Result<Self::SerializeArray<'_>, Self::Error>;
 }
-
 
 pub trait SerializeArray {
     type Error: Error;
