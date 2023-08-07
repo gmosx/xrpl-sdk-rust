@@ -48,9 +48,7 @@ pub struct Memo {
 /// A ledger transaction <https://xrpl.org/transaction-formats.html>
 #[derive(Debug, Clone)]
 pub struct TransactionCommon {
-    // Common fields https://xrpl.org/transaction-common-fields.html#transaction-common-fields
     pub account: AccountId,
-    pub transaction_type: TransactionType,
     pub fee: Option<DropsAmount>,
     pub sequence: Option<UInt32>,
     pub account_txn_id: Option<Hash256>,
@@ -63,9 +61,25 @@ pub struct TransactionCommon {
     pub txn_signature: Option<Blob>,
 }
 
+impl TransactionCommon {
+    pub fn new(account: AccountId) -> Self {
+        Self {
+            account,
+            fee: None,
+            sequence: None,
+            account_txn_id: None,
+            last_ledger_sequence: None,
+            network_id: None,
+            source_tag: None,
+            signing_pub_key: None,
+            ticket_sequence: None,
+            txn_signature: None,
+        }
+    }
+}
+
 impl Serialize for TransactionCommon {
     fn serialize<S: Serializer>(&self, s: &mut S) -> Result<(), S::Error> {
-        s.serialize_uint16(FieldCode(2), self.transaction_type as u16)?;
         if let Some(network_id) = self.network_id {
             s.serialize_uint32(FieldCode(1), network_id)?;
         }

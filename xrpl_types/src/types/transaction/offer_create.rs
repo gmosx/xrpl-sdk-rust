@@ -1,5 +1,5 @@
 use crate::serialize::{FieldCode, Serialize, Serializer};
-use crate::{Amount, TransactionCommon, UInt32};
+use crate::{AccountId, Amount, TransactionCommon, TransactionType, UInt32};
 use enumflags2::{bitflags, BitFlags};
 
 /// An `OfferCreate` transaction <https://xrpl.org/offercreate.html>
@@ -11,6 +11,19 @@ pub struct OfferCreateTransaction {
     pub offer_sequence: Option<UInt32>,
     pub taker_gets: Amount,
     pub taker_pays: Amount,
+}
+
+impl OfferCreateTransaction {
+    pub fn new(account_id: AccountId, taker_gets: Amount, taker_pays: Amount) -> Self {
+        Self {
+            common: TransactionCommon::new(account_id),
+            flags: Default::default(),
+            expiration: None,
+            offer_sequence: None,
+            taker_gets,
+            taker_pays,
+        }
+    }
 }
 
 /// `OfferCreate` flags <https://xrpl.org/offercreate.html#offercreate-flags>
@@ -27,6 +40,7 @@ pub enum OfferCreateFlags {
 
 impl Serialize for OfferCreateTransaction {
     fn serialize<S: Serializer>(&self, s: &mut S) -> Result<(), S::Error> {
+        s.serialize_uint16(FieldCode(2), TransactionType::OfferCreate as u16)?;
         self.common.serialize(s)?;
         s.serialize_uint32(FieldCode(2), self.flags.bits())?;
         if let Some(expiration) = self.expiration {

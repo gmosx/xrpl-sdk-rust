@@ -304,7 +304,7 @@ mod tests {
     use assert_matches::assert_matches;
     use enumflags2::BitFlags;
     use xrpl_types::serialize::{FieldCode, Serialize, Serializer};
-    use xrpl_types::{OfferCreateTransaction, TransactionCommon, TransactionType};
+    use xrpl_types::OfferCreateTransaction;
 
     fn serializer() -> super::Serializer<Vec<u8>> {
         super::Serializer::new(Vec::new())
@@ -723,30 +723,26 @@ mod tests {
     #[test]
     fn test_serialize_offer_create() {
         let mut s = serializer();
-        let tx = OfferCreateTransaction {
-            common: TransactionCommon {
-                account: AccountId::from_address("rMBzp8CgpE441cp5PVyA9rpVV7oT8hP3ys").unwrap(),
-                transaction_type: TransactionType::OfferCreate,
-                fee: Some(DropsAmount::from_drops(10).unwrap()),
-                sequence: Some(1752792),
-                account_txn_id: None,
-                last_ledger_sequence: None,
-                network_id: None,
-                source_tag: None,
-                signing_pub_key: Some(Blob(hex::decode("03EE83BB432547885C219634A1BC407A9DB0474145D69737D09CCDC63E1DEE7FE3").unwrap())),
-                ticket_sequence: None,
-                txn_signature: Some(Blob(hex::decode("30440220143759437C04F7B61F012563AFE90D8DAFC46E86035E1D965A9CED282C97D4CE02204CFD241E86F17E011298FC1A39B63386C74306A5DE047E213B0F29EFA4571C2C").unwrap())),
-            },
-            expiration: Some(595640108),
-            flags: BitFlags::from_bits(524288).unwrap(),
-            offer_sequence: Some(1752791),
-            taker_gets: Amount::drops(15000000000).unwrap(),
-            taker_pays: Amount::issued(
+        let mut tx = OfferCreateTransaction::new(
+            AccountId::from_address("rMBzp8CgpE441cp5PVyA9rpVV7oT8hP3ys").unwrap(),
+            Amount::drops(15000000000).unwrap(),
+            Amount::issued(
                 IssuedValue::from_mantissa_exponent(70728, -1).unwrap(),
                 CurrencyCode::standard([AsciiChar::U, AsciiChar::S, AsciiChar::D]).unwrap(),
                 AccountId::from_address("rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B").unwrap(),
-            ).unwrap(),
-        };
+            )
+            .unwrap(),
+        );
+        tx.common.fee = Some(DropsAmount::from_drops(10).unwrap());
+        tx.common.sequence = Some(1752792);
+        tx.common.signing_pub_key = Some(Blob(
+            hex::decode("03EE83BB432547885C219634A1BC407A9DB0474145D69737D09CCDC63E1DEE7FE3")
+                .unwrap(),
+        ));
+        tx.common.txn_signature = Some(Blob(hex::decode("30440220143759437C04F7B61F012563AFE90D8DAFC46E86035E1D965A9CED282C97D4CE02204CFD241E86F17E011298FC1A39B63386C74306A5DE047E213B0F29EFA4571C2C").unwrap()));
+        tx.expiration = Some(595640108);
+        tx.flags = BitFlags::from_bits(524288).unwrap();
+        tx.offer_sequence = Some(1752791);
 
         tx.serialize(&mut s).unwrap();
         assert_eq!(hex::encode_upper(s.into_inner()), "120007220008000024001ABED82A2380BF2C2019001ABED764D55920AC9391400000000000000000000000000055534400000000000A20B3C85F482532A9578DBB3950B85CA06594D165400000037E11D60068400000000000000A732103EE83BB432547885C219634A1BC407A9DB0474145D69737D09CCDC63E1DEE7FE3744630440220143759437C04F7B61F012563AFE90D8DAFC46E86035E1D965A9CED282C97D4CE02204CFD241E86F17E011298FC1A39B63386C74306A5DE047E213B0F29EFA4571C2C8114DD76483FACDEE26E60D8A586BB58D09F27045C46");
