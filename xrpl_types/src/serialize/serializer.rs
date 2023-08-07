@@ -1,9 +1,10 @@
-use crate::serialize::FieldCode;
+use crate::serialize::{FieldCode, Serialize};
 use crate::{AccountId, Amount, Blob, Hash128, Hash160, Hash256, UInt16, UInt32, UInt8, Uint64};
 use std::error::Error;
 
 pub trait Serializer {
     type Error: Error;
+    type SerializeArray<'a>: SerializeArray where Self: 'a;
 
     fn serialize_account_id(
         &mut self,
@@ -56,4 +57,22 @@ pub trait Serializer {
         field_code: FieldCode,
         uint64: Uint64,
     ) -> Result<(), Self::Error>;
+
+    fn serialize_array<>(
+        &mut self,
+        field_code: FieldCode,
+    ) -> Result<Self::SerializeArray<'_>, Self::Error>;
+}
+
+
+pub trait SerializeArray {
+    type Error: Error;
+
+    fn serialize_object<T: Serialize>(
+        &mut self,
+        field_code: FieldCode,
+        object: T,
+    ) -> Result<(), Self::Error>;
+
+    fn end(self) -> Result<(), Self::Error>;
 }

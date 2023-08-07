@@ -5,5 +5,5 @@ use crate::serializer::Serializer;
 pub fn serialize(object: impl Serialize) -> Result<Vec<u8>, BinaryCodecError> {
     let mut s = Serializer::new();
     object.serialize(&mut s)?;
-    Ok(s.into_bytes())
+    s.into_bytes()
 }

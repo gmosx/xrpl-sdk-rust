@@ -13,6 +13,8 @@ pub enum TypeCode {
     UInt16 = 1,
     UInt32 = 2,
     UInt64 = 3,
+    Array = 15,
+    Object = 14,
 }
 
 /// Field code <https://xrpl.org/serialization.html#field-codes>. The code for a given field can be found at
