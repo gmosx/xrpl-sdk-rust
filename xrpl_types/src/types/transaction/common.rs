@@ -79,6 +79,11 @@ impl TransactionCommon {
     }
 }
 
+pub trait Transaction {
+    fn common(&self) -> &TransactionCommon;
+    fn common_mut(&mut self) -> &mut TransactionCommon;
+}
+
 impl Serialize for TransactionCommon {
     fn serialize<S: Serializer>(&self, s: &mut S) -> Result<(), S::Error> {
         if let Some(network_id) = self.network_id {

@@ -8,10 +8,6 @@ use xrpl_types::{
 
 mod field_info;
 
-// todo allan
-pub const HASH_PREFIX_TRANSACTION: [u8; 4] = [0x53, 0x4E, 0x44, 0x00];
-pub const HASH_PREFIX_UNSIGNED_TRANSACTION_SINGLE: [u8; 4] = [0x53, 0x54, 0x58, 0x00];
-
 #[derive(Debug, Default)]
 pub struct Serializer {
     /// Buffer in which fields are initially serialized. Fields are not sorted in this buffer

@@ -1,5 +1,5 @@
 use crate::serialize::{Serialize, Serializer};
-use crate::{AccountId, Amount, IssuedAmount, TransactionCommon, TransactionType, UInt32};
+use crate::{AccountId, Amount, IssuedAmount, Transaction, TransactionCommon, TransactionType, UInt32};
 use enumflags2::{bitflags, BitFlags};
 
 /// A `TrustSet` transaction <https://xrpl.org/trustset.html>
@@ -21,6 +21,16 @@ impl TrustSetTransaction {
             quality_in: None,
             quality_out: None,
         }
+    }
+}
+
+impl Transaction for TrustSetTransaction {
+    fn common(&self) -> &TransactionCommon {
+        &self.common
+    }
+
+    fn common_mut(&mut self) -> &mut TransactionCommon {
+        &mut self.common
     }
 }
 

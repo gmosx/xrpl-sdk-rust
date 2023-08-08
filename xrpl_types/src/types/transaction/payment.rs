@@ -1,5 +1,5 @@
 use crate::serialize::{Serialize, Serializer};
-use crate::{AccountId, Amount, Hash256, TransactionCommon, TransactionType, UInt32};
+use crate::{AccountId, Amount, Hash256, Transaction, TransactionCommon, TransactionType, UInt32};
 use enumflags2::{bitflags, BitFlags};
 
 /// An `Payment` transaction <https://xrpl.org/payment.html>
@@ -27,6 +27,16 @@ impl PaymentTransaction {
             send_max: None,
             deliver_min: None,
         }
+    }
+}
+
+impl Transaction for PaymentTransaction {
+    fn common(&self) -> &TransactionCommon {
+        &self.common
+    }
+
+    fn common_mut(&mut self) -> &mut TransactionCommon {
+        &mut self.common
     }
 }
 
