@@ -2,7 +2,7 @@ use libsecp256k1::{Message, PublicKey, SecretKey};
 use sha2::{Sha512, Digest};
 use xrpl_types::{Blob, Hash256, Transaction};
 use xrpl_types::serialize::Serialize;
-use crate::{BinaryCodecError, serialize};
+use crate::{BinaryCodecError, hash, serialize};
 
 /// Unsigned single signer transactions prefix <https://xrpl.org/basic-data-types.html#hash-prefixes>
 const HASH_PREFIX_UNSIGNED_TRANSACTION_SINGLE: [u8; 4] = [0x53, 0x54, 0x58, 0x00];
@@ -16,19 +16,9 @@ pub fn sign_transaction<T: Transaction + Serialize>(transaction: &mut T, public_
     Ok(())
 }
 
-
-/// Calculate hash <https://xrpl.org/basic-data-types.html#hashes>
-fn hash(prefix: [u8; 4], data: &[u8]) -> Hash256 {
-    // INSIGHT: Sha512Trunc245 does not give same result as Sha512[0..32]
-    let mut hasher = Sha512::new_with_prefix(&prefix);
-    hasher.update(data);
-    let hash: [u8; 64] = hasher.finalize().into();
-    Hash256(hash[0..32].try_into().expect("length 64"))
-}
-
 /// Calculate secp256k1 signature <https://xrpl.org/cryptographic-keys.html#signing-algorithms>
 fn signature(prefix: [u8; 4], data: &[u8], secret_key: &SecretKey) -> Blob {
-    let hash = hash(prefix, data);
+    let hash = hash::hash(prefix, data);
     let message = Message::parse(&hash.0);
     let (signature, _) = libsecp256k1::sign(&message, secret_key);
     Blob(signature.serialize_der().as_ref().to_vec())
