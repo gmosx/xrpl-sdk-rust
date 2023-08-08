@@ -1,4 +1,4 @@
-use crate::serialize::{FieldCode, Serialize, Serializer};
+use crate::serialize::{Serialize, Serializer};
 use crate::{AccountId, Amount, IssuedAmount, TransactionCommon, TransactionType, UInt32};
 use enumflags2::{bitflags, BitFlags};
 
@@ -39,15 +39,15 @@ pub enum TrustSetFlags {
 
 impl Serialize for TrustSetTransaction {
     fn serialize<S: Serializer>(&self, s: &mut S) -> Result<(), S::Error> {
-        s.serialize_uint16(FieldCode(2), TransactionType::TrustSet as u16)?;
+        s.serialize_uint16("TransactionType", TransactionType::TrustSet as u16)?;
         self.common.serialize(s)?;
-        s.serialize_uint32(FieldCode(2), self.flags.bits())?;
-        s.serialize_amount(FieldCode(3), Amount::Issued(self.limit_amount))?;
+        s.serialize_uint32("Flags", self.flags.bits())?;
+        s.serialize_amount("LimitAmount", Amount::Issued(self.limit_amount))?;
         if let Some(quality_in) = self.quality_in {
-            s.serialize_uint32(FieldCode(20), quality_in)?;
+            s.serialize_uint32("QualityIn", quality_in)?;
         }
         if let Some(quality_out) = self.quality_out {
-            s.serialize_uint32(FieldCode(21), quality_out)?;
+            s.serialize_uint32("QualityOut", quality_out)?;
         }
         Ok(())
     }

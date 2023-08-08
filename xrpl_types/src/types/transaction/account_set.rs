@@ -1,4 +1,4 @@
-use crate::serialize::{FieldCode, Serialize, Serializer};
+use crate::serialize::{Serialize, Serializer};
 use crate::{AccountId, Blob, Hash128, Hash256, TransactionCommon, TransactionType, UInt32, UInt8};
 use enumflags2::{bitflags, BitFlags};
 
@@ -74,38 +74,38 @@ pub enum AccountSetTransactionFlags {
 
 impl Serialize for AccountSetTransaction {
     fn serialize<S: Serializer>(&self, s: &mut S) -> Result<(), S::Error> {
-        s.serialize_uint16(FieldCode(2), TransactionType::AccountSet as u16)?;
+        s.serialize_uint16("TransactionType", TransactionType::AccountSet as u16)?;
         self.common.serialize(s)?;
-        s.serialize_uint32(FieldCode(2), self.flags.bits())?;
+        s.serialize_uint32("Flags", self.flags.bits())?;
         if let Some(clear_flag) = self.clear_flag {
-            s.serialize_uint32(FieldCode(34), clear_flag as UInt32)?;
+            s.serialize_uint32("ClearFlag", clear_flag as UInt32)?;
         }
         if let Some(domain) = self.domain.as_ref() {
-            s.serialize_blob(FieldCode(7), domain)?;
+            s.serialize_blob("Domain", domain)?;
         }
         if let Some(email_hash) = self.email_hash {
-            s.serialize_hash128(FieldCode(1), email_hash)?;
+            s.serialize_hash128("EmailHash", email_hash)?;
         }
         if let Some(message_key) = self.message_key.as_ref() {
-            s.serialize_blob(FieldCode(2), message_key)?;
+            s.serialize_blob("MessageKey", message_key)?;
         }
         if let Some(nf_token_minter) = self.nf_token_minter.as_ref() {
-            s.serialize_blob(FieldCode(9), nf_token_minter)?;
+            s.serialize_blob("NFTokenMinter", nf_token_minter)?;
         }
         if let Some(set_flag) = self.set_flag {
-            s.serialize_uint32(FieldCode(33), set_flag as UInt32)?;
+            s.serialize_uint32("SetFlag", set_flag as UInt32)?;
         }
         if let Some(transfer_rate) = self.transfer_rate {
-            s.serialize_uint32(FieldCode(11), transfer_rate)?;
+            s.serialize_uint32("TransferRate", transfer_rate)?;
         }
         if let Some(tick_size) = self.tick_size {
-            s.serialize_uint8(FieldCode(16), tick_size)?;
+            s.serialize_uint8("TickSize", tick_size)?;
         }
         if let Some(wallet_locator) = self.wallet_locator {
-            s.serialize_hash256(FieldCode(7), wallet_locator)?;
+            s.serialize_hash256("WalletLocator", wallet_locator)?;
         }
         if let Some(wallet_size) = self.wallet_size {
-            s.serialize_uint32(FieldCode(12), wallet_size)?;
+            s.serialize_uint32("WalletSize", wallet_size)?;
         }
         Ok(())
     }

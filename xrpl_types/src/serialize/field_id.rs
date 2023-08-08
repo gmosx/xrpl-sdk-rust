@@ -1,3 +1,5 @@
+use std::fmt;
+
 /// Field data type codes <https://xrpl.org/serialization.html#type-list>
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd)]
 #[repr(u8)]
@@ -17,11 +19,23 @@ pub enum TypeCode {
     Object = 14,
 }
 
+impl fmt::Display for TypeCode {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
 /// Field code <https://xrpl.org/serialization.html#field-codes>. The code for a given field can be found at
 /// <https://github.com/XRPLF/xrpl.js/blob/main/packages/ripple-binary-codec/src/enums/definitions.json> or
 /// <https://github.com/XRPLF/rippled/blob/72e6005f562a8f0818bc94803d222ac9345e1e40/src/ripple/protocol/impl/SField.cpp#L72-L266>
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd)]
 pub struct FieldCode(pub u8);
+
+impl fmt::Display for FieldCode {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
 
 /// Ordered field id <https://xrpl.org/serialization.html#canonical-field-order>
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd)]

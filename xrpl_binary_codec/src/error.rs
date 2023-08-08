@@ -11,6 +11,8 @@ pub enum BinaryCodecError {
     FieldOrder(String),
     #[error("IO error: {0}")]
     IO(String),
+    #[error("Invalid field: {0}")]
+    InvalidField(String),
 }
 
 impl From<bs58::decode::Error> for BinaryCodecError {

@@ -1,4 +1,4 @@
-use crate::serialize::{FieldCode, Serialize, Serializer};
+use crate::serialize::{Serialize, Serializer};
 use crate::{AccountId, TransactionCommon, TransactionType, UInt32};
 use enumflags2::{bitflags, BitFlags};
 
@@ -31,12 +31,12 @@ pub enum AccountDeleteFlags {
 
 impl Serialize for AccountDeleteTransaction {
     fn serialize<S: Serializer>(&self, s: &mut S) -> Result<(), S::Error> {
-        s.serialize_uint16(FieldCode(2), TransactionType::AccountDelete as u16)?;
+        s.serialize_uint16("TransactionType", TransactionType::AccountDelete as u16)?;
         self.common.serialize(s)?;
-        s.serialize_uint32(FieldCode(2), self.flags.bits())?;
-        s.serialize_account_id(FieldCode(3), self.destination)?;
+        s.serialize_uint32("Flags", self.flags.bits())?;
+        s.serialize_account_id("Destination", self.destination)?;
         if let Some(destination_tag) = self.destination_tag {
-            s.serialize_uint32(FieldCode(14), destination_tag)?;
+            s.serialize_uint32("DestinationTag", destination_tag)?;
         }
         Ok(())
     }

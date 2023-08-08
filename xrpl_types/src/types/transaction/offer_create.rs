@@ -1,4 +1,4 @@
-use crate::serialize::{FieldCode, Serialize, Serializer};
+use crate::serialize::{Serialize, Serializer};
 use crate::{AccountId, Amount, TransactionCommon, TransactionType, UInt32};
 use enumflags2::{bitflags, BitFlags};
 
@@ -40,17 +40,17 @@ pub enum OfferCreateFlags {
 
 impl Serialize for OfferCreateTransaction {
     fn serialize<S: Serializer>(&self, s: &mut S) -> Result<(), S::Error> {
-        s.serialize_uint16(FieldCode(2), TransactionType::OfferCreate as u16)?;
+        s.serialize_uint16("TransactionType", TransactionType::OfferCreate as u16)?;
         self.common.serialize(s)?;
-        s.serialize_uint32(FieldCode(2), self.flags.bits())?;
+        s.serialize_uint32("Flags", self.flags.bits())?;
         if let Some(expiration) = self.expiration {
-            s.serialize_uint32(FieldCode(10), expiration)?;
+            s.serialize_uint32("Expiration", expiration)?;
         }
         if let Some(offer_sequence) = self.offer_sequence {
-            s.serialize_uint32(FieldCode(25), offer_sequence)?;
+            s.serialize_uint32("OfferSequence", offer_sequence)?;
         }
-        s.serialize_amount(FieldCode(4), self.taker_pays)?;
-        s.serialize_amount(FieldCode(5), self.taker_gets)?;
+        s.serialize_amount("TakerPays", self.taker_pays)?;
+        s.serialize_amount("TakerGets", self.taker_gets)?;
         Ok(())
     }
 }
