@@ -2,3 +2,4 @@
 /Cargo.lock
 /**/*.code-workspace
 /**/_*.md
+/.idea/
