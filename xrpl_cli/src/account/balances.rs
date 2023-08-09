@@ -24,7 +24,10 @@ pub fn account_balances(account_matches: &ArgMatches, balances_matches: &ArgMatc
         if let Ok(resp) = account_info_resp {
             let account_data = &resp.account_data;
 
-            balances.insert("XRP".to_owned(), account_data.balance.parse().unwrap());
+            balances.insert(
+                "XRP".to_owned(),
+                account_data.balance.as_ref().unwrap().parse().unwrap(),
+            );
 
             if let Ok(resp) = account_lines_resp {
                 for line in resp.lines {

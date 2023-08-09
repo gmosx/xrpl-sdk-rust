@@ -6,20 +6,21 @@
 use serde::{Deserialize, Serialize};
 use xrpl_types::Currency;
 
-use crate::{Offer, Request};
+use crate::{
+    Offer, Request, RequestPagination, ResponsePagination, RetrieveLedgerSpec, ReturnLedgerSpec,
+    WithLedgerSpec, WithRequestPagination, WithResponsePagination,
+};
 
 #[derive(Default, Debug, Clone, Serialize)]
 pub struct BookOffersRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
-    ledger_hash: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    ledger_index: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    limit: Option<u32>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     taker: Option<String>,
     taker_gets: Currency,
     taker_pays: Currency,
+    #[serde(flatten)]
+    pub ledger_spec: RetrieveLedgerSpec,
+    #[serde(flatten)]
+    pub pagination: RequestPagination,
 }
 
 impl Request for BookOffersRequest {
@@ -30,19 +31,32 @@ impl Request for BookOffersRequest {
     }
 }
 
+impl WithLedgerSpec for BookOffersRequest {
+    fn as_ledger_spec(&self) -> &crate::RetrieveLedgerSpec {
+        &self.ledger_spec
+    }
+
+    fn as_ledger_spec_mut(&mut self) -> &mut crate::RetrieveLedgerSpec {
+        &mut self.ledger_spec
+    }
+}
+
+impl WithRequestPagination for BookOffersRequest {
+    fn as_pagination(&self) -> &RequestPagination {
+        &self.pagination
+    }
+
+    fn as_pagination_mut(&mut self) -> &mut RequestPagination {
+        &mut self.pagination
+    }
+}
+
 impl BookOffersRequest {
     pub fn new(taker_gets: Currency, taker_pays: Currency) -> Self {
         Self {
             taker_gets,
             taker_pays,
             ..Default::default()
-        }
-    }
-
-    pub fn limit(self, limit: u32) -> Self {
-        Self {
-            limit: Some(limit),
-            ..self
         }
     }
 
@@ -57,6 +71,16 @@ impl BookOffersRequest {
 #[derive(Debug, Deserialize)]
 pub struct BookOffersResponse {
     pub offers: Vec<Offer>,
+    #[serde(flatten)]
+    pub ledger_spec: ReturnLedgerSpec,
+    #[serde(flatten)]
+    pub pagination: ResponsePagination,
+}
+
+impl WithResponsePagination for BookOffersResponse {
+    fn as_pagination(&self) -> &ResponsePagination {
+        &self.pagination
+    }
 }
 
 // impl Client {

@@ -36,10 +36,18 @@ pub struct Offer {
     pub account: String,
     pub book_directory: String,
     pub book_node: Option<String>,
+    pub expiration: Option<u32>,
     pub flags: BitFlags<OfferFlags>,
+    pub owner_node: String,
     pub sequence: u32,
     pub taker_gets: Amount,
     pub taker_pays: Amount,
+    /// Declared optional since it is not part of transaction metadata fields <https://xrpl.org/transaction-metadata.html#modifiednode-fields>
+    #[serde(rename = "PreviousTxnID")]
+    pub previous_txn_id: Option<String>,
+    /// Declared optional since it is not part of transaction metadata fields <https://xrpl.org/transaction-metadata.html#modifiednode-fields>
+    pub previous_txn_lgr_seq: Option<u32>,
+    #[serde(rename = "index")]
     pub index: Option<String>,
 }
 

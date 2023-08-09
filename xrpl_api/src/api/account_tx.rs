@@ -5,24 +5,23 @@
 
 use crate::{
     types::{Meta, Transaction},
-    Request,
+    Request, RequestPagination, ResponsePagination, RetrieveLedgerSpec, ReturnLedgerSpec,
+    WithLedgerSpec, WithRequestPagination, WithResponsePagination,
 };
 use serde::{Deserialize, Serialize};
 
 #[derive(Default, Debug, Clone, Serialize)]
 pub struct AccountTxRequest {
-    account: String,
+    pub account: String,
     #[serde(skip_serializing_if = "Option::is_none")]
-    ledger_hash: Option<String>,
+    pub ledger_index_min: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    ledger_index: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    ledger_index_min: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    ledger_index_max: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    limit: Option<u32>,
-    // TODO: add more parameters!
+    pub ledger_index_max: Option<String>,
+    pub forward: Option<bool>,
+    #[serde(flatten)]
+    pub ledger_spec: RetrieveLedgerSpec,
+    #[serde(flatten)]
+    pub pagination: RequestPagination,
 }
 
 impl Request for AccountTxRequest {
@@ -33,19 +32,31 @@ impl Request for AccountTxRequest {
     }
 }
 
+impl WithLedgerSpec for AccountTxRequest {
+    fn as_ledger_spec(&self) -> &crate::RetrieveLedgerSpec {
+        &self.ledger_spec
+    }
+
+    fn as_ledger_spec_mut(&mut self) -> &mut crate::RetrieveLedgerSpec {
+        &mut self.ledger_spec
+    }
+}
+
+impl WithRequestPagination for AccountTxRequest {
+    fn as_pagination(&self) -> &RequestPagination {
+        &self.pagination
+    }
+
+    fn as_pagination_mut(&mut self) -> &mut RequestPagination {
+        &mut self.pagination
+    }
+}
+
 impl AccountTxRequest {
     pub fn new(account: &str) -> Self {
         Self {
             account: account.to_owned(),
             ..Default::default()
-        }
-    }
-
-    // #TODO add more builders.
-    pub fn limit(self, limit: u32) -> Self {
-        Self {
-            limit: Some(limit),
-            ..self
         }
     }
 }
@@ -61,6 +72,15 @@ pub struct AccountTransaction {
 #[derive(Debug, Deserialize)]
 pub struct AccountTxResponse {
     pub account: String,
-    pub limit: u32,
     pub transactions: Vec<AccountTransaction>,
+    #[serde(flatten)]
+    pub ledger_spec: ReturnLedgerSpec,
+    #[serde(flatten)]
+    pub pagination: ResponsePagination,
+}
+
+impl WithResponsePagination for AccountTxResponse {
+    fn as_pagination(&self) -> &ResponsePagination {
+        &self.pagination
+    }
 }

@@ -48,6 +48,12 @@ pub struct RippleState {
     pub low_node: Option<String>,
     pub low_quality_in: Option<u32>,
     pub low_quality_out: Option<u32>,
+    /// Declared optional since it is not part of transaction metadata fields <https://xrpl.org/transaction-metadata.html#modifiednode-fields>
+    #[serde(rename = "PreviousTxnID")]
+    pub previous_txn_id: Option<String>,
+    /// Declared optional since it is not part of transaction metadata fields <https://xrpl.org/transaction-metadata.html#modifiednode-fields>
+    pub previous_txn_lgr_seq: Option<u32>,
+    #[serde(rename = "index")]
     pub index: Option<String>,
 }
 
@@ -99,5 +105,6 @@ mod test {
 "#;
 
         let _ripple_state: RippleState = serde_json::from_str(json).unwrap();
+        println!("{:#?}", _ripple_state);
     }
 }

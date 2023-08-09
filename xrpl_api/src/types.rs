@@ -156,7 +156,7 @@ pub struct Transaction {
     #[serde(rename = "TxnSignature")]
     pub txn_signature: Option<String>,
 
-    pub date: Option<u32>, // TODO: what is the correct type?
+    pub date: Option<u64>,
 
     pub hash: String,
 
