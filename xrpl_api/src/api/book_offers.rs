@@ -72,7 +72,6 @@ pub struct BookOffersResponse {
     pub ledger_spec: ReturnLedgerSpec,
 }
 
-
 // impl Client {
 //     /// Returns the offers on a book. Please note that the term book, on XRPL,
 //     /// refers to one-side of an order book (a queue).
