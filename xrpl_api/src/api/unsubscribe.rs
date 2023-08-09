@@ -29,33 +29,30 @@ impl UnsubscribeRequest {
         Self::default()
     }
 
-    pub fn streams(streams: &[&str]) -> Self {
-        let streams = streams.iter().map(|s| s.to_string()).collect();
+    pub fn streams(streams: Vec<String>) -> Self {
         Self {
             streams: Some(streams),
             ..Default::default()
         }
     }
 
-    pub fn accounts(accounts: &[&str]) -> Self {
-        let accounts = accounts.iter().map(|a| a.to_string()).collect();
+    pub fn accounts(accounts: Vec<String>) -> Self {
         Self {
             accounts: Some(accounts),
             ..Default::default()
         }
     }
 
-    pub fn accounts_proposed(accounts: &[&str]) -> Self {
-        let accounts = accounts.iter().map(|a| a.to_string()).collect();
+    pub fn accounts_proposed(accounts: Vec<String>) -> Self {
         Self {
             accounts_proposed: Some(accounts),
             ..Default::default()
         }
     }
 
-    pub fn books(books: &[Book]) -> Self {
+    pub fn books(books: Vec<Book>) -> Self {
         Self {
-            books: Some(books.to_vec()),
+            books: Some(books),
             ..Default::default()
         }
     }

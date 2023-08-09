@@ -162,6 +162,8 @@ pub struct Transaction {
 
     pub ledger_index: Option<u32>,
 
+    /// Meta is present in transactions returned by https://xrpl.org/ledger.html. In other API
+    /// methods it is found outside (next to) the transaction field.
     #[serde(rename = "metaData")]
     pub meta: Option<Meta>,
 }

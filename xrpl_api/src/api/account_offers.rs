@@ -4,9 +4,10 @@
 //! <https://xrpl.org/account_offers.html>
 
 use crate::{
-    Request, RequestPagination, ResponsePagination, RetrieveLedgerSpec, ReturnLedgerSpec,
-    WithLedgerSpec, WithRequestPagination, WithResponsePagination,
+    OfferFlags, Request, RequestPagination, ResponsePagination, RetrieveLedgerSpec,
+    ReturnLedgerSpec, WithLedgerSpec, WithRequestPagination, WithResponsePagination,
 };
+use enumflags2::BitFlags;
 use serde::{Deserialize, Serialize};
 use xrpl_types::Amount;
 
@@ -58,7 +59,7 @@ impl AccountOffersRequest {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AccountOffer {
-    pub flags: u32,
+    pub flags: BitFlags<OfferFlags>,
     pub quality: String,
     pub seq: u32,
     pub taker_gets: Amount,

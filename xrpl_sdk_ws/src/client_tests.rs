@@ -28,7 +28,7 @@ mod tests {
             .await
             .expect("cannot connect");
 
-        let req = SubscribeRequest::streams(&["ledger"]);
+        let req = SubscribeRequest::streams(vec!["ledger".to_string()]);
 
         client.call(req).await.expect("cannot subscribe");
 
@@ -56,7 +56,7 @@ mod tests {
         )
         .snapshot(true);
 
-        let req = SubscribeRequest::books(&[book]);
+        let req = SubscribeRequest::books(vec![book]);
 
         client.call(req).await.expect("cannot subscribe");
 
