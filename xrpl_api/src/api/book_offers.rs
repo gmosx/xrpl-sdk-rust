@@ -14,13 +14,13 @@ use crate::{
 #[derive(Default, Debug, Clone, Serialize)]
 pub struct BookOffersRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub limit: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     taker: Option<String>,
     taker_gets: Currency,
     taker_pays: Currency,
     #[serde(flatten)]
     pub ledger_spec: RetrieveLedgerSpec,
-    #[serde(flatten)]
-    pub pagination: RequestPagination,
 }
 
 impl Request for BookOffersRequest {
@@ -41,16 +41,6 @@ impl WithLedgerSpec for BookOffersRequest {
     }
 }
 
-impl WithRequestPagination for BookOffersRequest {
-    fn as_pagination(&self) -> &RequestPagination {
-        &self.pagination
-    }
-
-    fn as_pagination_mut(&mut self) -> &mut RequestPagination {
-        &mut self.pagination
-    }
-}
-
 impl BookOffersRequest {
     pub fn new(taker_gets: Currency, taker_pays: Currency) -> Self {
         Self {
@@ -66,6 +56,13 @@ impl BookOffersRequest {
             ..self
         }
     }
+
+    pub fn limit(self, limit: u32) -> Self {
+        Self {
+            limit: Some(limit),
+            ..self
+        }
+    }
 }
 
 #[derive(Debug, Deserialize)]
@@ -73,15 +70,8 @@ pub struct BookOffersResponse {
     pub offers: Vec<Offer>,
     #[serde(flatten)]
     pub ledger_spec: ReturnLedgerSpec,
-    #[serde(flatten)]
-    pub pagination: ResponsePagination,
 }
 
-impl WithResponsePagination for BookOffersResponse {
-    fn as_pagination(&self) -> &ResponsePagination {
-        &self.pagination
-    }
-}
 
 // impl Client {
 //     /// Returns the offers on a book. Please note that the term book, on XRPL,
