@@ -13,7 +13,7 @@ mod tests {
             .await
             .expect("cannot connect");
 
-        let req = AccountInfoRequest::new("r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59").strict(true);
+        let req = AccountInfoRequest::new("r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59");
 
         client.call(req).await.expect("cannot send request");
 

@@ -6,10 +6,7 @@
 use serde::{Deserialize, Serialize};
 use xrpl_types::Currency;
 
-use crate::{
-    Offer, Request, RequestPagination, ResponsePagination, RetrieveLedgerSpec, ReturnLedgerSpec,
-    WithLedgerSpec, WithRequestPagination, WithResponsePagination,
-};
+use crate::{Offer, Request, RetrieveLedgerSpec, ReturnLedgerSpec, WithLedgerSpec};
 
 #[derive(Default, Debug, Clone, Serialize)]
 pub struct BookOffersRequest {

@@ -7,7 +7,7 @@ mod tests {
         DepositAuthorizedRequest, FeeRequest, GatewayBalancesRequest, GetOfferObjectRequest,
         LedgerClosedRequest, LedgerCurrentRequest, LedgerDataRequest, LedgerEntryRequest,
         LedgerRequest, ManifestRequest, PingRequest, RandomRequest, ServerInfoRequest,
-        ServerStateRequest, TransactionEntryRequest, TxRequest,
+        ServerStateRequest, TransactionEntryRequest, TxRequest, WithRequestPagination,
     };
     use xrpl_types::Currency;
 
@@ -28,7 +28,7 @@ mod tests {
     async fn client_can_fetch_account_info() {
         let client = Client::default();
 
-        let req = AccountInfoRequest::new("r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59").strict(true);
+        let req = AccountInfoRequest::new("r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59");
         let resp = client.call(req).await;
 
         dbg!(&resp);
