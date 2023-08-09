@@ -2,6 +2,7 @@
 
 use crate::Request;
 use serde::{Deserialize, Serialize};
+use xrpl_types::Book;
 
 #[derive(Default, Debug, Clone, Serialize)]
 pub struct UnsubscribeRequest {
@@ -9,6 +10,10 @@ pub struct UnsubscribeRequest {
     streams: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     accounts: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    accounts_proposed: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    books: Option<Vec<Book>>,
 }
 
 impl Request for UnsubscribeRequest {
@@ -36,6 +41,21 @@ impl UnsubscribeRequest {
         let accounts = accounts.iter().map(|a| a.to_string()).collect();
         Self {
             accounts: Some(accounts),
+            ..Default::default()
+        }
+    }
+
+    pub fn accounts_proposed(accounts: &[&str]) -> Self {
+        let accounts = accounts.iter().map(|a| a.to_string()).collect();
+        Self {
+            accounts_proposed: Some(accounts),
+            ..Default::default()
+        }
+    }
+
+    pub fn books(books: &[Book]) -> Self {
+        Self {
+            books: Some(books.to_vec()),
             ..Default::default()
         }
     }
