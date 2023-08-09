@@ -52,8 +52,8 @@ mod tests {
         let book = Book::new(
             Currency::Xrp,
             Currency::issued("USD", "rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B"),
-            "rf1BiGeXwwQoi8Z2ueFYTEXSwuJYfV2Jpn",
         )
+        .taker("rf1BiGeXwwQoi8Z2ueFYTEXSwuJYfV2Jpn")
         .snapshot(true);
 
         let req = SubscribeRequest::books(vec![book]);
