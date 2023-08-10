@@ -54,6 +54,18 @@ pub struct Offer {
     /// <https://xrpl.org/book_offers.html#response-format>.
     #[serde(rename = "owner_funds")]
     pub owner_funds: Option<String>,
+    /// `taker_gets_funded` may be present in offers returned by `book_offers` method, see
+    /// <https://xrpl.org/book_offers.html#response-format>.
+    #[serde(rename = "taker_gets_funded")]
+    pub taker_gets_funded: Option<Amount>,
+    /// taker_pays_funded may be present in offers returned by `book_offers` method, see
+    /// <https://xrpl.org/book_offers.html#response-format>.
+    #[serde(rename = "taker_pays_funded")]
+    pub taker_pays_funded: Option<Amount>,
+    /// `quality` is present in offers returned by `book_offers` method, see
+    /// <https://xrpl.org/book_offers.html#response-format>.
+    #[serde(rename = "quality")]
+    pub quality: Option<String>,
 }
 
 #[bitflags]
