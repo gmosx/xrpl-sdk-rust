@@ -49,6 +49,11 @@ pub struct Offer {
     pub previous_txn_lgr_seq: Option<u32>,
     #[serde(rename = "index")]
     pub index: Option<String>,
+
+    /// `owner_funds` is present in offers returned by `book_offers` method, see
+    /// <https://xrpl.org/book_offers.html#response-format>.
+    #[serde(rename = "owner_funds")]
+    pub owner_funds: Option<String>,
 }
 
 #[bitflags]

@@ -156,16 +156,28 @@ pub struct Transaction {
     #[serde(rename = "TxnSignature")]
     pub txn_signature: Option<String>,
 
+    /// Close time of the ledger in which the transaction is included
     pub date: Option<u64>,
 
+    /// Transaction hash
     pub hash: String,
 
-    pub ledger_index: Option<u32>,
+    /// The ledger index of the ledger that includes this transaction.
+    pub ledger_index: u32,
+    /// If true, this data comes from a validated ledger version; if omitted or
+    /// set to false, this data is not final.
+    pub validated: bool,
 
-    /// Meta is present in transactions returned by https://xrpl.org/ledger.html. In other API
+    /// Meta is present in transactions returned by https://xrpl.org/ledger.html and
+    /// also <https://xrpl.org/tx.html>. In other API
     /// methods it is found outside (next to) the transaction field.
-    #[serde(rename = "metaData")]
+    #[serde(rename = "meta", alias = "metaData")]
     pub meta: Option<Meta>,
+
+    /// `owner_funds` is present in transactions returned by book subscription, see
+    /// <https://xrpl.org/subscribe.html#order-book-streams>.
+    #[serde(rename = "owner_funds")]
+    pub owner_funds: Option<String>,
 }
 
 /// Ledger object. See <https://xrpl.org/ledger-object-types.html>

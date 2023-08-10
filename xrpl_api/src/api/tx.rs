@@ -44,16 +44,6 @@ impl TxRequest {
 
 #[derive(Debug, Deserialize)]
 pub struct TxResponse {
-    /// The SHA-512 hash of the transaction.
-    // pub hash: String,
-    /// The ledger index of the ledger that includes this transaction.
-    pub ledger_index: u32,
-    /// If true, this data comes from a validated ledger version; if omitted or
-    /// set to false, this data is not final.
-    pub validated: bool,
-    /// Transaction metadata, which describes the results of the transaction.
-    pub meta: Meta,
-    /// Other fields from the Transaction object.
     #[serde(flatten)]
     pub tx: Transaction,
 }

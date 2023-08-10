@@ -9,6 +9,7 @@ use crate::{
     WithLedgerSpec, WithRequestPagination, WithResponsePagination,
 };
 use serde::{Deserialize, Serialize};
+use xrpl_types::LedgerIndex;
 
 #[derive(Default, Debug, Clone, Serialize)]
 pub struct AccountTxRequest {
@@ -18,8 +19,10 @@ pub struct AccountTxRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ledger_index_max: Option<String>,
     pub forward: Option<bool>,
-    #[serde(flatten)]
-    pub ledger_spec: RetrieveLedgerSpec,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ledger_hash: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ledger_index: Option<LedgerIndex>,
     #[serde(flatten)]
     pub pagination: RequestPagination,
 }
@@ -29,16 +32,6 @@ impl Request for AccountTxRequest {
 
     fn method(&self) -> String {
         "account_tx".to_owned()
-    }
-}
-
-impl WithLedgerSpec for AccountTxRequest {
-    fn as_ledger_spec(&self) -> &crate::RetrieveLedgerSpec {
-        &self.ledger_spec
-    }
-
-    fn as_ledger_spec_mut(&mut self) -> &mut crate::RetrieveLedgerSpec {
-        &mut self.ledger_spec
     }
 }
 
@@ -72,9 +65,10 @@ pub struct AccountTransaction {
 #[derive(Debug, Deserialize)]
 pub struct AccountTxResponse {
     pub account: String,
+    pub ledger_index_min: u32,
+    pub ledger_index_max: u32,
     pub transactions: Vec<AccountTransaction>,
-    #[serde(flatten)]
-    pub ledger_spec: ReturnLedgerSpec,
+    pub validated: bool,
     #[serde(flatten)]
     pub pagination: ResponsePagination,
 }

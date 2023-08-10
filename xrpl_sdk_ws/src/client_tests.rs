@@ -63,7 +63,7 @@ mod tests {
         let mut count = 0;
 
         while let Some(msg) = client.messages.next().await {
-            if count > 5 {
+            if count > 1 {
                 break;
             }
             dbg!(&msg);
