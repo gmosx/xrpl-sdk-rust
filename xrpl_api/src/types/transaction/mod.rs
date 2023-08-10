@@ -22,6 +22,7 @@ use serde::Deserialize;
 pub enum Transaction {
     AccountDelete(AccountDeleteTransaction),
     AccountSet(AccountSetTransaction),
+    // TODO add model for remaining transactions
     CheckCancel(TransactionCommon),
     CheckCash(TransactionCommon),
     CheckCreate(TransactionCommon),

@@ -2,9 +2,7 @@
 //!
 //! TIP: Better use the more specialized methods, like `get_offer_object`.
 
-use crate::{
-    LedgerObject, OfferParams, Request, RetrieveLedgerSpec, ReturnLedgerSpec, WithLedgerSpec,
-};
+use crate::{LedgerObject, Request, RetrieveLedgerSpec, ReturnLedgerSpec, WithLedgerSpec};
 use serde::{Deserialize, Serialize};
 
 #[derive(Default, Debug, Clone, Serialize)]
@@ -17,6 +15,12 @@ pub struct LedgerEntryRequest {
     pub offer: Option<OfferParams>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub account_root: Option<String>,
+}
+
+#[derive(Default, Debug, Clone, Serialize)]
+pub struct OfferParams {
+    pub account: String,
+    pub seq: u32,
 }
 
 impl Request for LedgerEntryRequest {

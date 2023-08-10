@@ -46,3 +46,9 @@ pub struct TransactionCommon {
     #[serde(rename = "owner_funds")]
     pub owner_funds: Option<String>,
 }
+
+// #[derive(Debug, Deserialize)]
+// pub struct Memo {
+//     #[serde(rename = "MemoData")]
+//     pub memo_data: Option<String>,
+// }
