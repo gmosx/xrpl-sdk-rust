@@ -3,7 +3,7 @@
 //!
 //! <https://xrpl.org/tx.html>
 
-use crate::{types::Meta, types::Transaction, Request};
+use crate::{types::Transaction, Request};
 use serde::{Deserialize, Serialize};
 
 #[derive(Default, Debug, Clone, Serialize)]

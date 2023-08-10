@@ -4,30 +4,26 @@
 //!
 //! <https://xrpl.org/ledger_data.html>
 
-use crate::Request;
+use crate::{
+    LedgerObject, ObjectType, Request, RequestPagination, ResponsePagination, RetrieveLedgerSpec,
+    ReturnLedgerSpec, WithLedgerSpec, WithRequestPagination, WithResponsePagination,
+};
 use serde::{Deserialize, Serialize};
+use xrpl_types::LedgerIndex;
 
 // TIP: Better use the more specialized methods, like `get_offer_object`.
 
 #[derive(Default, Debug, Clone, Serialize)]
 pub struct LedgerDataRequest {
-    /// A 20-byte hex string for the ledger version to use.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    ledger_hash: Option<String>,
-    /// The ledger index of the ledger to use, or a shortcut string to choose a ledger automatically.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    ledger_index: Option<String>,
     /// If set to true, return ledger objects as hashed hex strings instead of JSON.
     #[serde(skip_serializing_if = "Option::is_none")]
-    binary: Option<bool>,
-    /// Limit the number of ledger objects to retrieve. The server is not
-    /// required to honor this value.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    limit: Option<u32>,
-    /// Value from a previous paginated response. Resume retrieving data where
-    /// that response left off.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    marker: Option<String>,
+    pub binary: Option<bool>,
+    #[serde(rename = "type", skip_serializing_if = "Option::is_none")]
+    pub object_type: Option<ObjectType>,
+    #[serde(flatten)]
+    pub ledger_spec: RetrieveLedgerSpec,
+    #[serde(flatten)]
+    pub pagination: RequestPagination,
 }
 
 impl Request for LedgerDataRequest {
@@ -38,38 +34,59 @@ impl Request for LedgerDataRequest {
     }
 }
 
-impl LedgerDataRequest {
-    // #TODO force either ledger_hash or ledger_index
-    pub fn new(ledger_hash: &str) -> Self {
-        Self {
-            ledger_hash: Some(ledger_hash.to_owned()),
-            ..Default::default()
-        }
+impl WithLedgerSpec for LedgerDataRequest {
+    fn as_ledger_spec(&self) -> &crate::RetrieveLedgerSpec {
+        &self.ledger_spec
+    }
+
+    fn as_ledger_spec_mut(&mut self) -> &mut crate::RetrieveLedgerSpec {
+        &mut self.ledger_spec
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+impl WithRequestPagination for LedgerDataRequest {
+    fn as_pagination(&self) -> &RequestPagination {
+        &self.pagination
+    }
+
+    fn as_pagination_mut(&mut self) -> &mut RequestPagination {
+        &mut self.pagination
+    }
+}
+
+impl LedgerDataRequest {
+    pub fn with_ledger_hash(ledger_hash: impl Into<String>) -> Self {
+        LedgerDataRequest::default().ledger_hash(ledger_hash)
+    }
+
+    pub fn with_ledger_index(ledger_index: LedgerIndex) -> Self {
+        LedgerDataRequest::default().ledger_index(ledger_index)
+    }
+}
+
+#[derive(Debug, Deserialize)]
 pub struct LedgerData {
     /// Hex representation of the requested data.
     /// (Only included if "binary":true)
     pub data: Option<String>,
-    #[serde(rename = "LedgerEntryType")]
-    /// String indicating what type of ledger object this object represents.
-    /// (Only included if "binary":false)
-    pub ledger_entry_type: Option<String>,
+    #[serde(flatten)]
+    pub object: Option<LedgerObject>,
     /// Unique identifier for this ledger entry, as hex.
     pub index: String,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct LedgerDataResponse {
-    /// The ledger index of the ledger that was used when retrieving this data.
-    pub ledger_index: u32,
-    /// Unique identifying hash of this ledger version.
-    pub ledger_hash: String,
     /// Array of JSON objects containing data from the ledger's state tree.
     pub state: Vec<LedgerData>,
-    /// Server-defined value indicating the response is paginated. Pass this to
-    /// the next call to resume where this call left off.
-    pub marker: Option<String>,
+    #[serde(flatten)]
+    pub ledger_spec: ReturnLedgerSpec,
+    #[serde(flatten)]
+    pub pagination: ResponsePagination,
+}
+
+impl WithResponsePagination for LedgerDataResponse {
+    fn as_pagination(&self) -> &ResponsePagination {
+        &self.pagination
+    }
 }

@@ -1,15 +1,17 @@
 use serde::{Deserialize, Serialize};
-use xrpl_types::{Amount, TransactionType};
+use xrpl_types::Amount;
 
 // Submodules defining ledger objects: (https://xrpl.org/ledger-object-types.html)
 
 mod account_root;
 mod offer;
 mod ripple_state;
+mod transaction;
 
 pub use account_root::*;
 pub use offer::*;
 pub use ripple_state::*;
+pub use transaction::*;
 
 pub trait Request {
     type Response;
@@ -112,73 +114,6 @@ pub struct Meta {
 //     #[serde(rename = "MemoData")]
 //     pub memo_data: Option<String>,
 // }
-
-// TODO: rename to `Tx`? nah...
-#[derive(Debug, Clone, Deserialize)]
-pub struct Transaction {
-    #[serde(rename = "Account")]
-    pub account: String,
-
-    #[serde(rename = "SourceTag")]
-    pub source_tag: Option<u32>,
-
-    #[serde(rename = "Fee")]
-    pub fee: String,
-
-    #[serde(rename = "Destination")]
-    pub destination: Option<String>,
-
-    #[serde(rename = "DestinationTag")]
-    pub destination_tag: Option<u32>,
-
-    #[serde(rename = "Amount")]
-    pub amount: Option<Amount>,
-
-    #[serde(rename = "Flags")]
-    pub flags: Option<u32>,
-
-    #[serde(rename = "Memos")]
-    // pub memos: Option<Vec<Memo>>,
-    pub memos: Option<Vec<serde_json::Value>>,
-
-    #[serde(rename = "Sequence")]
-    pub sequence: u32,
-
-    #[serde(rename = "TakerGets")]
-    pub taker_gets: Option<Amount>,
-
-    #[serde(rename = "TakerPays")]
-    pub taker_pays: Option<Amount>,
-
-    #[serde(rename = "TransactionType")]
-    pub transaction_type: TransactionType,
-
-    #[serde(rename = "TxnSignature")]
-    pub txn_signature: Option<String>,
-
-    /// Close time of the ledger in which the transaction is included
-    pub date: Option<u64>,
-
-    /// Transaction hash
-    pub hash: String,
-
-    /// The ledger index of the ledger that includes this transaction.
-    pub ledger_index: u32,
-    /// If true, this data comes from a validated ledger version; if omitted or
-    /// set to false, this data is not final.
-    pub validated: bool,
-
-    /// Meta is present in transactions returned by https://xrpl.org/ledger.html and
-    /// also <https://xrpl.org/tx.html>. In other API
-    /// methods it is found outside (next to) the transaction field.
-    #[serde(rename = "meta", alias = "metaData")]
-    pub meta: Option<Meta>,
-
-    /// `owner_funds` is present in transactions returned by book subscription, see
-    /// <https://xrpl.org/subscribe.html#order-book-streams>.
-    #[serde(rename = "owner_funds")]
-    pub owner_funds: Option<String>,
-}
 
 /// Ledger object. See <https://xrpl.org/ledger-object-types.html>
 #[derive(Debug, Clone, Deserialize)]

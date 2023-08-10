@@ -151,7 +151,7 @@ mod tests {
         let client = Client::default();
 
         let resp = client
-            .call(LedgerDataRequest::new(
+            .call(LedgerDataRequest::with_ledger_hash(
                 "842B57C1CC0613299A686D3E9F310EC0422C84D3911E5056389AA7E5808A93C8",
             ))
             .await;
@@ -164,7 +164,7 @@ mod tests {
         let client = Client::default();
 
         let resp = client
-            .call(LedgerEntryRequest::new(
+            .call(LedgerEntryRequest::offer(
                 "rf1BiGeXwwQoi8Z2ueFYTEXSwuJYfV2Jpn",
                 359,
             ))
@@ -283,8 +283,8 @@ mod tests {
 
         let resp = resp.expect("error response");
 
-        assert_eq!(resp.tx.hash, tx_hash);
-        assert_eq!(resp.ledger_index, 56865245);
+        assert_eq!(resp.tx.common().hash, tx_hash);
+        assert_eq!(resp.tx.common().ledger_index, Some(56865245));
     }
 
     #[tokio::test]

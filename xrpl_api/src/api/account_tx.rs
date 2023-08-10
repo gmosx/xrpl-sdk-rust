@@ -5,8 +5,7 @@
 
 use crate::{
     types::{Meta, Transaction},
-    Request, RequestPagination, ResponsePagination, RetrieveLedgerSpec, ReturnLedgerSpec,
-    WithLedgerSpec, WithRequestPagination, WithResponsePagination,
+    Request, RequestPagination, ResponsePagination, WithRequestPagination, WithResponsePagination,
 };
 use serde::{Deserialize, Serialize};
 use xrpl_types::LedgerIndex;

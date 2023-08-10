@@ -1,8 +1,9 @@
 //! <https://xrpl.org/account_objects.html>
 
 use crate::{
-    types::LedgerObject, Request, RequestPagination, ResponsePagination, RetrieveLedgerSpec,
-    ReturnLedgerSpec, WithLedgerSpec, WithRequestPagination, WithResponsePagination,
+    types::LedgerObject, ObjectType, Request, RequestPagination, ResponsePagination,
+    RetrieveLedgerSpec, ReturnLedgerSpec, WithLedgerSpec, WithRequestPagination,
+    WithResponsePagination,
 };
 use serde::{Deserialize, Serialize};
 
@@ -10,7 +11,7 @@ use serde::{Deserialize, Serialize};
 pub struct AccountObjectsRequest {
     pub account: String,
     #[serde(rename = "type", skip_serializing_if = "Option::is_none")]
-    pub object_type: Option<AccountObjectType>,
+    pub object_type: Option<ObjectType>,
     #[serde(flatten)]
     pub ledger_spec: RetrieveLedgerSpec,
     #[serde(flatten)]
@@ -45,21 +46,6 @@ impl WithRequestPagination for AccountObjectsRequest {
     }
 }
 
-#[derive(Clone, Debug, Copy, Eq, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-pub enum AccountObjectType {
-    Check,
-    DepositPreauth,
-    Escrow,
-    NftOffer,
-    NftPage,
-    Offer,
-    PaymentChannel,
-    SignerList,
-    State,
-    Ticket,
-}
-
 impl AccountObjectsRequest {
     pub fn new(account: &str) -> Self {
         Self {
@@ -68,7 +54,7 @@ impl AccountObjectsRequest {
         }
     }
 
-    pub fn object_type(self, object_type: AccountObjectType) -> Self {
+    pub fn object_type(self, object_type: ObjectType) -> Self {
         Self {
             object_type: Some(object_type),
             ..self
