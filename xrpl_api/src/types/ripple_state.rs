@@ -105,6 +105,5 @@ mod test {
 "#;
 
         let _ripple_state: RippleState = serde_json::from_str(json).unwrap();
-        println!("{:#?}", _ripple_state);
     }
 }
