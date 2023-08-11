@@ -14,12 +14,13 @@ use xrpl_types::LedgerIndex;
 pub struct AccountTxRequest {
     pub account: String,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub ledger_hash: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub ledger_index_min: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ledger_index_max: Option<String>,
     pub forward: Option<bool>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub ledger_hash: Option<String>,
+
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ledger_index: Option<LedgerIndex>,
     #[serde(flatten)]
