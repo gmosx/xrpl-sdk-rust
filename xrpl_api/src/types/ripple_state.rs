@@ -1,5 +1,5 @@
 use enumflags2::{bitflags, BitFlags};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use xrpl_types::IssuedAmount;
 
@@ -31,7 +31,7 @@ use xrpl_types::IssuedAmount;
 ///     "PreviousTxnLgrSeq": 14090896,
 ///     "index": "9CA88CDEDFF9252B3DE183CE35B038F57282BC9503CDFA1923EF9A95DF0D6F7B"
 /// }
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct RippleState {
     pub balance: IssuedAmount,

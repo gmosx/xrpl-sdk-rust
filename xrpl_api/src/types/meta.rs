@@ -1,7 +1,7 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use xrpl_types::Amount;
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub enum AffectedNode {
     CreatedNode {
         #[serde(rename = "LedgerEntryType")]
@@ -37,7 +37,7 @@ pub enum AffectedNode {
     },
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct Meta {
     pub affected_nodes: Vec<AffectedNode>,

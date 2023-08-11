@@ -1,9 +1,9 @@
 use crate::TransactionCommon;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use xrpl_types::Amount;
 
 /// An `OfferCreate` transaction <https://xrpl.org/offercreate.html>
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct OfferCreateTransaction {
     #[serde(flatten)]
