@@ -7,14 +7,14 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Default, Debug, Clone, Serialize)]
 pub struct LedgerEntryRequest {
-    #[serde(flatten)]
-    pub ledger_spec: RetrieveLedgerSpec,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub binary: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub offer: Option<OfferParams>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub account_root: Option<String>,
+    #[serde(flatten)]
+    pub ledger_spec: RetrieveLedgerSpec,
 }
 
 #[derive(Default, Debug, Clone, Serialize)]
