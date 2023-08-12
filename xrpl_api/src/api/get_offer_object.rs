@@ -2,10 +2,10 @@
 //!
 //! <https://xrpl.org/ledger_entry.html#get-offer-object>
 
-use crate::Offer;
+use crate::{Offer, OfferParams};
 use serde::{Deserialize, Serialize};
 
-use crate::{types::OfferParams, Request};
+use crate::Request;
 
 #[derive(Default, Debug, Clone, Serialize)]
 pub struct GetOfferObjectRequest {

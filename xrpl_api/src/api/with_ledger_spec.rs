@@ -16,11 +16,11 @@ pub trait WithLedgerSpec: Request {
         self
     }
 
-    fn ledger_hash(mut self, ledger_hash: String) -> Self
+    fn ledger_hash(mut self, ledger_hash: impl Into<String>) -> Self
     where
         Self: Sized,
     {
-        self.as_ledger_spec_mut().ledger_hash = Some(ledger_hash);
+        self.as_ledger_spec_mut().ledger_hash = Some(ledger_hash.into());
         self
     }
 

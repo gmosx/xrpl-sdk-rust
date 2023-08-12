@@ -2,17 +2,13 @@
 
 use serde::{Deserialize, Serialize};
 
-use crate::Request;
+use crate::{Request, RetrieveLedgerSpec, ReturnLedgerSpec, WithLedgerSpec};
 
 #[derive(Default, Debug, Clone, Serialize)]
 pub struct AccountCurrenciesRequest {
     pub account: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub ledger_hash: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub ledger_index: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub strict: Option<bool>,
+    #[serde(flatten)]
+    pub ledger_spec: RetrieveLedgerSpec,
 }
 
 impl Request for AccountCurrenciesRequest {
@@ -20,6 +16,16 @@ impl Request for AccountCurrenciesRequest {
 
     fn method(&self) -> String {
         "account_currencies".to_owned()
+    }
+}
+
+impl WithLedgerSpec for AccountCurrenciesRequest {
+    fn as_ledger_spec(&self) -> &crate::RetrieveLedgerSpec {
+        &self.ledger_spec
+    }
+
+    fn as_ledger_spec_mut(&mut self) -> &mut crate::RetrieveLedgerSpec {
+        &mut self.ledger_spec
     }
 }
 
@@ -32,14 +38,12 @@ impl AccountCurrenciesRequest {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Deserialize)]
 pub struct AccountCurrenciesResponse {
-    /// The ledger index of the ledger version used to retrieve this data.
-    pub ledger_index: u32,
     /// Array of Currency Codes for currencies that this account can receive.
     pub receive_currencies: Vec<String>,
     /// Array of Currency Codes for currencies that this account can send.
     pub send_currencies: Vec<String>,
-    /// If true, this data comes from a validated ledger.
-    pub validated: bool,
+    #[serde(flatten)]
+    pub ledger_spec: ReturnLedgerSpec,
 }
