@@ -8,6 +8,7 @@ mod nf_token_offer;
 mod offer;
 mod ripple_state;
 mod transaction;
+mod transactions;
 
 pub use account_root::*;
 pub use meta::*;
@@ -15,6 +16,7 @@ pub use nf_token_offer::*;
 pub use offer::*;
 pub use ripple_state::*;
 pub use transaction::*;
+pub use transactions::*;
 
 pub trait Request {
     type Response;
