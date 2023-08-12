@@ -1,5 +1,6 @@
 mod common;
 mod variants;
+
 use serde::Deserialize;
 
 pub use common::*;
