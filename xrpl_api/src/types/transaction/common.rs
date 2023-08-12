@@ -1,4 +1,4 @@
-use crate::Meta;
+use crate::types::Meta;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
