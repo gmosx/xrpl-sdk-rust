@@ -2,7 +2,7 @@ use clap::ArgMatches;
 use xrpl_sdk_jsonrpc::{AccountLinesRequest, Client};
 
 pub fn account_trustlines(account_matches: &ArgMatches, lines_matches: &ArgMatches) {
-    let account = account_matches.value_of("ACCOUNT").unwrap();
+    let account: &String = account_matches.get_one("ACCOUNT").unwrap();
 
     let rt = tokio::runtime::Runtime::new().unwrap();
 
@@ -16,13 +16,13 @@ pub fn account_trustlines(account_matches: &ArgMatches, lines_matches: &ArgMatch
         let resp = client.call(AccountLinesRequest::new(account)).await;
 
         if let Ok(resp) = resp {
-            if lines_matches.is_present("json") {
-                if lines_matches.is_present("pretty") {
+            if lines_matches.get_flag("json") {
+                if lines_matches.get_flag("pretty") {
                     println!("{}", serde_json::to_string_pretty(&resp.lines).unwrap());
                 } else {
                     println!("{}", serde_json::to_string(&resp.lines).unwrap());
                 }
-            } else if lines_matches.is_present("pretty") {
+            } else if lines_matches.get_flag("pretty") {
                 for offer in resp.lines {
                     println!("{offer:?}");
                 }

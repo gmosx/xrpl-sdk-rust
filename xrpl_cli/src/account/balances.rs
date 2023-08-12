@@ -6,7 +6,7 @@ use xrpl_sdk_jsonrpc::{AccountInfoRequest, AccountLinesRequest, Client};
 // #TODO add error handling
 
 pub fn account_balances(account_matches: &ArgMatches, balances_matches: &ArgMatches) {
-    let account = account_matches.value_of("ACCOUNT").unwrap();
+    let account: &String = account_matches.get_one("ACCOUNT").unwrap();
 
     let rt = tokio::runtime::Runtime::new().unwrap();
 
@@ -39,8 +39,8 @@ pub fn account_balances(account_matches: &ArgMatches, balances_matches: &ArgMatc
                 }
             }
 
-            if balances_matches.is_present("json") {
-                if balances_matches.is_present("pretty") {
+            if balances_matches.get_flag("json") {
+                if balances_matches.get_flag("pretty") {
                     println!("{}", serde_json::to_string_pretty(&balances).unwrap());
                 } else {
                     println!("{}", serde_json::to_string(&balances).unwrap());
