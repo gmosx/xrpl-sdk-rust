@@ -32,6 +32,10 @@ xrpl account ADDRESS offers --pretty
 xrpl account ADDRESS offers --json --pretty
 xrpl account ADDRESS offers -jp
 
+xrpl account ADDRESS offers list
+
+xrpl account ADDRESS --public-key=".." --secret-key=".." offers remove <SEQUENCE>
+
 xrpl ledger --closed
 ```
 
