@@ -21,6 +21,7 @@ pub async fn remove_offer(
 
     let tx = client.prepare_transaction(tx).await?;
 
+    // #todo
     let public_key = std::env::var("XRPL_ACC_PK").unwrap();
     let secret_key = std::env::var("XRPL_ACC_SK").unwrap();
 
@@ -32,7 +33,9 @@ pub async fn remove_offer(
     let tx_blob = serialize_transaction_to_hex(&tx);
 
     let req = SubmitRequest::new(&tx_blob);
-    let _resp = client.call(req).await?;
+    let resp = client.call(req).await?;
+
+    println!("{resp}");
 
     Ok(())
 }
