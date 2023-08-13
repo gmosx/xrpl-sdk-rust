@@ -9,15 +9,3 @@ pub struct OfferCancelTransaction {
     pub common: TransactionCommon,
     pub offer_sequence: u32,
 }
-
-impl OfferCancelTransaction {
-    pub fn new(account: String, offer_sequence: u32) -> Self {
-        Self {
-            common: TransactionCommon {
-                account,
-                ..Default::default()
-            },
-            offer_sequence,
-        }
-    }
-}

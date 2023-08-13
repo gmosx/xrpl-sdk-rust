@@ -1,35 +1,34 @@
 use clap::ArgMatches;
 use xrpl_sdk_jsonrpc::{AccountOffersRequest, Client};
 
-pub fn list_offers(account: impl AsRef<str>, list_offers_matches: &ArgMatches) {
+pub async fn list_offers(
+    account: impl AsRef<str>,
+    list_offers_matches: &ArgMatches,
+) -> anyhow::Result<()> {
     let account = account.as_ref();
 
-    let rt = tokio::runtime::Runtime::new().unwrap();
+    let client = Client::new();
+    // TODO: add limit option
+    // TODO: also use account from environment.
+    // TODO: render as text/md, html and json.
+    // TODO: use handlebars for formatting?
 
-    rt.block_on(async {
-        let client = Client::new();
-        // TODO: add limit option
-        // TODO: also use account from environment.
-        // TODO: render as text/md, html and json.
-        // TODO: use handlebars for formatting?
+    let req = AccountOffersRequest::new(account);
+    let resp = client.call(req).await?;
 
-        let req = AccountOffersRequest::new(account);
-        let resp = client.call(req).await;
-
-        if let Ok(resp) = resp {
-            if list_offers_matches.get_flag("json") {
-                if list_offers_matches.get_flag("pretty") {
-                    println!("{}", serde_json::to_string_pretty(&resp.offers).unwrap());
-                } else {
-                    println!("{}", serde_json::to_string(&resp.offers).unwrap());
-                }
-            } else if list_offers_matches.get_flag("pretty") {
-                for offer in resp.offers {
-                    println!("{offer:?}");
-                }
-            } else {
-                println!("{:?}", resp.offers);
-            }
+    if list_offers_matches.get_flag("json") {
+        if list_offers_matches.get_flag("pretty") {
+            println!("{}", serde_json::to_string_pretty(&resp.offers).unwrap());
+        } else {
+            println!("{}", serde_json::to_string(&resp.offers).unwrap());
         }
-    });
+    } else if list_offers_matches.get_flag("pretty") {
+        for offer in resp.offers {
+            println!("{offer:?}");
+        }
+    } else {
+        println!("{:?}", resp.offers);
+    }
+
+    Ok(())
 }

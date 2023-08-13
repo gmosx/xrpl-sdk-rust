@@ -15,7 +15,8 @@ use ledger::closed::ledger_closed;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
-fn main() {
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt::init();
 
     // `account` subcommand
@@ -178,18 +179,20 @@ fn main() {
 
     if let Some(account_matches) = matches.subcommand_matches("account") {
         if let Some(info_matches) = account_matches.subcommand_matches("info") {
-            account_info(account_matches, info_matches);
+            account_info(account_matches, info_matches).await?;
         } else if let Some(balance_matches) = account_matches.subcommand_matches("balances") {
-            account_balances(account_matches, balance_matches);
+            account_balances(account_matches, balance_matches).await?;
         } else if let Some(offers_matches) = account_matches.subcommand_matches("offers") {
-            account_offers(account_matches, offers_matches);
+            account_offers(account_matches, offers_matches).await?;
         } else if let Some(offers_matches) = account_matches.subcommand_matches("trustlines") {
-            account_trustlines(account_matches, offers_matches);
+            account_trustlines(account_matches, offers_matches).await?;
         }
     } else if let Some(ledger_matches) = matches.subcommand_matches("ledger") {
         // #TODO properly handle this
-        ledger_closed(ledger_matches);
+        ledger_closed(ledger_matches).await?;
     } else {
         xrpl_cmd.print_long_help().unwrap();
     }
+
+    Ok(())
 }

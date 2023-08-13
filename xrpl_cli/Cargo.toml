@@ -8,16 +8,17 @@ keywords = ["xrpl", "ledger", "cli"]
 authors = ["George Moschovitis <gmosx@reizu.org>"]
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
+anyhow = "1"
 clap = { version = "4", features = ["derive"] }
 tokio = { version = "1", features = ["full"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 tracing = "0.1"
 tracing-subscriber = "0.3"
-xrpl_api = { path = "../xrpl_api", version = "0.11" }
+hex = "0.4"
+xrpl_binary_codec = { path = "../xrpl_binary_codec", version = "0.11" }
+xrpl_types = { path = "../xrpl_types", version = "0.11" }
 xrpl_sdk_jsonrpc = { path = "../xrpl_sdk_jsonrpc", version = "0.11" }
 
 [[bin]]
