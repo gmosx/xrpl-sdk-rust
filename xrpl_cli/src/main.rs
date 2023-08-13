@@ -67,29 +67,33 @@ fn main() {
         )
         .subcommand(
             Command::new("offers")
-                .about("offers")
-                .arg(
-                    Arg::new("limit")
-                        .short('l')
-                        .long("limit")
-                        .value_name("LIMIT")
-                        .help("The maximum count of offers returned")
-                        .required(false)
-                        .action(ArgAction::Set),
-                )
-                .arg(
-                    Arg::new("json")
-                        .short('j')
-                        .long("json")
-                        .help("Format response as JSON")
-                        .action(ArgAction::SetTrue),
-                )
-                .arg(
-                    Arg::new("pretty")
-                        .short('p')
-                        .long("pretty")
-                        .help("Pretty-print the response")
-                        .action(ArgAction::SetTrue),
+                .about("Account offers")
+                .subcommand(
+                    Command::new("list")
+                        .about("List account offers")
+                        .arg(
+                            Arg::new("limit")
+                                .short('l')
+                                .long("limit")
+                                .value_name("LIMIT")
+                                .help("The maximum count of offers returned")
+                                .required(false)
+                                .action(ArgAction::Set),
+                        )
+                        .arg(
+                            Arg::new("json")
+                                .short('j')
+                                .long("json")
+                                .help("Format response as JSON")
+                                .action(ArgAction::SetTrue),
+                        )
+                        .arg(
+                            Arg::new("pretty")
+                                .short('p')
+                                .long("pretty")
+                                .help("Pretty-print the response")
+                                .action(ArgAction::SetTrue),
+                        ),
                 )
                 .subcommand(
                     Command::new("remove").about("Remove offer").arg(
