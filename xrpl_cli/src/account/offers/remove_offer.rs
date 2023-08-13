@@ -21,11 +21,12 @@ pub async fn remove_offer(
 
     let tx = client.prepare_transaction(tx).await?;
 
-    // #todo
+    // #insight
+    // The secret/private key is 32 bytes, the public key is 33 bytes.
+
+    // #todo get as cli arguments
     let public_key = std::env::var("XRPL_ACC_PK").unwrap();
     let secret_key = std::env::var("XRPL_ACC_SK").unwrap();
-
-    println!("== {tx:?}");
 
     let public_key = hex::decode(public_key)?;
     let secret_key = hex::decode(secret_key)?;
