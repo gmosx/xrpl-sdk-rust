@@ -116,7 +116,6 @@ impl Client {
 
         let body = serde_json::to_string(&request)?;
 
-        dbg!(&body);
         debug!("POST {}", body);
 
         let response = self

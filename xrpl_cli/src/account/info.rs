@@ -2,7 +2,7 @@ use clap::ArgMatches;
 use xrpl_sdk_jsonrpc::{AccountInfoRequest, Client};
 
 pub fn account_info(account_matches: &ArgMatches, info_matches: &ArgMatches) {
-    let account = account_matches.value_of("ACCOUNT").unwrap();
+    let account: &String = account_matches.get_one("ACCOUNT").unwrap();
 
     let rt = tokio::runtime::Runtime::new().unwrap();
 
@@ -15,8 +15,8 @@ pub fn account_info(account_matches: &ArgMatches, info_matches: &ArgMatches) {
         let resp = client.call(AccountInfoRequest::new(account)).await;
 
         if let Ok(resp) = resp {
-            if info_matches.is_present("json") {
-                if info_matches.is_present("pretty") {
+            if info_matches.get_flag("json") {
+                if info_matches.get_flag("pretty") {
                     println!(
                         "{}",
                         serde_json::to_string_pretty(&resp.account_data).unwrap()
