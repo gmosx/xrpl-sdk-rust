@@ -94,8 +94,8 @@ fn main() {
                 .subcommand(
                     Command::new("remove").about("Remove offer").arg(
                         // Positional argument.
-                        Arg::new("OFFER_ID")
-                            .help("The id of the offer")
+                        Arg::new("OFFER_SEQ")
+                            .help("The sequence of the offer")
                             .required(true)
                             .index(1),
                     ),
