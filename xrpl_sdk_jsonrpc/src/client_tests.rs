@@ -7,9 +7,9 @@ mod tests {
         DepositAuthorizedRequest, FeeRequest, GatewayBalancesRequest, GetOfferObjectRequest,
         LedgerClosedRequest, LedgerCurrentRequest, LedgerDataRequest, LedgerEntryRequest,
         LedgerRequest, ManifestRequest, PingRequest, RandomRequest, ServerInfoRequest,
-        ServerStateRequest, TransactionEntryRequest, TxRequest,
+        ServerStateRequest, TransactionEntryRequest, TxRequest, WithRequestPagination,
     };
-    use xrpl_types::Currency;
+    use xrpl_types::{Currency, LedgerIndex};
 
     #[tokio::test]
     async fn client_can_fetch_account_currencies() {
@@ -28,7 +28,7 @@ mod tests {
     async fn client_can_fetch_account_info() {
         let client = Client::default();
 
-        let req = AccountInfoRequest::new("r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59").strict(true);
+        let req = AccountInfoRequest::new("r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59");
         let resp = client.call(req).await;
 
         dbg!(&resp);
@@ -151,7 +151,7 @@ mod tests {
         let client = Client::default();
 
         let resp = client
-            .call(LedgerDataRequest::new(
+            .call(LedgerDataRequest::with_ledger_hash(
                 "842B57C1CC0613299A686D3E9F310EC0422C84D3911E5056389AA7E5808A93C8",
             ))
             .await;
@@ -164,7 +164,7 @@ mod tests {
         let client = Client::default();
 
         let resp = client
-            .call(LedgerEntryRequest::new(
+            .call(LedgerEntryRequest::offer(
                 "rf1BiGeXwwQoi8Z2ueFYTEXSwuJYfV2Jpn",
                 359,
             ))
@@ -266,7 +266,7 @@ mod tests {
                 TransactionEntryRequest::new(
                     "DA86C7F1979A010BB5F54C49116697A44D8088F92C9AA3AAE419136FE8275A10",
                 )
-                .ledger_index("73355924"),
+                .ledger_index(LedgerIndex::Index(73355924)),
             )
             .await;
 
@@ -283,8 +283,8 @@ mod tests {
 
         let resp = resp.expect("error response");
 
-        assert_eq!(resp.tx.hash, tx_hash);
-        assert_eq!(resp.ledger_index, 56865245);
+        assert_eq!(resp.tx.common().hash, tx_hash);
+        assert_eq!(resp.tx.common().ledger_index, Some(56865245));
     }
 
     #[tokio::test]

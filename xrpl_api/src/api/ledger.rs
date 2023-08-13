@@ -1,16 +1,10 @@
 //! <https://xrpl.org/ledger.html>
 
-use crate::{types::Transaction, Request};
+use crate::{types::Transaction, Request, RetrieveLedgerSpec, ReturnLedgerSpec, WithLedgerSpec};
 use serde::{Deserialize, Serialize};
 
 // #TODO refactor to make the two variants internal!
 // #TODO add tests
-
-#[derive(Default, Debug, Clone, Serialize)]
-pub struct LedgerTransactionsRequest {
-    #[serde(flatten)]
-    pub ledger_request: LedgerRequest,
-}
 
 #[derive(Default, Debug, Clone, Serialize)]
 pub struct ExpandLedgerRequest {
@@ -21,24 +15,44 @@ pub struct ExpandLedgerRequest {
 #[derive(Default, Debug, Clone, Serialize)]
 pub struct LedgerRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub ledger_hash: Option<String>,
-    /// The ledger index of the ledger to use, or a shortcut string to choose a ledger automatically.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub ledger_index: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub full: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub accounts: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub transactions: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub expand: Option<bool>,
+    expand: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub owner_funds: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub binary: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub queue: Option<bool>,
+    #[serde(rename = "type", skip_serializing_if = "Option::is_none")]
+    pub object_type: Option<ObjectType>,
+    #[serde(flatten)]
+    pub ledger_spec: RetrieveLedgerSpec,
+}
+
+#[derive(Clone, Debug, Copy, Eq, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ObjectType {
+    Account,
+    Amendments,
+    Amm,
+    Check,
+    DepositPreauth,
+    Directory,
+    Escrow,
+    Fee,
+    Hashes,
+    NftOffer,
+    NftPage,
+    Offer,
+    PaymentChannel,
+    SignerList,
+    State,
+    Ticket,
 }
 
 impl Request for LedgerRequest {
@@ -46,6 +60,16 @@ impl Request for LedgerRequest {
 
     fn method(&self) -> String {
         "ledger".to_owned()
+    }
+}
+
+impl WithLedgerSpec for LedgerRequest {
+    fn as_ledger_spec(&self) -> &crate::RetrieveLedgerSpec {
+        &self.ledger_spec
+    }
+
+    fn as_ledger_spec_mut(&mut self) -> &mut crate::RetrieveLedgerSpec {
+        &mut self.ledger_spec
     }
 }
 
@@ -84,17 +108,13 @@ impl Request for ExpandLedgerRequest {
 
 #[derive(Debug, Deserialize)]
 pub struct LedgerResponse<TransactionType> {
-    /// Unique identifying hash of the entire ledger.
-    pub ledger_hash: String,
-    /// The Ledger Index of this ledger.
-    pub ledger_index: u32,
-    /// (May be omitted) If true, this is a validated ledger version. If omitted or set to false, this ledger's data is not final.
-    pub validated: bool,
     /// (Omitted unless requested with the queue parameter) Array of objects describing queued transactions, in the same order as the queue.
     /// If the request specified expand as true, members contain full representations of the transactions, in either JSON or binary depending on whether the request specified binary as true.
-    pub queue_data: Option<u64>,
+    // pub queue_data: Vec<???>,
     /// The complete header data of this ledger.
     pub ledger: Ledger<TransactionType>,
+    #[serde(flatten)]
+    pub ledger_spec: ReturnLedgerSpec,
 }
 
 #[derive(Debug, Deserialize)]

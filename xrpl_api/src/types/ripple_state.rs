@@ -1,5 +1,5 @@
 use enumflags2::{bitflags, BitFlags};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use xrpl_types::IssuedAmount;
 
@@ -31,7 +31,7 @@ use xrpl_types::IssuedAmount;
 ///     "PreviousTxnLgrSeq": 14090896,
 ///     "index": "9CA88CDEDFF9252B3DE183CE35B038F57282BC9503CDFA1923EF9A95DF0D6F7B"
 /// }
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct RippleState {
     pub balance: IssuedAmount,
@@ -48,6 +48,12 @@ pub struct RippleState {
     pub low_node: Option<String>,
     pub low_quality_in: Option<u32>,
     pub low_quality_out: Option<u32>,
+    /// Declared optional since it is not part of transaction metadata fields <https://xrpl.org/transaction-metadata.html#modifiednode-fields>
+    #[serde(rename = "PreviousTxnID")]
+    pub previous_txn_id: Option<String>,
+    /// Declared optional since it is not part of transaction metadata fields <https://xrpl.org/transaction-metadata.html#modifiednode-fields>
+    pub previous_txn_lgr_seq: Option<u32>,
+    #[serde(rename = "index")]
     pub index: Option<String>,
 }
 

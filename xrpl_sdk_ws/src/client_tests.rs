@@ -13,7 +13,7 @@ mod tests {
             .await
             .expect("cannot connect");
 
-        let req = AccountInfoRequest::new("r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59").strict(true);
+        let req = AccountInfoRequest::new("r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59");
 
         client.call(req).await.expect("cannot send request");
 
@@ -28,7 +28,7 @@ mod tests {
             .await
             .expect("cannot connect");
 
-        let req = SubscribeRequest::streams(&["ledger"]);
+        let req = SubscribeRequest::streams(vec!["ledger".to_string()]);
 
         client.call(req).await.expect("cannot subscribe");
 
@@ -52,18 +52,18 @@ mod tests {
         let book = Book::new(
             Currency::Xrp,
             Currency::issued("USD", "rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B"),
-            "rf1BiGeXwwQoi8Z2ueFYTEXSwuJYfV2Jpn",
         )
+        .taker("rf1BiGeXwwQoi8Z2ueFYTEXSwuJYfV2Jpn")
         .snapshot(true);
 
-        let req = SubscribeRequest::books(&[book]);
+        let req = SubscribeRequest::books(vec![book]);
 
         client.call(req).await.expect("cannot subscribe");
 
         let mut count = 0;
 
         while let Some(msg) = client.messages.next().await {
-            if count > 5 {
+            if count > 1 {
                 break;
             }
             dbg!(&msg);

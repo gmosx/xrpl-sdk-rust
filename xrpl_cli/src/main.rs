@@ -7,7 +7,7 @@ use account::{
     balances::account_balances, info::account_info, offers::account_offers,
     trustlines::account_trustlines,
 };
-use clap::{Arg, Command};
+use clap::{Arg, ArgAction, Command};
 use ledger::closed::ledger_closed;
 
 // #TODO also used WebSocket
@@ -37,14 +37,14 @@ fn main() {
                         .short('j')
                         .long("json")
                         .help("Format response as JSON")
-                        .takes_value(false),
+                        .action(ArgAction::SetTrue),
                 )
                 .arg(
                     Arg::new("pretty")
                         .short('p')
                         .long("pretty")
                         .help("Pretty-print the response")
-                        .takes_value(false),
+                        .action(ArgAction::SetTrue),
                 ),
         )
         .subcommand(
@@ -55,14 +55,14 @@ fn main() {
                         .short('j')
                         .long("json")
                         .help("Format response as JSON")
-                        .takes_value(false),
+                        .action(ArgAction::SetTrue),
                 )
                 .arg(
                     Arg::new("pretty")
                         .short('p')
                         .long("pretty")
                         .help("Pretty-print the response")
-                        .takes_value(false),
+                        .action(ArgAction::SetTrue),
                 ),
         )
         .subcommand(
@@ -75,21 +75,21 @@ fn main() {
                         .value_name("LIMIT")
                         .help("The maximum count of offers returned")
                         .required(false)
-                        .takes_value(true),
+                        .action(ArgAction::Set),
                 )
                 .arg(
                     Arg::new("json")
                         .short('j')
                         .long("json")
                         .help("Format response as JSON")
-                        .takes_value(false),
+                        .action(ArgAction::SetTrue),
                 )
                 .arg(
                     Arg::new("pretty")
                         .short('p')
                         .long("pretty")
                         .help("Pretty-print the response")
-                        .takes_value(false),
+                        .action(ArgAction::SetTrue),
                 ),
         )
         .subcommand(
@@ -102,21 +102,21 @@ fn main() {
                         .value_name("LIMIT")
                         .help("The maximum count of trustlines returned")
                         .required(false)
-                        .takes_value(true),
+                        .action(ArgAction::Set),
                 )
                 .arg(
                     Arg::new("json")
                         .short('j')
                         .long("json")
                         .help("Format response as JSON")
-                        .takes_value(false),
+                        .action(ArgAction::SetTrue),
                 )
                 .arg(
                     Arg::new("pretty")
                         .short('p')
                         .long("pretty")
                         .help("Pretty-print the response")
-                        .takes_value(false),
+                        .action(ArgAction::SetTrue),
                 ),
         );
 
@@ -131,7 +131,7 @@ fn main() {
                 .value_name("LEDGER_INDEX")
                 .help("Selects the ledger by index")
                 .required(false)
-                .takes_value(true),
+                .action(ArgAction::Set),
         )
         .arg(
             Arg::new("hash")
@@ -140,7 +140,7 @@ fn main() {
                 .value_name("LEDGER_HASH")
                 .help("Selects the ledger by hash")
                 .required(false)
-                .takes_value(true),
+                .action(ArgAction::Set),
         )
         .arg(
             Arg::new("closed")
@@ -148,7 +148,7 @@ fn main() {
                 .long("closed")
                 .help("Selects the latest closed ledger")
                 .required(false)
-                .takes_value(false),
+                .action(ArgAction::SetTrue),
         );
 
     let mut xrpl_cmd = Command::new("xrpl")
@@ -161,7 +161,7 @@ fn main() {
         .subcommand(account_cmd)
         .subcommand(ledger_cmd);
 
-    let matches = xrpl_cmd.clone().get_matches();
+    let matches = xrpl_cmd.get_matches_mut();
 
     if let Some(account_matches) = matches.subcommand_matches("account") {
         if let Some(info_matches) = account_matches.subcommand_matches("info") {

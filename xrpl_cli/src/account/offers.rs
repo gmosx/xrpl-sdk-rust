@@ -2,7 +2,7 @@ use clap::ArgMatches;
 use xrpl_sdk_jsonrpc::{AccountOffersRequest, Client};
 
 pub fn account_offers(account_matches: &ArgMatches, offers_matches: &ArgMatches) {
-    let account = account_matches.value_of("ACCOUNT").unwrap();
+    let account: &String = account_matches.get_one("ACCOUNT").unwrap();
 
     let rt = tokio::runtime::Runtime::new().unwrap();
 
@@ -17,13 +17,13 @@ pub fn account_offers(account_matches: &ArgMatches, offers_matches: &ArgMatches)
         let resp = client.call(req).await;
 
         if let Ok(resp) = resp {
-            if offers_matches.is_present("json") {
-                if offers_matches.is_present("pretty") {
+            if offers_matches.get_flag("json") {
+                if offers_matches.get_flag("pretty") {
                     println!("{}", serde_json::to_string_pretty(&resp.offers).unwrap());
                 } else {
                     println!("{}", serde_json::to_string(&resp.offers).unwrap());
                 }
-            } else if offers_matches.is_present("pretty") {
+            } else if offers_matches.get_flag("pretty") {
                 for offer in resp.offers {
                     println!("{offer:?}");
                 }

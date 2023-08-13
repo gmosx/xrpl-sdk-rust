@@ -44,24 +44,21 @@ impl SubscribeRequest {
     /// The ledger stream only sends ledgerClosed messages when the consensus
     /// process declares a new validated ledger. The message identifies the
     /// ledger and provides some information about its contents.
-    pub fn streams(streams: &[&str]) -> Self {
-        let streams = streams.iter().map(|s| s.to_string()).collect();
+    pub fn streams(streams: Vec<String>) -> Self {
         Self {
             streams: Some(streams),
             ..Default::default()
         }
     }
 
-    pub fn accounts(accounts: &[&str]) -> Self {
-        let accounts = accounts.iter().map(|a| a.to_string()).collect();
+    pub fn accounts(accounts: Vec<String>) -> Self {
         Self {
             accounts: Some(accounts),
             ..Default::default()
         }
     }
 
-    pub fn accounts_proposed(accounts: &[&str]) -> Self {
-        let accounts = accounts.iter().map(|a| a.to_string()).collect();
+    pub fn accounts_proposed(accounts: Vec<String>) -> Self {
         Self {
             accounts_proposed: Some(accounts),
             ..Default::default()
@@ -70,23 +67,23 @@ impl SubscribeRequest {
 
     /// When you subscribe to one or more order books with the books field, you
     /// get back any transactions that affect those order books.
-    pub fn books(books: &[Book]) -> Self {
+    pub fn books(books: Vec<Book>) -> Self {
         Self {
-            books: Some(books.to_vec()),
+            books: Some(books),
             ..Default::default()
         }
     }
 
-    pub fn url(url: &str) -> Self {
+    pub fn url(url: impl Into<String>) -> Self {
         Self {
-            url: Some(url.to_owned()),
+            url: Some(url.into()),
             ..Default::default()
         }
     }
 
-    pub fn url_username(url: &str) -> Self {
+    pub fn url_username(url: impl Into<String>) -> Self {
         Self {
-            url: Some(url.to_owned()),
+            url: Some(url.into()),
             ..Default::default()
         }
     }

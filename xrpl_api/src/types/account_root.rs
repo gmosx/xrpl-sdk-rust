@@ -1,5 +1,5 @@
 use enumflags2::{bitflags, BitFlags};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 /// An account root in the ledger.
 ///
@@ -21,7 +21,7 @@ use serde::Deserialize;
 ///    "TransferRate": 1004999999,
 ///    "index": "13F1A95D7AAB7108D5CE7EEAF504B2894B8C674E6D68499076441C4837282BF8"
 ///}
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct AccountRoot {
     pub account: String,
@@ -41,13 +41,6 @@ pub struct AccountRoot {
     #[serde(rename = "NFTokenMinter")]
     pub nf_token_minter: Option<String>,
     pub owner_count: u32,
-    /// This field is mandatory on `AccountRoot` object, but we leave it optional, such
-    /// that we can parse the object from `ModifiedNode` fields. See <https://xrpl.org/transaction-metadata.html#modifiednode-fields>
-    #[serde(rename = "PreviousTxnID")]
-    pub previous_txn_id: Option<String>,
-    /// This field is mandatory on `AccountRoot` object, but we leave it optional, such
-    /// that we can parse the object from `ModifiedNode` fields. See <https://xrpl.org/transaction-metadata.html#modifiednode-fields>
-    pub previous_txn_lgr_seq: Option<u32>,
     pub regular_key: Option<String>,
     pub sequence: u32,
     pub ticket_count: Option<u32>,
@@ -55,6 +48,12 @@ pub struct AccountRoot {
     pub transfer_rate: Option<u32>,
     pub wallet_locator: Option<String>,
     pub wallet_size: Option<u32>,
+    /// Declared optional since it is not part of transaction metadata fields <https://xrpl.org/transaction-metadata.html#modifiednode-fields>
+    #[serde(rename = "PreviousTxnID")]
+    pub previous_txn_id: Option<String>,
+    /// Declared optional since it is not part of transaction metadata fields <https://xrpl.org/transaction-metadata.html#modifiednode-fields>
+    pub previous_txn_lgr_seq: Option<u32>,
+    #[serde(rename = "index")]
     pub index: Option<String>,
 }
 
