@@ -2,7 +2,7 @@ use crate::error::Error;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use std::time::Duration;
 use tracing::debug;
-use xrpl_api::{AccountInfoRequest, Request, ServerStateRequest};
+use xrpl_api::{AccountInfoRequest, Request, ServerInfoRequest};
 use xrpl_types::Transaction;
 
 pub const GENERAL_PURPOSE_MAINNET_URL: &str = "https://s1.ripple.com:51234";
@@ -181,11 +181,17 @@ impl Client {
         }
 
         if tx.last_ledger_sequence.is_none() || tx.fee.is_none() {
-            let resp = self.call(ServerStateRequest::new()).await?;
+            // let resp = self.call(ServerStateRequest::new()).await?;
+            //
+            // // The recommendation for backend applications is to use (last validated ledger index + 4).
+            // tx.last_ledger_sequence = Some(resp.state.validated_ledger.seq + 4);
+            // tx.fee = Some(resp.state.validated_ledger.base_fee);
+
+            let resp = self.call(ServerInfoRequest::new()).await?;
 
             // The recommendation for backend applications is to use (last validated ledger index + 4).
-            tx.last_ledger_sequence = Some(resp.state.validated_ledger.seq + 4);
-            tx.fee = Some(resp.state.validated_ledger.base_fee);
+            tx.last_ledger_sequence = Some(resp.info.validated_ledger.seq + 4);
+            tx.fee = Some((resp.info.validated_ledger.base_fee_xrp * 1_000_000.0) as u64);
         }
 
         Ok(tx)

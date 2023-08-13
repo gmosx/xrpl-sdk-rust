@@ -25,6 +25,8 @@ pub async fn remove_offer(
     let public_key = std::env::var("XRPL_ACC_PK").unwrap();
     let secret_key = std::env::var("XRPL_ACC_SK").unwrap();
 
+    println!("== {tx:?}");
+
     let public_key = hex::decode(public_key)?;
     let secret_key = hex::decode(secret_key)?;
 
