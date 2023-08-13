@@ -14,7 +14,9 @@ pub async fn account_offers(
     let account: &String = account_matches.get_one("ACCOUNT").unwrap();
 
     if let Some(remove_offer_matches) = offers_matches.subcommand_matches("remove") {
-        remove_offer(account, remove_offer_matches).await?;
+        let public_key: &String = account_matches.get_one("PUBLIC_KEY").unwrap();
+        let secret_key: &String = account_matches.get_one("SECRET_KEY").unwrap();
+        remove_offer(account, public_key, secret_key, remove_offer_matches).await?;
     } else if let Some(list_offers_matches) = offers_matches.subcommand_matches("list") {
         list_offers(account, list_offers_matches).await?;
     }

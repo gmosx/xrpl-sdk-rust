@@ -30,6 +30,22 @@ async fn main() -> anyhow::Result<()> {
                 .required(true)
                 .index(1),
         )
+        .arg(
+            Arg::new("PUBLIC_KEY")
+                .help("The public key of the account")
+                .short('p')
+                .long("public-key")
+                .required(false)
+                .action(ArgAction::Set),
+        )
+        .arg(
+            Arg::new("SECRET_KEY")
+                .help("The secret/private key of the account")
+                .short('s')
+                .long("secret-key")
+                .required(false)
+                .action(ArgAction::Set),
+        )
         .subcommand(
             Command::new("info")
                 .about("info")

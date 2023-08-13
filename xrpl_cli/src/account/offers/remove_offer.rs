@@ -6,6 +6,8 @@ use xrpl_types::Transaction;
 
 pub async fn remove_offer(
     account: impl AsRef<str>,
+    public_key: impl AsRef<str>,
+    secret_key: impl AsRef<str>,
     remove_offer_matches: &ArgMatches,
 ) -> anyhow::Result<()> {
     let account = account.as_ref();
@@ -24,9 +26,8 @@ pub async fn remove_offer(
     // #insight
     // The secret/private key is 32 bytes, the public key is 33 bytes.
 
-    // #todo get as cli arguments
-    let public_key = std::env::var("XRPL_ACC_PK").unwrap();
-    let secret_key = std::env::var("XRPL_ACC_SK").unwrap();
+    let public_key = public_key.as_ref();
+    let secret_key = secret_key.as_ref();
 
     let public_key = hex::decode(public_key)?;
     let secret_key = hex::decode(secret_key)?;
