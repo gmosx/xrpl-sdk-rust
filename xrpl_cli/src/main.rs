@@ -90,6 +90,15 @@ fn main() {
                         .long("pretty")
                         .help("Pretty-print the response")
                         .action(ArgAction::SetTrue),
+                )
+                .subcommand(
+                    Command::new("remove").about("Remove offer").arg(
+                        // Positional argument.
+                        Arg::new("OFFER_ID")
+                            .help("The id of the offer")
+                            .required(true)
+                            .index(1),
+                    ),
                 ),
         )
         .subcommand(
