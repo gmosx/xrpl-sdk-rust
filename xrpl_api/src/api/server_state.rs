@@ -28,14 +28,14 @@ impl ServerStateRequest {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct ValidatedLedger {
+pub struct SSValidatedLedger {
     pub seq: u32,
     pub base_fee: u64,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct ServerState {
-    pub validated_ledger: ValidatedLedger,
+    pub validated_ledger: SSValidatedLedger,
 }
 
 #[derive(Debug, Deserialize)]
