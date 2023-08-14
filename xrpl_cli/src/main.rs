@@ -182,7 +182,7 @@ async fn main() -> anyhow::Result<()> {
         );
 
     let mut xrpl_cmd = Command::new("xrpl")
-        .author("George Moschovitis, gmosx@reizu.org")
+        .author("Georgios Moschovitis, george.moschovitis@gmail.com")
         .version(VERSION)
         .about("A CLI for the XRP Ledger")
         .after_help(
