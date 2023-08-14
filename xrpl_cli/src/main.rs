@@ -113,6 +113,26 @@ async fn main() -> anyhow::Result<()> {
                         ),
                 )
                 .subcommand(
+                    Command::new("create")
+                        .about("Create offer")
+                        .arg(
+                            Arg::new("TAKER_PAYS")
+                                .short('p')
+                                .long("taker-pays")
+                                .help("The amount the taker pays")
+                                .required(true)
+                                .action(ArgAction::Set),
+                        )
+                        .arg(
+                            Arg::new("TAKER_GETS")
+                                .short('g')
+                                .long("taker-gets")
+                                .help("The amount the taker gets")
+                                .required(true)
+                                .action(ArgAction::Set),
+                        ),
+                )
+                .subcommand(
                     Command::new("remove").about("Remove offer").arg(
                         // Positional argument.
                         Arg::new("OFFER_SEQ")

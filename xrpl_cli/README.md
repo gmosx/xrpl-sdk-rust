@@ -19,22 +19,24 @@ cargo install --path .
 ```sh
 xrpl --help
 
-xrpl account ADDRESS info
-xrpl account ADDRESS info --json --pretty
-xrpl account ADDRESS info -jp
+xrpl account <ADDRESS> info
+xrpl account <ADDRESS> info --json --pretty
+xrpl account <ADDRESS> info -jp
 
-xrpl account ADDRESS balances
-xrpl account ADDRESS balances --json --pretty
-xrpl account ADDRESS balances -jp
+xrpl account <ADDRESS> balances
+xrpl account <ADDRESS> balances --json --pretty
+xrpl account <ADDRESS> balances -jp
 
-xrpl account ADDRESS offers
-xrpl account ADDRESS offers --pretty
-xrpl account ADDRESS offers --json --pretty
-xrpl account ADDRESS offers -jp
+xrpl account <ADDRESS> offers
+xrpl account <ADDRESS> offers --pretty
+xrpl account <ADDRESS> offers --json --pretty
+xrpl account <ADDRESS> offers -jp
 
-xrpl account ADDRESS offers list
+xrpl account <ADDRESS> offers list
 
-xrpl account ADDRESS --public-key=".." --secret-key=".." offers remove <SEQUENCE>
+xrpl account <ADDRESS> --public-key=".." --secret-key=".." offers remove <OFFER_SEQUENCE>
+
+xrpl account <ADDRESS> --public-key="..." --secret-key="..." offers create --taker-pays="5.0 USD:rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq" --taker-gets="1.0 XRP"
 
 xrpl ledger --closed
 ```
