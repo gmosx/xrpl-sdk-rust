@@ -2,7 +2,9 @@ use clap::ArgMatches;
 
 use xrpl_binary_codec::{sign::sign_transaction, util::serialize_transaction_to_hex};
 use xrpl_sdk_jsonrpc::{Client, SubmitRequest};
-use xrpl_types::{Amount, Transaction};
+use xrpl_types::Transaction;
+
+use crate::fmt::amount_from_str;
 
 // xrpl account <ADDRESS> --public-key="..." --secret-key="..." offers create --taker-pays="5.0 USD:rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq" --taker-gets="1.0 XRP"
 
@@ -19,8 +21,8 @@ pub async fn create_offer(
 
     let client = Client::new();
 
-    let taker_pays = Amount::try_from_str(taker_pays_spec).expect("invalid taker pays amount");
-    let taker_gets = Amount::try_from_str(taker_gets_spec).expect("invalid taker gets amount");
+    let taker_pays = amount_from_str(taker_pays_spec).expect("invalid taker pays amount");
+    let taker_gets = amount_from_str(taker_gets_spec).expect("invalid taker gets amount");
 
     // #warning this is an order from the TAKER side!
     let tx = Transaction::offer_create(&account, taker_pays, taker_gets);
