@@ -12,9 +12,9 @@ pub async fn account_balances(
     let account: &String = account_matches.get_one("ACCOUNT").unwrap();
 
     let client = Client::new();
-    // TODO: also use account from environment.
-    // TODO: render as text/md, html and json.
-    // TODO: use handlebars for formatting?
+    // #todo also use account from environment.
+    // #todo render as text/md, html and json.
+    // #todo use handlebars for formatting?
 
     let mut balances: HashMap<String, f64> = HashMap::new();
 

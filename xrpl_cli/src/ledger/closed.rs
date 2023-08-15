@@ -4,8 +4,8 @@ use xrpl_sdk_jsonrpc::{Client, LedgerClosedRequest};
 pub async fn ledger_closed(_ledger_matches: &ArgMatches) -> anyhow::Result<()> {
     let client = Client::new();
 
-    // TODO: render as text/md, html and json.
-    // TODO: use handlebars for formatting?
+    // #todo render as text/md, html and json.
+    // #todo use handlebars for formatting?
 
     let resp = client.call(LedgerClosedRequest::new()).await?;
 

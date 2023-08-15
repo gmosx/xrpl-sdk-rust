@@ -85,7 +85,7 @@ impl ClientBuilder {
 pub struct Client {
     base_url: String,
     user_agent: String,
-    // TODO: hm, not really used currently.
+    // #todo hm, not really used currently.
     http_client: reqwest::Client,
 }
 

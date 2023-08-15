@@ -12,10 +12,10 @@ pub async fn list_offers(
     let account = account.as_ref();
 
     let client = Client::new();
-    // TODO: add limit option
-    // TODO: also use account from environment.
-    // TODO: render as text/md, html and json.
-    // TODO: use handlebars for formatting?
+    // #todo add limit option
+    // #todo also use account from environment.
+    // #todo render as text/md, html and json.
+    // #todo use handlebars for formatting?
 
     let req = AccountOffersRequest::new(account);
     let resp = client.call(req).await?;

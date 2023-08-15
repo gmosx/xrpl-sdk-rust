@@ -8,7 +8,7 @@ use xrpl_types::{Amount, IssuedAmount, Memo, Transaction};
 pub const HASH_PREFIX_TRANSACTION: [u8; 4] = [0x53, 0x4E, 0x44, 0x00];
 pub const HASH_PREFIX_UNSIGNED_TRANSACTION_SINGLE: [u8; 4] = [0x53, 0x54, 0x58, 0x00];
 
-// TODO: Define type_code constants / enum
+// #todo Define type_code constants / enum
 
 #[derive(Default)]
 pub struct Serializer {
@@ -85,7 +85,7 @@ impl Serializer {
         }
     }
 
-    // TODO: use more descriptive name.
+    // #todo use more descriptive name.
     pub fn push_slice(&mut self, bytes: &[u8]) {
         for byte in bytes {
             self.push(*byte);
@@ -162,7 +162,7 @@ impl Serializer {
         self.push_slice(decoded);
     }
 
-    // TODO: implement generic `push_array`
+    // #todo implement generic `push_array`
     // https://xrpl.org/serialization.html#array-fields
 
     pub fn push_blob(&mut self, field_code: u8, blob: &[u8]) {

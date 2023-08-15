@@ -8,10 +8,10 @@ pub async fn account_trustlines(
     let account: &String = account_matches.get_one("ACCOUNT").unwrap();
 
     let client = Client::new();
-    // TODO: add limit option
-    // TODO: also use account from environment.
-    // TODO: render as text/md, html and json.
-    // TODO: use handlebars for formatting?
+    // #todo add limit option
+    // #todo also use account from environment.
+    // #todo render as text/md, html and json.
+    // #todo use handlebars for formatting?
 
     let resp = client.call(AccountLinesRequest::new(account)).await?;
 

@@ -57,8 +57,8 @@ pub const TF_SETF_AUTH: u32 = 0x0001_0000;
 pub const TF_SET_NO_RIPPLE: u32 = 0x0002_0000;
 pub const TF_CLEAR_NO_RIPPLE: u32 = 0x0004_0000;
 
-// TODO: consider separate structs per TransactionType?
-// TODO: add the serde metadata.
+// #todo consider separate structs per TransactionType?
+// #todo add the serde metadata.
 
 /// A ledger transaction
 ///
@@ -97,15 +97,15 @@ pub struct Transaction {
     pub quality_out: Option<u32>,
 }
 
-// TODO: PaymentTransaction or Transaction<Payment>
-// TODO: TransactionBuilder?
+// #todo PaymentTransaction or Transaction<Payment>
+// #todo TransactionBuilder?
 
 impl Transaction {
-    // TODO: Synthetic offer_replace constructor?
+    // #todo Synthetic offer_replace constructor?
 
     /// <https://xrpl.org/offercreate.html>
     pub fn offer_create(account: &str, taker_pays: Amount, taker_gets: Amount) -> Self {
-        // TODO: Add support for expiration, offer_sequence
+        // #todo Add support for expiration, offer_sequence
         Self {
             transaction_type: TransactionType::OfferCreate,
             account: account.to_string(),
@@ -176,7 +176,7 @@ impl Transaction {
         }
     }
 
-    // TODO: make sure we add the NO RIPPLE flag!!!!
+    // #todo make sure we add the NO RIPPLE flag!!!!
     /// <https://xrpl.org/trustset.html>
     pub fn trust_set(
         account: &str,
@@ -216,7 +216,7 @@ impl Transaction {
         Self {
             transaction_type: TransactionType::TrustSet,
             account: account.to_string(),
-            // TODO: remove TF_FULLY_CANONICAL_SIG, it's deprecated!
+            // #todo remove TF_FULLY_CANONICAL_SIG, it's deprecated!
             flags: Some(TF_SET_NO_RIPPLE | TF_FULLY_CANONICAL_SIG),
             last_ledger_sequence: None,
             fee: None,
@@ -296,5 +296,5 @@ impl Transaction {
         }
     }
 
-    // TODO: with_fee
+    // #todo with_fee
 }

@@ -40,7 +40,7 @@ impl AccountNftsRequest {
     }
 }
 
-// TODO: consider extracting as a type.
+// #todo consider extracting as a type.
 
 /// The NFToken object represents a single non-fungible token (NFT). It is not
 /// stored on its own, but is contained in a NFTokenPage object alongside other
