@@ -2,26 +2,28 @@ use clap::ArgMatches;
 
 use xrpl_binary_codec::{sign::sign_transaction, util::serialize_transaction_to_hex};
 use xrpl_sdk_jsonrpc::{Client, SubmitRequest};
-use xrpl_types::Transaction;
+use xrpl_types::{Amount, Transaction};
 
-// xrpl account <ADDRESS> --public-key="..." --secret-key="..." offers remove <OFFER_SEQUENCE>
+// xrpl account <ADDRESS> --public-key="..." --secret-key="..." offers create --taker-pays="5.0 USD:rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq" --taker-gets="1.0 XRP"
 
-pub async fn remove_offer(
+pub async fn create_offer(
     account: impl AsRef<str>,
     public_key: impl AsRef<str>,
     secret_key: impl AsRef<str>,
-    remove_offer_matches: &ArgMatches,
+    matches: &ArgMatches,
 ) -> anyhow::Result<()> {
     let account = account.as_ref();
 
-    let offer_sequence: &String = remove_offer_matches
-        .get_one("OFFER_SEQ")
-        .expect("offer sequence missing");
-    let offer_sequence: u32 = offer_sequence.parse().expect("offer sequence invalid");
+    let taker_pays_spec: &String = matches.get_one("TAKER_PAYS").expect("taker pays missing");
+    let taker_gets_spec: &String = matches.get_one("TAKER_GETS").expect("taker gets missing");
 
     let client = Client::new();
 
-    let tx = Transaction::offer_cancel(account, offer_sequence);
+    let taker_pays = Amount::try_from_str(taker_pays_spec).expect("invalid taker pays amount");
+    let taker_gets = Amount::try_from_str(taker_gets_spec).expect("invalid taker gets amount");
+
+    // #warning this is an order from the TAKER side!
+    let tx = Transaction::offer_create(&account, taker_pays, taker_gets);
 
     let tx = client.prepare_transaction(tx).await?;
 
