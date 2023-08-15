@@ -40,9 +40,10 @@ impl Amount {
         }
     }
 
+    // #todo move this convenience method in a higher-level package.
     /// Try to construct an amount from a 'spec' string.
     /// Examples:
-    /// Amount::try_from_str("26.231 USD:rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq");
+    /// Amount::try_from_str("26.231 USD.rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq");
     /// Amount::try_from_str("11.1 XRP");
     pub fn try_from_str(s: impl AsRef<str>) -> Option<Self> {
         let mut parts = s.as_ref().split_whitespace();
@@ -59,7 +60,7 @@ impl Amount {
             return Some(Self::xrp(value));
         }
 
-        let mut currency_parts = currency.split(":");
+        let mut currency_parts = currency.split(".");
 
         let Some(currency) = currency_parts.next() else {
             return None;

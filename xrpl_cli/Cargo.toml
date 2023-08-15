@@ -17,6 +17,7 @@ serde_json = "1"
 tracing = "0.1"
 tracing-subscriber = "0.3"
 hex = "0.4"
+prettytable-rs = "0.10"
 xrpl_binary_codec = { path = "../xrpl_binary_codec", version = "0.13" }
 xrpl_types = { path = "../xrpl_types", version = "0.13" }
 xrpl_sdk_jsonrpc = { path = "../xrpl_sdk_jsonrpc", version = "0.13" }

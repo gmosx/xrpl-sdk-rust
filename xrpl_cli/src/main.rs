@@ -1,14 +1,11 @@
 //! A CLI for the XRP Ledger.
 
-mod account;
-mod ledger;
-
-use account::{
+use clap::{Arg, ArgAction, Command};
+use xrpl_cli::account::{
     balances::account_balances, info::account_info, offers::account_offers,
     trustlines::account_trustlines,
 };
-use clap::{Arg, ArgAction, Command};
-use ledger::closed::ledger_closed;
+use xrpl_cli::ledger::closed::ledger_closed;
 
 // #TODO also used WebSocket
 // #TODO introduce `xrpl_util` or `xrpl_fmt` crate.
