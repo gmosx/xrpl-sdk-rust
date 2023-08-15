@@ -1,7 +1,7 @@
 [package]
 name = "xrpl_address_codec"
 description = "Binary serialization for XRPL Protocol addresses"
-version = "0.12.0"
+version = "0.13.0"
 edition = "2021"
 license = "Apache-2.0"
 repository = "https://github.com/gmosx/xrpl_sdk_rust/tree/main/xrpl_address_codec"
