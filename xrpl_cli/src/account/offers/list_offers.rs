@@ -34,6 +34,8 @@ pub async fn list_offers(
         let mut offers = resp.offers;
         offers.sort();
 
+        let offers_count = offers.len();
+
         for offer in offers {
             table.add_row(row![
                 offer.seq,
@@ -42,7 +44,7 @@ pub async fn list_offers(
             ]);
         }
 
-        println!("{table}");
+        println!("{table}{} offers.", offers_count);
     } else {
         println!("{:?}", resp.offers);
     }
