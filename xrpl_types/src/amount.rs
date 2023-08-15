@@ -40,39 +40,6 @@ impl Amount {
         }
     }
 
-    // #todo move this convenience method in a higher-level package.
-    /// Try to construct an amount from a 'spec' string.
-    /// Examples:
-    /// Amount::try_from_str("26.231 USD.rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq");
-    /// Amount::try_from_str("11.1 XRP");
-    pub fn try_from_str(s: impl AsRef<str>) -> Option<Self> {
-        let mut parts = s.as_ref().split_whitespace();
-
-        let Some(value) = parts.next() else {
-            return None;
-        };
-
-        let Some(currency) = parts.next() else {
-            return None;
-        };
-
-        if currency.to_uppercase() == "XRP" {
-            return Some(Self::xrp(value));
-        }
-
-        let mut currency_parts = currency.split(".");
-
-        let Some(currency) = currency_parts.next() else {
-            return None;
-        };
-
-        let Some(issuer) = currency_parts.next() else {
-            return None;
-        };
-
-        Some(Self::issued(value, currency.to_uppercase(), issuer))
-    }
-
     pub fn size(&self) -> f64 {
         match self {
             Amount::Drops(value) => value.parse::<f64>().unwrap() / 1_000_000.0,
@@ -155,24 +122,5 @@ mod test {
             assert_eq!(currency, "USD");
             assert_eq!(issuer, "rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq");
         });
-    }
-
-    #[test]
-    fn amount_from_spec_string() {
-        let amount = Amount::try_from_str("26.231 USD:rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq").unwrap();
-        assert_matches!(
-            amount,
-            Amount::Issued(IssuedAmount {
-                value,
-                currency,
-                issuer
-            }) if value == "26.231" && currency == "USD" && issuer == "rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq"
-        );
-
-        let amount = Amount::try_from_str("11.1 XRP").unwrap();
-        assert_matches!(
-            amount,
-            Amount::Drops(drops) if drops == "11100000"
-        );
     }
 }

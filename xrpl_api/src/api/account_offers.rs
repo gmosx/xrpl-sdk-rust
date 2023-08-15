@@ -3,8 +3,6 @@
 //!
 //! <https://xrpl.org/account_offers.html>
 
-use std::cmp::Ordering;
-
 use crate::{
     OfferFlags, Request, RequestPagination, ResponsePagination, RetrieveLedgerSpec,
     ReturnLedgerSpec, WithLedgerSpec, WithRequestPagination, WithResponsePagination,
@@ -66,31 +64,6 @@ pub struct AccountOffer {
     pub seq: u32,
     pub taker_gets: Amount,
     pub taker_pays: Amount,
-}
-
-impl PartialEq for AccountOffer {
-    fn eq(&self, other: &Self) -> bool {
-        self.seq == other.seq
-    }
-}
-
-impl Eq for AccountOffer {}
-
-impl PartialOrd for AccountOffer {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-// #insight
-// The offer sequence is the natural ordering key for AccountOffers.
-// Moreover, the sequence acts as a unique id (within an account) so we can use
-// it for Eq/PartialEq.
-
-impl Ord for AccountOffer {
-    fn cmp(&self, other: &Self) -> Ordering {
-        self.seq.cmp(&other.seq)
-    }
 }
 
 #[derive(Debug, Deserialize)]

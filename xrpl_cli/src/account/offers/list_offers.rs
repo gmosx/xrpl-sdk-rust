@@ -32,7 +32,7 @@ pub async fn list_offers(
         table.add_row(row!["Sequence", "Taker Pays", "Taker Gets"]);
 
         let mut offers = resp.offers;
-        offers.sort();
+        offers.sort_by_key(|o| o.seq);
 
         let offers_count = offers.len();
 
