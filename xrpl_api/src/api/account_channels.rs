@@ -62,7 +62,7 @@ impl AccountChannelsRequest {
     }
 }
 
-// TODO: consider extracting as a type.
+// #todo consider extracting as a type.
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AccountChannel {

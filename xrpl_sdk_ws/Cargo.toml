@@ -1,11 +1,11 @@
 [package]
 name = "xrpl_sdk_ws"
 description = "A strongly-typed client for the XRP Ledger WebSocket API"
-version = "0.11.0"
+version = "0.13.0"
 license = "Apache-2.0"
 repository = "https://github.com/gmosx/xrpl_sdk_rust/tree/main/xrpl_sdk_jsonrpc"
 keywords = ["xrpl", "ledger", "client", "websocket", "api"]
-authors = ["George Moschovitis <gmosx@reizu.org>"]
+authors = ["Georgios Moschovitis <george.moschovitis@gmail.com>"]
 edition = "2021"
 
 [dependencies]
@@ -20,6 +20,6 @@ tokio-tungstenite = { version = "0.20", features = ["rustls-tls-webpki-roots"] }
 async-stream = "0.3"
 tracing = "0.1"
 uuid = { version = "1", features = ["v4", "fast-rng"] }
-xrpl_types = { path = "../xrpl_types", version = "0.11" }
-xrpl_api = { path = "../xrpl_api", version = "0.11" }
-xrpl_binary_codec = { path = "../xrpl_binary_codec", version = "0.11" }
+xrpl_types = { path = "../xrpl_types", version = "0.13" }
+xrpl_api = { path = "../xrpl_api", version = "0.13" }
+xrpl_binary_codec = { path = "../xrpl_binary_codec", version = "0.13" }

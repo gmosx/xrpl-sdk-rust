@@ -13,7 +13,7 @@ More information about this crate can be found in the [crate documentation][docs
 
 ```toml
 [dependencies]
-xrpl_sdk_jsonrpc = "0.6"
+xrpl_sdk_jsonrpc = "0.12"
 ```
 
 ## Usage
@@ -21,12 +21,38 @@ xrpl_sdk_jsonrpc = "0.6"
 ```rust
 let client = Client::new();
 
-let account = env::var("XRPL_ACCOUNT_ADDRESS").expect("account not defined");
+let account = "...";
 
 let req = AccountTxRequest::new(&account).limit(5);
 let resp = client.call(req).await;
 
 dbg!(&resp);
+```
+
+```rust
+let client = Client::new();
+
+let account = "...";
+let public_key = "...";
+let secret_key = "...";
+
+let offer_sequence = 123; // the sequence of the offer to cancel
+
+let tx = Transaction::offer_cancel(account, offer_sequence);
+
+let tx = client.prepare_transaction(tx).await?;
+
+let public_key = hex::decode(public_key)?;
+let secret_key = hex::decode(secret_key)?;
+
+let tx = sign_transaction(tx, &public_key, &secret_key);
+
+let tx_blob = serialize_transaction_to_hex(&tx);
+
+let req = SubmitRequest::new(&tx_blob);
+let resp = client.call(req).await?;
+
+dbg!(resp);
 ```
 
 ## Status

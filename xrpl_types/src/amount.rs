@@ -81,7 +81,7 @@ mod test {
     use serde::Serialize;
 
     #[test]
-    fn test_serialize_drops() {
+    fn serialize_drops() {
         let amount = Amount::drops(100);
 
         let mut v = Vec::new();
@@ -91,7 +91,7 @@ mod test {
     }
 
     #[test]
-    fn test_serialize_issued_amount() {
+    fn serialize_issued_amount() {
         let amount = Amount::issued("12.34", "USD", "rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq");
 
         let mut v = Vec::new();
@@ -104,7 +104,7 @@ mod test {
     }
 
     #[test]
-    fn test_deserialize_drops() {
+    fn deserialize_drops() {
         let amount = serde_json::from_str(r#""100""#).unwrap();
         assert_matches!(amount, Amount::Drops(drops) => {
             assert_eq!(drops, "100");
@@ -112,7 +112,7 @@ mod test {
     }
 
     #[test]
-    fn test_deserialize_issued_amount() {
+    fn deserialize_issued_amount() {
         let amount = serde_json::from_str(
             r#"{"value":"12.34","currency":"USD","issuer":"rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq"}"#,
         )

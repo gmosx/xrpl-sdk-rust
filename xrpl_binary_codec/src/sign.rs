@@ -18,12 +18,12 @@ pub fn sign_transaction(tx: Transaction, public_key: &[u8], secret_key: &[u8]) -
 }
 
 pub fn sign(data: &[u8], secret_key: &[u8]) -> Vec<u8> {
-    // INSIGHT: Sha512Trunc245 does not give same result as Sha512[0..32]
+    // #insight Sha512Trunc245 does not give same result as Sha512[0..32]
     let mut hasher = Sha512::new();
     hasher.update(data);
     let hash = hasher.finalize().to_vec();
 
-    // TODO: remove unwraps.
+    // #todo remove unwraps.
     let message = Message::parse_slice(&hash[0..32]).unwrap();
     let key = SecretKey::parse_slice(secret_key).unwrap();
 
@@ -113,7 +113,7 @@ mod tests {
     fn test_sign() {
         let tx = hex::decode("deadbeaf").unwrap();
 
-        // INSIGHT: The secret key is 32 bytes long. Remove the first byte (2 hex chars)
+        // #insight The secret key is 32 bytes long. Remove the first byte (2 hex chars)
         // if the key is padded to 33 bytes.
         let key = hex::decode("915EDE054B37DF14BA612E7528A95B0D73013DC0ADED094B10957AD9BAD25455")
             .unwrap();

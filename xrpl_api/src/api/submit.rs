@@ -62,5 +62,5 @@ impl SubmitRequest {
 //     pub status: String,
 // }
 
-// #TODO implement typed response
+// #todo implement typed response
 pub type SubmitResponse = serde_json::Value;

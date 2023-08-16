@@ -1,7 +1,7 @@
 use crate::types::Meta;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Default, Debug, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "PascalCase")]
 pub struct TransactionCommon {
     pub account: String,

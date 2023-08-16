@@ -13,10 +13,10 @@ const MAX_MANTISSA: i64 = 10i64.pow(16) - 1;
 /// - <https://github.com/ripple/rippled/blob/develop/src/ripple/protocol/impl/STAmount.cpp#L781>
 /// - <https://github.com/XRPLF/xrpl-py/blob/master/xrpl/core/binarycodec/types/amount.py#L141>
 pub fn internal_number_from_string(s: &str) -> u64 {
-    // TODO: handle sign
-    // TODO: handle zero case
-    // TODO: handle integer case
-    // TODO: handle unwraps!
+    // #todo handle sign
+    // #todo handle zero case
+    // #todo handle integer case
+    // #todo handle unwraps!
 
     if s == "0" || s == "0.0" {
         // Special case for zero value.
@@ -60,7 +60,7 @@ pub fn internal_number_from_string(s: &str) -> u64 {
         return 0b1000000000000000000000000000000000000000000000000000000000000000;
     }
 
-    // TODO:
+    // #todo
     //
     // if exp > _MAX_IOU_EXPONENT or mantissa > _MAX_MANTISSA:
     //     raise XRPLBinaryCodecException(
