@@ -1,6 +1,6 @@
 use enumflags2::{bitflags, BitFlags};
 use serde::{Deserialize, Serialize};
-use xrpl_types::Amount;
+use xrpl_types::{Amount, LedgerTimestamp};
 
 /// The object was placed as a passive offer
 pub const LSF_PASSIVE: u32 = 0x00010000;
@@ -36,7 +36,7 @@ pub struct Offer {
     pub account: String,
     pub book_directory: String,
     pub book_node: Option<String>,
-    pub expiration: Option<u32>,
+    pub expiration: Option<LedgerTimestamp>,
     pub flags: BitFlags<OfferFlags>,
     pub owner_node: String,
     pub sequence: u32,
