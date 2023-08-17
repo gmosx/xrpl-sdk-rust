@@ -2,6 +2,7 @@
 
 use crate::{types::Transaction, Request, RetrieveLedgerSpec, ReturnLedgerSpec, WithLedgerSpec};
 use serde::{Deserialize, Serialize};
+use xrpl_types::LedgerTimestamp;
 
 // #TODO refactor to make the two variants internal!
 // #TODO add tests
@@ -123,11 +124,11 @@ pub struct Ledger<TransactionType> {
     pub account_hash: String,
     pub close_flags: u64,
     /// The time this ledger was closed, in seconds since the Ripple Epoch.
-    pub close_time: u64,
+    pub close_time: LedgerTimestamp,
     /// The time this ledger was closed, in human-readable format. Always uses the UTC time zone.
     pub close_time_human: String,
     /// Ledger close times are rounded to within this many seconds.
-    pub close_time_resolution: u64,
+    pub close_time_resolution: u32,
     /// Whether or not this ledger has been closed.
     pub closed: bool,
     /// Unique identifying hash of the entire ledger.
@@ -135,7 +136,7 @@ pub struct Ledger<TransactionType> {
     /// The Ledger Index of this ledger, as a quoted integer.
     pub ledger_index: String,
     /// The time at which the previous ledger was closed.
-    pub parent_close_time: u64,
+    pub parent_close_time: LedgerTimestamp,
     /// Unique identifying hash of the ledger that came immediately before this one.
     pub parent_hash: String,
     /// Total number of XRP drops in the network, as a quoted integer. (This decreases as transaction costs destroy XRP.)

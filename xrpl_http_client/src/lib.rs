@@ -7,4 +7,4 @@ pub mod error;
 mod client_tests;
 
 pub use client::{Client, Result};
-pub use xrpl_api::api::*;
+pub use xrpl_api::*;
