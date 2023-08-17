@@ -4,8 +4,8 @@ A strongly-typed client for the XRP Ledger HTTP JSONRPC API.
 
 This crate is an *unofficial*, community-driven effort.
 
-[![Crates.io](https://img.shields.io/crates/v/xrpl_sdk_jsonrpc)](https://crates.io/crates/xrpl_sdk_jsonrpc)
-[![Documentation](https://docs.rs/xrpl_sdk_jsonrpc/badge.svg)](https://docs.rs/xrpl_sdk_jsonrpc)
+[![Crates.io](https://img.shields.io/crates/v/xrpl_http_client)](https://crates.io/crates/xrpl_http_client)
+[![Documentation](https://docs.rs/xrpl_http_client/badge.svg)](https://docs.rs/xrpl_http_client)
 
 More information about this crate can be found in the [crate documentation][docs].
 
@@ -13,7 +13,7 @@ More information about this crate can be found in the [crate documentation][docs
 
 ```toml
 [dependencies]
-xrpl_sdk_jsonrpc = "0.12"
+xrpl_http_client = "0.12"
 ```
 
 ## Usage
@@ -71,4 +71,4 @@ This work is licensed under the Apache-2.0 License. See [LICENSE.txt](LICENSE.tx
 
 Copyright © 2022 [Georgios Moschovitis](https://gmosx.ninja).
 
-[docs]: https://docs.rs/xrpl_sdk_jsonrpc
+[docs]: https://docs.rs/xrpl_http_client
