@@ -1,5 +1,5 @@
 [package]
-name = "xrpl_sdk_ws"
+name = "xrpl_ws_client"
 description = "A strongly-typed client for the XRP Ledger WebSocket API"
 version = "0.13.0"
 license = "Apache-2.0"

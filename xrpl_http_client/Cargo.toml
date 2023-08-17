@@ -1,5 +1,5 @@
 [package]
-name = "xrpl_sdk_jsonrpc"
+name = "xrpl_http_client"
 description = "A strongly-typed client for the XRP Ledger JSONRPC API"
 version = "0.13.0"
 license = "Apache-2.0"
