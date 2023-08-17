@@ -1,5 +1,5 @@
 use clap::ArgMatches;
-use xrpl_sdk_jsonrpc::{AccountLinesRequest, Client};
+use xrpl_http_client::{AccountLinesRequest, Client};
 
 pub async fn account_trustlines(
     account_matches: &ArgMatches,

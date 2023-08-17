@@ -1,5 +1,5 @@
 use clap::ArgMatches;
-use xrpl_sdk_jsonrpc::{Client, LedgerClosedRequest};
+use xrpl_http_client::{Client, LedgerClosedRequest};
 
 pub async fn ledger_closed(_ledger_matches: &ArgMatches) -> anyhow::Result<()> {
     let client = Client::new();
