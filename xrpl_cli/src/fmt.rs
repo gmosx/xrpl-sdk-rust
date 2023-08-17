@@ -1,4 +1,4 @@
-use xrpl_sdk_jsonrpc::AccountOffer;
+use xrpl_http_client::AccountOffer;
 use xrpl_types::{Amount, IssuedAmount};
 
 // #todo extract some of these functions to another crate, to promote reuse.

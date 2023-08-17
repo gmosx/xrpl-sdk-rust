@@ -8,7 +8,7 @@ use crate::{
     Request, ReturnLedgerSpec,
 };
 use serde::{Deserialize, Serialize};
-use xrpl_types::Book;
+use xrpl_types::{Book, LedgerTimestamp};
 
 #[derive(Default, Debug, Clone, Serialize)]
 pub struct SubscribeRequest {
@@ -100,7 +100,7 @@ pub struct LedgerClosedEvent {
     pub fee_ref: u32,
     pub ledger_hash: String,
     pub ledger_index: u32,
-    pub ledger_time: u64,
+    pub ledger_time: LedgerTimestamp,
     pub reserve_base: u32,
     pub reserve_inc: u32,
     pub txn_count: u32,

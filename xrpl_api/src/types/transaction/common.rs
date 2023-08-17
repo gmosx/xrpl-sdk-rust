@@ -1,5 +1,6 @@
 use crate::types::Meta;
 use serde::{Deserialize, Serialize};
+use xrpl_types::LedgerTimestamp;
 
 #[derive(Default, Debug, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "PascalCase")]
@@ -21,7 +22,7 @@ pub struct TransactionCommon {
 
     /// Close time of the ledger in which the transaction is included
     #[serde(rename = "date")]
-    pub date: Option<u64>,
+    pub date: Option<LedgerTimestamp>,
 
     /// Transaction hash
     #[serde(rename = "hash")]
@@ -40,11 +41,6 @@ pub struct TransactionCommon {
     /// methods it is found outside (next to) the transaction field.
     #[serde(rename = "meta", alias = "metaData")]
     pub meta: Option<Meta>,
-
-    /// `owner_funds` is present in transactions returned by book subscription, see
-    /// <https://xrpl.org/subscribe.html#order-book-streams>.
-    #[serde(rename = "owner_funds")]
-    pub owner_funds: Option<String>,
 }
 
 // #[derive(Debug, Deserialize)]

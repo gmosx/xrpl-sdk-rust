@@ -1,7 +1,7 @@
 use clap::ArgMatches;
 use prettytable::row;
 use prettytable::Table;
-use xrpl_sdk_jsonrpc::{AccountOffersRequest, Client};
+use xrpl_http_client::{AccountOffersRequest, Client};
 
 use crate::fmt::format_amount;
 

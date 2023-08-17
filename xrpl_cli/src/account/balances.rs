@@ -1,6 +1,6 @@
 use clap::ArgMatches;
 use std::collections::HashMap;
-use xrpl_sdk_jsonrpc::{AccountInfoRequest, AccountLinesRequest, Client};
+use xrpl_http_client::{AccountInfoRequest, AccountLinesRequest, Client};
 
 // #TODO should be `balance` or `balances`?
 // #TODO add error handling

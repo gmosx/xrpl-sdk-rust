@@ -1,7 +1,7 @@
 use clap::ArgMatches;
 
 use xrpl_binary_codec::{sign::sign_transaction, util::serialize_transaction_to_hex};
-use xrpl_sdk_jsonrpc::{Client, SubmitRequest};
+use xrpl_http_client::{Client, SubmitRequest};
 use xrpl_types::Transaction;
 
 use crate::fmt::amount_from_str;
