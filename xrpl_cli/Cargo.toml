@@ -3,7 +3,7 @@ name = "xrpl_cli"
 description = "A CLI for the XRP Ledger"
 version = "0.13.0"
 license = "Apache-2.0"
-repository = "https://github.com/gmosx/xrpl_sdk_rust/tree/main/xrpl_sdk_jsonrpc"
+repository = "https://github.com/gmosx/xrpl-sdk-rust/tree/main/xrpl_http_client"
 keywords = ["xrpl", "ledger", "cli"]
 authors = ["Georgios Moschovitis <george.moschovitis@gmail.com>"]
 edition = "2021"
@@ -20,7 +20,7 @@ hex = "0.4"
 prettytable-rs = "0.10"
 xrpl_binary_codec = { path = "../xrpl_binary_codec", version = "0.13" }
 xrpl_types = { path = "../xrpl_types", version = "0.13" }
-xrpl_sdk_jsonrpc = { path = "../xrpl_sdk_jsonrpc", version = "0.13" }
+xrpl_http_client = { path = "../xrpl_http_client", version = "0.13" }
 
 [dev-dependencies]
 assert_matches = "1.5.0"

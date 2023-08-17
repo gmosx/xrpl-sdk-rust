@@ -8,8 +8,8 @@ This project is an *unofficial*, community-driven effort.
 
 The SDK contains the following high-level crates:
 
-- [xrpl_sdk_jsonrpc](xrpl_sdk_jsonrpc/)
-- [xrpl_sdk_ws](xrpl_sdk_ws/)
+- [xrpl_http_client](xrpl_http_client/)
+- [xrpl_ws_client](xrpl_ws_client/)
 
 Additionally, low-level crates are provided:
 
@@ -56,7 +56,7 @@ if let Some(msg) = client.messages.next().await {
 
 ## Links
 
-- [Github Repository](https://github.com/gmosx/xrpl_sdk_rust)
+- [Github Repository](https://github.com/gmosx/xrpl-sdk-rust)
 
 ## Status
 
