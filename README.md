@@ -63,11 +63,6 @@ if let Some(msg) = client.messages.next().await {
 This work is under active development (pre-alpha) and the API is expected to
 change. It's not considered ready for use in production.
 
-### Roadmap
-
-- Support for WebSocket API
-- Introduce XRPL command line client (CLI)
-
 ## Contributing
 
 Pull requests, issues and comments are welcome! Make sure to add tests for new features and bug fixes.
