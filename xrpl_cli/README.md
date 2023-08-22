@@ -38,6 +38,9 @@ xrpl account <ADDRESS> --public-key=".." --secret-key=".." offers remove <OFFER_
 
 xrpl account <ADDRESS> --public-key="..." --secret-key="..." offers create --taker-pays="5.0 USD:rhub8VRN55s94qWKDv6jmDy1pUykJzF3wq" --taker-gets="1.0 XRP"
 
+xrpl account <ADDRESS> trustlines list --pretty
+xrpl account <ADDRESS> lines list --pretty
+
 xrpl ledger --closed
 ```
 
