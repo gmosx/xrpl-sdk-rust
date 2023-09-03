@@ -56,7 +56,8 @@ if let Some(msg) = client.messages.next().await {
 
 ## Links
 
-- [Github Repository](https://github.com/gmosx/xrpl-sdk-rust)
+- [XRP Ledger SDK](https://github.com/gmosx/xrpl-sdk-rust)
+- [Kraken SDK](https://github.com/gmosx/kraken-sdk-rust)
 
 ## Status
 
