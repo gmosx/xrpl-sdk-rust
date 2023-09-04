@@ -11,10 +11,21 @@ use serde::Deserialize;
 #[derive(Debug, Clone, Deserialize)]
 #[serde(tag = "LedgerEntryType")]
 pub enum LedgerObject {
-    RippleState(RippleState),
-    Offer(Offer),
     AccountRoot(AccountRoot),
-    // TODO: add the rest of the entry types and remove Other variant
-    #[serde(other)]
-    Other,
+    // TODO add model for remaining obejcts
+    Amendments,
+    Check,
+    DepositPreauth,
+    DirectoryNode,
+    Escrow,
+    FeeSettings,
+    LedgerHashes,
+    NegativeUNL,
+    NFTokenOffer,
+    NFTokenPage,
+    Offer(Offer),
+    PayChannel,
+    RippleState(RippleState),
+    SignerList,
+    Ticket,
 }

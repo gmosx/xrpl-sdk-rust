@@ -39,7 +39,7 @@ pub async fn remove_offer(
     let secret_key = SecretKey::parse_slice(&secret_key)?;
     let public_key = PublicKey::parse_compressed(&public_key.as_slice().try_into()?)?;
 
-    sign::sign_transaction(&mut tx, &public_key, &secret_key);
+    sign::sign_transaction(&mut tx, &public_key, &secret_key)?;
 
     let tx_blob = serialize::serialize(&tx)?;
 

@@ -6,10 +6,9 @@ mod tests {
         AccountNftsRequest, AccountOffersRequest, AccountTxRequest, BookOffersRequest, Currency,
         DepositAuthorizedRequest, FeeRequest, GatewayBalancesRequest, GetOfferObjectRequest,
         LedgerClosedRequest, LedgerCurrentRequest, LedgerDataRequest, LedgerEntryRequest,
-        LedgerRequest, ManifestRequest, PingRequest, RandomRequest, ServerInfoRequest,
+        LedgerIndex, LedgerRequest, ManifestRequest, PingRequest, RandomRequest, ServerInfoRequest,
         ServerStateRequest, TransactionEntryRequest, TxRequest, WithRequestPagination,
     };
-    use xrpl_types::{Currency, LedgerIndex};
 
     #[tokio::test]
     async fn client_can_fetch_account_currencies() {
@@ -283,7 +282,7 @@ mod tests {
 
         let resp = resp.expect("error response");
 
-        assert_eq!(resp.tx.common().hash, tx_hash);
+        assert_eq!(resp.tx.common().hash, Some(tx_hash.to_string()));
         assert_eq!(resp.tx.common().ledger_index, Some(56865245));
     }
 
