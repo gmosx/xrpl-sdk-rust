@@ -35,7 +35,7 @@ impl Amount {
 /// Amount of XRP in drops, see <https://xrpl.org/currency-formats.html#xrp-amounts>
 /// and <https://xrpl.org/serialization.html#amount-fields>
 #[derive(Debug, Eq, PartialEq, Clone, Copy)]
-// tuple is private since it is validated when the DropsAmount value is created
+// tuple element is private since it is validated when the DropsAmount value is created
 pub struct DropsAmount(u64);
 
 impl DropsAmount {
@@ -132,6 +132,7 @@ impl IssuedValue {
         self.exponent
     }
 
+    /// Normalizes value into the ranges specified at <https://xrpl.org/serialization.html#token-amount-format>
     fn normalize(self) -> Result<Self, Error> {
         // rippled implementation: https://github.com/seelabs/rippled/blob/cecc0ad75849a1d50cc573188ad301ca65519a5b/src/ripple/protocol/impl/IOUAmount.cpp#L38
 

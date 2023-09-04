@@ -1,11 +1,13 @@
 use crate::error::BinaryCodecError;
-use xrpl_types::serialize::{FieldCode, FieldId, Serialize, SerializeArray, TypeCode};
+use crate::serializer::field_id::{FieldCode, FieldId, TypeCode};
+use xrpl_types::serialize::{Serialize, SerializeArray};
 use xrpl_types::Uint64;
 use xrpl_types::{
     AccountId, Amount, Blob, CurrencyCode, DropsAmount, Hash128, Hash160, Hash256, IssuedValue,
     UInt16, UInt32, UInt8,
 };
 
+mod field_id;
 mod field_info;
 
 #[derive(Debug, Default)]
@@ -429,7 +431,7 @@ mod tests {
     use ascii::AsciiChar;
     use assert_matches::assert_matches;
     use enumflags2::BitFlags;
-    use xrpl_types::serialize::{FieldCode, Serialize, Serializer};
+    use xrpl_types::serialize::{Serialize, Serializer};
     use xrpl_types::OfferCreateTransaction;
 
     fn serializer() -> super::Serializer {

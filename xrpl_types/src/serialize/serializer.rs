@@ -2,6 +2,7 @@ use crate::serialize::Serialize;
 use crate::{AccountId, Amount, Blob, Hash128, Hash160, Hash256, UInt16, UInt32, UInt8, Uint64};
 use std::error::Error;
 
+/// Serialize for XRPL types and objects
 pub trait Serializer {
     type Error: Error;
     type SerializeArray<'a>: SerializeArray<Error = Self::Error>

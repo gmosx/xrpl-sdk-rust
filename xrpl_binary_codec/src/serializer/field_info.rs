@@ -1,6 +1,6 @@
+use crate::serializer::field_id::{FieldCode, TypeCode};
 use std::collections::HashMap;
 use std::sync::OnceLock;
-use xrpl_types::serialize::{FieldCode, TypeCode};
 
 #[derive(Debug)]
 pub struct FieldInfo {

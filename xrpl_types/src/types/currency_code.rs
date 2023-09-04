@@ -80,7 +80,7 @@ impl Display for CurrencyCode {
 
 /// Iso style currency code <https://xrpl.org/currency-formats.html#standard-currency-codes>
 #[derive(Debug, Eq, PartialEq, Clone, Copy)]
-// tuple is private since it is validated when the StandardCurrencyCode value is created
+// tuple element is private since it is validated when the StandardCurrencyCode value is created
 pub struct StandardCurrencyCode([AsciiChar; 3]);
 
 impl StandardCurrencyCode {
@@ -130,7 +130,7 @@ impl Display for StandardCurrencyCode {
 
 /// Hex style currency code <https://xrpl.org/currency-formats.html#nonstandard-currency-codes>
 #[derive(Debug, Eq, PartialEq, Clone, Copy)]
-// tuple is private since it is validated when the NonStandardCurrencyCode value is created
+// tuple element is private since it is validated when the NonStandardCurrencyCode value is created
 pub struct NonStandardCurrencyCode([u8; 20]);
 
 impl NonStandardCurrencyCode {
