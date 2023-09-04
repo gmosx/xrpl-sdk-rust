@@ -30,14 +30,8 @@ pub async fn remove_offer(
     // #insight
     // The secret/private key is 32 bytes, the public key is 33 bytes.
 
-    let public_key = public_key.as_ref();
-    let secret_key = secret_key.as_ref();
-
-    let public_key = hex::decode(public_key)?;
-    let secret_key = hex::decode(secret_key)?;
-
-    let secret_key = SecretKey::parse_slice(&secret_key)?;
-    let public_key = PublicKey::parse_compressed(&public_key.as_slice().try_into()?)?;
+    let secret_key = SecretKey::parse_slice(&hex::decode(secret_key.as_ref())?)?;
+    let public_key = PublicKey::parse_compressed(&hex::decode(public_key.as_ref())?.as_slice().try_into()?)?;
 
     sign::sign_transaction(&mut tx, &public_key, &secret_key)?;
 
