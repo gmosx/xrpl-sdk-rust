@@ -1,56 +1,106 @@
-use crate::{Amount, Meta};
+mod common;
+mod variants;
+
 use serde::Deserialize;
-use xrpl_types::TransactionType;
 
-// TODO: rename to `Tx`? nah...
+pub use common::*;
+
+pub use variants::account_delete::*;
+pub use variants::account_set::*;
+pub use variants::offer_cancel::*;
+pub use variants::offer_create::*;
+pub use variants::payment::*;
+pub use variants::trust_set::*;
+
+/// Ledger transaction. See <https://xrpl.org/transaction-formats.html>
 #[derive(Debug, Clone, Deserialize)]
-pub struct Transaction {
-    #[serde(rename = "Account")]
-    pub account: String,
+#[serde(tag = "TransactionType")]
+pub enum Transaction {
+    AccountDelete(AccountDeleteTransaction),
+    AccountSet(AccountSetTransaction),
+    // TODO add model for remaining transactions
+    CheckCancel(TransactionCommon),
+    CheckCash(TransactionCommon),
+    CheckCreate(TransactionCommon),
+    DepositPreauth(TransactionCommon),
+    EscrowCancel(TransactionCommon),
+    EscrowCreate(TransactionCommon),
+    EscrowFinish(TransactionCommon),
+    NFTokenAcceptOffer(TransactionCommon),
+    NFTokenBurn(TransactionCommon),
+    NFTokenCancelOffer(TransactionCommon),
+    NFTokenCreateOffer(TransactionCommon),
+    NFTokenMint(TransactionCommon),
+    OfferCancel(OfferCancelTransaction),
+    OfferCreate(OfferCreateTransaction),
+    Payment(PaymentTransaction),
+    PaymentChannelClaim(TransactionCommon),
+    PaymentChannelCreate(TransactionCommon),
+    PaymentChannelFund(TransactionCommon),
+    SetRegularKey(TransactionCommon),
+    SignerListSet(TransactionCommon),
+    TicketCreate(TransactionCommon),
+    TrustSet(TrustSetTransaction),
+}
 
-    #[serde(rename = "SourceTag")]
-    pub source_tag: Option<u32>,
+impl Transaction {
+    pub fn common(&self) -> &TransactionCommon {
+        match self {
+            Transaction::AccountDelete(t) => &t.common,
+            Transaction::AccountSet(t) => &t.common,
+            Transaction::OfferCancel(t) => &t.common,
+            Transaction::OfferCreate(t) => &t.common,
+            Transaction::Payment(t) => &t.common,
+            Transaction::TrustSet(t) => &t.common,
+            Transaction::CheckCancel(t) => t,
+            Transaction::CheckCash(t) => t,
+            Transaction::CheckCreate(t) => t,
+            Transaction::DepositPreauth(t) => t,
+            Transaction::EscrowCancel(t) => t,
+            Transaction::EscrowCreate(t) => t,
+            Transaction::EscrowFinish(t) => t,
+            Transaction::NFTokenAcceptOffer(t) => t,
+            Transaction::NFTokenBurn(t) => t,
+            Transaction::NFTokenCancelOffer(t) => t,
+            Transaction::NFTokenCreateOffer(t) => t,
+            Transaction::NFTokenMint(t) => t,
+            Transaction::PaymentChannelClaim(t) => t,
+            Transaction::PaymentChannelCreate(t) => t,
+            Transaction::PaymentChannelFund(t) => t,
+            Transaction::SetRegularKey(t) => t,
+            Transaction::SignerListSet(t) => t,
+            Transaction::TicketCreate(t) => t,
+        }
+    }
+}
 
-    #[serde(rename = "Fee")]
-    pub fee: String,
-
-    #[serde(rename = "Destination")]
-    pub destination: Option<String>,
-
-    #[serde(rename = "DestinationTag")]
-    pub destination_tag: Option<u32>,
-
-    #[serde(rename = "Amount")]
-    pub amount: Option<Amount>,
-
-    #[serde(rename = "Flags")]
-    pub flags: Option<u32>,
-
-    #[serde(rename = "Memos")]
-    // pub memos: Option<Vec<Memo>>,
-    pub memos: Option<Vec<serde_json::Value>>,
-
-    #[serde(rename = "Sequence")]
-    pub sequence: u32,
-
-    #[serde(rename = "TakerGets")]
-    pub taker_gets: Option<Amount>,
-
-    #[serde(rename = "TakerPays")]
-    pub taker_pays: Option<Amount>,
-
-    #[serde(rename = "TransactionType")]
-    pub transaction_type: TransactionType,
-
-    #[serde(rename = "TxnSignature")]
-    pub txn_signature: Option<String>,
-
-    pub date: Option<u32>, // TODO: what is the correct type?
-
-    pub hash: String,
-
-    pub ledger_index: Option<u32>,
-
-    #[serde(rename = "metaData")]
-    pub meta: Option<Meta>,
+impl Transaction {
+    pub fn common_mut(&mut self) -> &mut TransactionCommon {
+        match self {
+            Transaction::AccountDelete(t) => &mut t.common,
+            Transaction::AccountSet(t) => &mut t.common,
+            Transaction::OfferCancel(t) => &mut t.common,
+            Transaction::OfferCreate(t) => &mut t.common,
+            Transaction::Payment(t) => &mut t.common,
+            Transaction::TrustSet(t) => &mut t.common,
+            Transaction::CheckCancel(t) => t,
+            Transaction::CheckCash(t) => t,
+            Transaction::CheckCreate(t) => t,
+            Transaction::DepositPreauth(t) => t,
+            Transaction::EscrowCancel(t) => t,
+            Transaction::EscrowCreate(t) => t,
+            Transaction::EscrowFinish(t) => t,
+            Transaction::NFTokenAcceptOffer(t) => t,
+            Transaction::NFTokenBurn(t) => t,
+            Transaction::NFTokenCancelOffer(t) => t,
+            Transaction::NFTokenCreateOffer(t) => t,
+            Transaction::NFTokenMint(t) => t,
+            Transaction::PaymentChannelClaim(t) => t,
+            Transaction::PaymentChannelCreate(t) => t,
+            Transaction::PaymentChannelFund(t) => t,
+            Transaction::SetRegularKey(t) => t,
+            Transaction::SignerListSet(t) => t,
+            Transaction::TicketCreate(t) => t,
+        }
+    }
 }

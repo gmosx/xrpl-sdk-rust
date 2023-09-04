@@ -1,23 +1,32 @@
 [package]
 name = "xrpl_cli"
 description = "A CLI for the XRP Ledger"
-version = "0.10.0"
-license = "MIT OR Apache-2.0"
-repository = "https://github.com/gmosx/xrpl_sdk_rust/tree/main/xrpl_sdk_jsonrpc"
+version = "0.14.0"
+license = "Apache-2.0"
+repository = "https://github.com/gmosx/xrpl-sdk-rust/tree/main/xrpl_http_client"
 keywords = ["xrpl", "ledger", "cli"]
-authors = ["George Moschovitis <gmosx@reizu.org>"]
+authors = ["Georgios Moschovitis <george.moschovitis@gmail.com>"]
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
-clap = { version = "3.1", features = ["derive"] }
+anyhow = "1"
+clap = { version = "4", features = ["derive"] }
 tokio = { version = "1", features = ["full"] }
-serde = { version = "1", features = ["derive"]}
+serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 tracing = "0.1"
-tracing-subscriber = "0.2"
-xrpl_sdk_jsonrpc = { path = "../xrpl_sdk_jsonrpc", version = "0.10" }
+tracing-subscriber = "0.3"
+hex = "0.4"
+libsecp256k1 = "0.7.1"
+prettytable-rs = "0.10"
+rust_decimal = "1.32.0"
+xrpl_binary_codec = { path = "../xrpl_binary_codec", version = "0.14" }
+xrpl_types = { path = "../xrpl_types", version = "0.14" }
+xrpl_api = { path = "../xrpl_api", version = "0.14" }
+xrpl_http_client = { path = "../xrpl_http_client", version = "0.14" }
+
+[dev-dependencies]
+assert_matches = "1.5.0"
 
 [[bin]]
 name = "xrpl"

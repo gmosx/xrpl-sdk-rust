@@ -1,14 +1,22 @@
+use crate::{hash, serialize, BinaryCodecError};
 use libsecp256k1::{Message, PublicKey, SecretKey};
-use sha2::{Sha512, Digest};
-use xrpl_types::{Blob, Hash256, Transaction};
 use xrpl_types::serialize::Serialize;
-use crate::{BinaryCodecError, hash, serialize};
+use xrpl_types::{Blob, Transaction};
 
 /// Sign given transaction with secp256k1 <https://xrpl.org/cryptographic-keys.html#signing-algorithms>
-pub fn sign_transaction<T: Transaction + Serialize>(transaction: &mut T, public_key: &PublicKey, secret_key: &SecretKey) -> Result<(), BinaryCodecError> {
-    transaction.common_mut().signing_pub_key = Some(Blob(public_key.serialize_compressed().to_vec()));
+pub fn sign_transaction<T: Transaction + Serialize>(
+    transaction: &mut T,
+    public_key: &PublicKey,
+    secret_key: &SecretKey,
+) -> Result<(), BinaryCodecError> {
+    transaction.common_mut().signing_pub_key =
+        Some(Blob(public_key.serialize_compressed().to_vec()));
     let serialized = serialize::serialize(transaction)?;
-    let signature = signature(hash::HASH_PREFIX_UNSIGNED_TRANSACTION_SINGLE, &serialized, secret_key);
+    let signature = signature(
+        hash::HASH_PREFIX_UNSIGNED_TRANSACTION_SINGLE,
+        &serialized,
+        secret_key,
+    );
     transaction.common_mut().txn_signature = Some(signature);
     Ok(())
 }
@@ -21,7 +29,7 @@ fn signature(prefix: [u8; 4], data: &[u8], secret_key: &SecretKey) -> Blob {
     Blob(signature.serialize_der().as_ref().to_vec())
 }
 
-
+// todo allan
 //
 // #[cfg(test)]
 // mod tests {

@@ -30,7 +30,6 @@ impl Transaction for OfferCancelTransaction {
     }
 }
 
-
 #[bitflags]
 #[repr(u32)]
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]

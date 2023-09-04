@@ -2,7 +2,7 @@ use crate::error::Error;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use std::time::Duration;
 use tracing::debug;
-use xrpl_api::{AccountInfoRequest, Request, ServerStateRequest};
+use xrpl_api::{AccountInfoRequest, Request, ServerInfoRequest};
 use xrpl_types::{DropsAmount, TransactionCommon};
 
 pub const GENERAL_PURPOSE_MAINNET_URL: &str = "https://s1.ripple.com:51234";
@@ -85,7 +85,7 @@ impl ClientBuilder {
 pub struct Client {
     base_url: String,
     user_agent: String,
-    // TODO: hm, not really used currently.
+    // #todo hm, not really used currently.
     http_client: reqwest::Client,
 }
 
@@ -116,7 +116,6 @@ impl Client {
 
         let body = serde_json::to_string(&request)?;
 
-        dbg!(&body);
         debug!("POST {}", body);
 
         let response = self
@@ -172,7 +171,7 @@ impl Client {
     /// auto-filling required fields.
     ///
     /// <https://xrpl.org/reliable-transaction-submission.html>
-    pub async fn prepare_transaction(&self, tx: TransactionCommon) -> Result<TransactionCommon> {
+    pub async fn prepare_transaction(&self, tx: &mut TransactionCommon) -> Result<()> {
         let mut tx = tx;
 
         if tx.sequence.is_none() {
@@ -184,17 +183,25 @@ impl Client {
         }
 
         if tx.last_ledger_sequence.is_none() || tx.fee.is_none() {
-            let resp = self.call(ServerStateRequest::new()).await?;
+            // let resp = self.call(ServerStateRequest::new()).await?;
+            //
+            // // The recommendation for backend applications is to use (last validated ledger index + 4).
+            // tx.last_ledger_sequence = Some(resp.state.validated_ledger.seq + 4);
+            // tx.fee = Some(resp.state.validated_ledger.base_fee);
+
+            let resp = self.call(ServerInfoRequest::new()).await?;
 
             // The recommendation for backend applications is to use (last validated ledger index + 4).
-            tx.last_ledger_sequence = Some(resp.state.validated_ledger.seq + 4);
+            tx.last_ledger_sequence = Some(resp.info.validated_ledger.seq + 4);
             tx.fee = Some(
-                DropsAmount::from_drops(resp.state.validated_ledger.base_fee)
-                    .map_err(|err| Error::Internal(format!("Not a valid drops value: {}", err)))?,
+                DropsAmount::from_drops(
+                    (resp.info.validated_ledger.base_fee_xrp * 1_000_000.0) as u64,
+                )
+                .map_err(|err| Error::Internal(format!("Not a valid drops value: {}", err)))?,
             );
         }
 
-        Ok(tx)
+        Ok(())
     }
 
     // #TODO add additional helpers, like .submit(), and other requests with standard params.

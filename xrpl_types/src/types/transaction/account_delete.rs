@@ -32,7 +32,6 @@ impl Transaction for AccountDeleteTransaction {
     }
 }
 
-
 #[bitflags]
 #[repr(u32)]
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]

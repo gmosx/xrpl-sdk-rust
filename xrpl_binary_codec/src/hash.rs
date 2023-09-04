@@ -1,5 +1,5 @@
-use sha2::Sha512;
 use sha2::Digest;
+use sha2::Sha512;
 use xrpl_types::Hash256;
 
 /// Unsigned single signer transactions prefix <https://xrpl.org/basic-data-types.html#hash-prefixes>

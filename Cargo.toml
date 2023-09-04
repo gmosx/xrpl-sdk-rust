@@ -1,11 +1,13 @@
 [workspace]
 
+resolver = "2"
+
 members = [
     "xrpl_types",
     "xrpl_api",
     "xrpl_address_codec",
     "xrpl_binary_codec",
     "xrpl_cli",
-    "xrpl_sdk_jsonrpc",
-    "xrpl_sdk_ws",
+    "xrpl_http_client",
+    "xrpl_ws_client",
 ]

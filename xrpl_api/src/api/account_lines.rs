@@ -12,7 +12,7 @@ pub struct AccountLinesRequest {
     /// The Address of a second account. If provided, show only lines of trust
     /// connecting the two accounts.
     #[serde(skip_serializing_if = "Option::is_none")]
-    peer: Option<String>,
+    pub peer: Option<String>,
     #[serde(flatten)]
     pub ledger_spec: RetrieveLedgerSpec,
     #[serde(flatten)]

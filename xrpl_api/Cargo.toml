@@ -1,18 +1,18 @@
 [package]
 name = "xrpl_api"
 description = "XRPL Protocol endpoints and resouces"
-version = "0.10.0"
+version = "0.14.0"
 edition = "2021"
-license = "MIT OR Apache-2.0"
-repository = "https://github.com/gmosx/xrpl_sdk_rust/tree/main/xrpl_api"
+license = "Apache-2.0"
+repository = "https://github.com/gmosx/xrpl-sdk-rust/tree/main/xrpl_api"
 keywords = ["xrpl", "ledger", "api", "protocol"]
-authors = ["George Moschovitis <gmosx@reizu.org>"]
+authors = ["Georgios Moschovitis <george.moschovitis@gmail.com>"]
 
 [dependencies]
-serde = { version = "1", features = ["derive"]}
+serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 enumflags2 = { version = "0.7.7", features = ["serde"] }
-xrpl_types = { path = "../xrpl_types", version = "0.10" }
+xrpl_types = { path = "../xrpl_types", version = "0.14" }
 
 [dev-dependencies]
 assert_matches = "1.5.0"

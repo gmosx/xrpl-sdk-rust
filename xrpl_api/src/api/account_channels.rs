@@ -6,7 +6,10 @@
 //!
 //! <https://xrpl.org/account_channels.html>
 
-use crate::Request;
+use crate::{
+    Request, RequestPagination, ResponsePagination, RetrieveLedgerSpec, ReturnLedgerSpec,
+    WithLedgerSpec, WithRequestPagination, WithResponsePagination,
+};
 use serde::{Deserialize, Serialize};
 
 #[derive(Default, Debug, Clone, Serialize)]
@@ -16,16 +19,10 @@ pub struct AccountChannelsRequest {
     account: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     destination_account: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    ledger_hash: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    ledger_index: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    limit: Option<u32>,
-    /// Value from a previous paginated response. Resume retrieving data where
-    /// that response left off.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    marker: Option<String>,
+    #[serde(flatten)]
+    pub ledger_spec: RetrieveLedgerSpec,
+    #[serde(flatten)]
+    pub pagination: RequestPagination,
 }
 
 impl Request for AccountChannelsRequest {
@@ -33,6 +30,26 @@ impl Request for AccountChannelsRequest {
 
     fn method(&self) -> String {
         "account_channels".to_owned()
+    }
+}
+
+impl WithLedgerSpec for AccountChannelsRequest {
+    fn as_ledger_spec(&self) -> &crate::RetrieveLedgerSpec {
+        &self.ledger_spec
+    }
+
+    fn as_ledger_spec_mut(&mut self) -> &mut crate::RetrieveLedgerSpec {
+        &mut self.ledger_spec
+    }
+}
+
+impl WithRequestPagination for AccountChannelsRequest {
+    fn as_pagination(&self) -> &RequestPagination {
+        &self.pagination
+    }
+
+    fn as_pagination_mut(&mut self) -> &mut RequestPagination {
+        &mut self.pagination
     }
 }
 
@@ -45,7 +62,7 @@ impl AccountChannelsRequest {
     }
 }
 
-// TODO: consider extracting as a type.
+// #todo consider extracting as a type.
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AccountChannel {
@@ -77,6 +94,14 @@ pub struct AccountChannel {
 pub struct AccountChannelsResponse {
     pub account: String,
     pub channels: Vec<AccountChannel>,
-    pub limit: Option<u32>,
-    pub marker: Option<String>,
+    #[serde(flatten)]
+    pub ledger_spec: ReturnLedgerSpec,
+    #[serde(flatten)]
+    pub pagination: ResponsePagination,
+}
+
+impl WithResponsePagination for AccountChannelsResponse {
+    fn as_pagination(&self) -> &ResponsePagination {
+        &self.pagination
+    }
 }

@@ -1,5 +1,7 @@
 use crate::serialize::{Serialize, Serializer};
-use crate::{AccountId, Amount, IssuedAmount, Transaction, TransactionCommon, TransactionType, UInt32};
+use crate::{
+    AccountId, Amount, IssuedAmount, Transaction, TransactionCommon, TransactionType, UInt32,
+};
 use enumflags2::{bitflags, BitFlags};
 
 /// A `TrustSet` transaction <https://xrpl.org/trustset.html>

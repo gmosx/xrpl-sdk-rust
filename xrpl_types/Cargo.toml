@@ -1,15 +1,15 @@
 [package]
 name = "xrpl_types"
 description = "Core types and related functions for the XRP Ledger"
-version = "0.10.0"
-license = "MIT OR Apache-2.0"
-repository = "https://github.com/gmosx/xrpl_sdk_rust/tree/main/xrpl_types"
+version = "0.14.0"
+license = "Apache-2.0"
+repository = "https://github.com/gmosx/xrpl-sdk-rust/tree/main/xrpl_types"
 keywords = ["xrpl", "ledger", "api"]
-authors = ["George Moschovitis <gmosx@reizu.org>"]
+authors = ["Georgios Moschovitis <george.moschovitis@gmail.com>"]
 edition = "2021"
 
 [dependencies]
-serde = { version = "1", features = ["derive"]}
+serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 thiserror = "1.0.44"
 bs58 = {version = "0.5.0", features = ["check"]}

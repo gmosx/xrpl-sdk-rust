@@ -1,21 +1,19 @@
 //! A CLI for the XRP Ledger.
 
-mod account;
-mod ledger;
-
-use account::{
+use clap::{Arg, ArgAction, Command};
+use xrpl_cli::account::{
     balances::account_balances, info::account_info, offers::account_offers,
     trustlines::account_trustlines,
 };
-use clap::{Arg, Command};
-use ledger::closed::ledger_closed;
+use xrpl_cli::ledger::closed::ledger_closed;
 
 // #TODO also used WebSocket
 // #TODO introduce `xrpl_util` or `xrpl_fmt` crate.
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
-fn main() {
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt::init();
 
     // `account` subcommand
@@ -29,6 +27,22 @@ fn main() {
                 .required(true)
                 .index(1),
         )
+        .arg(
+            Arg::new("PUBLIC_KEY")
+                .help("The public key of the account")
+                .short('p')
+                .long("public-key")
+                .required(false)
+                .action(ArgAction::Set),
+        )
+        .arg(
+            Arg::new("SECRET_KEY")
+                .help("The secret/private key of the account")
+                .short('s')
+                .long("secret-key")
+                .required(false)
+                .action(ArgAction::Set),
+        )
         .subcommand(
             Command::new("info")
                 .about("info")
@@ -37,14 +51,14 @@ fn main() {
                         .short('j')
                         .long("json")
                         .help("Format response as JSON")
-                        .takes_value(false),
+                        .action(ArgAction::SetTrue),
                 )
                 .arg(
                     Arg::new("pretty")
                         .short('p')
                         .long("pretty")
                         .help("Pretty-print the response")
-                        .takes_value(false),
+                        .action(ArgAction::SetTrue),
                 ),
         )
         .subcommand(
@@ -55,68 +69,106 @@ fn main() {
                         .short('j')
                         .long("json")
                         .help("Format response as JSON")
-                        .takes_value(false),
+                        .action(ArgAction::SetTrue),
                 )
                 .arg(
                     Arg::new("pretty")
                         .short('p')
                         .long("pretty")
                         .help("Pretty-print the response")
-                        .takes_value(false),
+                        .action(ArgAction::SetTrue),
                 ),
         )
         .subcommand(
             Command::new("offers")
-                .about("offers")
-                .arg(
-                    Arg::new("limit")
-                        .short('l')
-                        .long("limit")
-                        .value_name("LIMIT")
-                        .help("The maximum count of offers returned")
-                        .required(false)
-                        .takes_value(true),
+                .about("Account offers")
+                .subcommand(
+                    Command::new("list")
+                        .about("List account offers")
+                        .arg(
+                            Arg::new("limit")
+                                .short('l')
+                                .long("limit")
+                                .value_name("LIMIT")
+                                .help("The maximum count of offers returned")
+                                .required(false)
+                                .action(ArgAction::Set),
+                        )
+                        .arg(
+                            Arg::new("json")
+                                .short('j')
+                                .long("json")
+                                .help("Format response as JSON")
+                                .action(ArgAction::SetTrue),
+                        )
+                        .arg(
+                            Arg::new("pretty")
+                                .short('p')
+                                .long("pretty")
+                                .help("Pretty-print the response")
+                                .action(ArgAction::SetTrue),
+                        ),
                 )
-                .arg(
-                    Arg::new("json")
-                        .short('j')
-                        .long("json")
-                        .help("Format response as JSON")
-                        .takes_value(false),
+                .subcommand(
+                    Command::new("create")
+                        .about("Create offer")
+                        .arg(
+                            Arg::new("TAKER_PAYS")
+                                .short('p')
+                                .long("taker-pays")
+                                .help("The amount the taker pays")
+                                .required(true)
+                                .action(ArgAction::Set),
+                        )
+                        .arg(
+                            Arg::new("TAKER_GETS")
+                                .short('g')
+                                .long("taker-gets")
+                                .help("The amount the taker gets")
+                                .required(true)
+                                .action(ArgAction::Set),
+                        ),
                 )
-                .arg(
-                    Arg::new("pretty")
-                        .short('p')
-                        .long("pretty")
-                        .help("Pretty-print the response")
-                        .takes_value(false),
+                .subcommand(
+                    Command::new("remove").about("Remove offer").arg(
+                        // Positional argument.
+                        Arg::new("OFFER_SEQ")
+                            .help("The sequence of the offer")
+                            .required(true)
+                            .index(1),
+                    ),
                 ),
         )
         .subcommand(
             Command::new("trustlines")
-                .about("lines")
-                .arg(
-                    Arg::new("limit")
-                        .short('l')
-                        .long("limit")
-                        .value_name("LIMIT")
-                        .help("The maximum count of trustlines returned")
-                        .required(false)
-                        .takes_value(true),
-                )
-                .arg(
-                    Arg::new("json")
-                        .short('j')
-                        .long("json")
-                        .help("Format response as JSON")
-                        .takes_value(false),
-                )
-                .arg(
-                    Arg::new("pretty")
-                        .short('p')
-                        .long("pretty")
-                        .help("Pretty-print the response")
-                        .takes_value(false),
+                .alias("lines")
+                .about("Account trustlines")
+                .subcommand(
+                    Command::new("list")
+                        .about("List account trustlines")
+                        .arg(
+                            Arg::new("limit")
+                                .short('l')
+                                .long("limit")
+                                .value_name("LIMIT")
+                                .help("The maximum count of trustlines returned")
+                                .required(false)
+                                .action(ArgAction::Set),
+                        )
+                        .arg(
+                            Arg::new("json")
+                                .short('j')
+                                .long("json")
+                                .help("Format response as JSON")
+                                .action(ArgAction::SetTrue),
+                        )
+                        .arg(
+                            Arg::new("pretty")
+                                .short('p')
+                                .long("pretty")
+                                .help("Pretty-print the response")
+                                .action(ArgAction::SetTrue),
+                        ),
                 ),
         );
 
@@ -131,7 +183,7 @@ fn main() {
                 .value_name("LEDGER_INDEX")
                 .help("Selects the ledger by index")
                 .required(false)
-                .takes_value(true),
+                .action(ArgAction::Set),
         )
         .arg(
             Arg::new("hash")
@@ -140,7 +192,7 @@ fn main() {
                 .value_name("LEDGER_HASH")
                 .help("Selects the ledger by hash")
                 .required(false)
-                .takes_value(true),
+                .action(ArgAction::Set),
         )
         .arg(
             Arg::new("closed")
@@ -148,11 +200,11 @@ fn main() {
                 .long("closed")
                 .help("Selects the latest closed ledger")
                 .required(false)
-                .takes_value(false),
+                .action(ArgAction::SetTrue),
         );
 
     let mut xrpl_cmd = Command::new("xrpl")
-        .author("George Moschovitis, gmosx@reizu.org")
+        .author("Georgios Moschovitis, george.moschovitis@gmail.com")
         .version(VERSION)
         .about("A CLI for the XRP Ledger")
         .after_help(
@@ -161,22 +213,24 @@ fn main() {
         .subcommand(account_cmd)
         .subcommand(ledger_cmd);
 
-    let matches = xrpl_cmd.clone().get_matches();
+    let matches = xrpl_cmd.get_matches_mut();
 
     if let Some(account_matches) = matches.subcommand_matches("account") {
         if let Some(info_matches) = account_matches.subcommand_matches("info") {
-            account_info(account_matches, info_matches);
+            account_info(account_matches, info_matches).await?;
         } else if let Some(balance_matches) = account_matches.subcommand_matches("balances") {
-            account_balances(account_matches, balance_matches);
+            account_balances(account_matches, balance_matches).await?;
         } else if let Some(offers_matches) = account_matches.subcommand_matches("offers") {
-            account_offers(account_matches, offers_matches);
+            account_offers(account_matches, offers_matches).await?;
         } else if let Some(offers_matches) = account_matches.subcommand_matches("trustlines") {
-            account_trustlines(account_matches, offers_matches);
+            account_trustlines(account_matches, offers_matches).await?;
         }
     } else if let Some(ledger_matches) = matches.subcommand_matches("ledger") {
         // #TODO properly handle this
-        ledger_closed(ledger_matches);
+        ledger_closed(ledger_matches).await?;
     } else {
         xrpl_cmd.print_long_help().unwrap();
     }
+
+    Ok(())
 }

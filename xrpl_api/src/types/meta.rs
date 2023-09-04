@@ -1,13 +1,9 @@
 use crate::Amount;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub enum AffectedNode {
-    // CreateNode {},
-    // CreatedNode(serde_json::Value),
-    // CreatedNode(CreatedNode),
     CreatedNode {
-        // TODO: more fields missing?
         #[serde(rename = "LedgerEntryType")]
         ledger_entry_type: String,
         #[serde(rename = "LedgerIndex")]
@@ -15,9 +11,7 @@ pub enum AffectedNode {
         #[serde(rename = "NewFields")]
         new_fields: serde_json::Value,
     },
-    // ModifiedNode(serde_json::Value),
     ModifiedNode {
-        // TODO: more fields missing?
         #[serde(rename = "LedgerEntryType")]
         ledger_entry_type: String,
         #[serde(rename = "LedgerIndex")]
@@ -26,10 +20,12 @@ pub enum AffectedNode {
         final_fields: Option<serde_json::Value>,
         #[serde(rename = "PreviousFields")]
         previous_fields: Option<serde_json::Value>,
+        #[serde(rename = "PreviousTxnID")]
+        previous_txn_id: Option<String>,
+        #[serde(rename = "PreviousTxnLgrSeq")]
+        previous_txn_lgr_seq: Option<u32>,
     },
-    // DeletedNode(serde_json::Value),
     DeletedNode {
-        // TODO: more fields missing?
         #[serde(rename = "LedgerEntryType")]
         ledger_entry_type: String,
         #[serde(rename = "LedgerIndex")]
@@ -41,13 +37,11 @@ pub enum AffectedNode {
     },
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "PascalCase")]
 pub struct Meta {
-    #[serde(rename = "AffectedNodes")]
     pub affected_nodes: Vec<AffectedNode>,
-    #[serde(rename = "TransactionIndex")]
     pub transaction_index: u32,
-    #[serde(rename = "TransactionResult")]
     pub transaction_result: String,
     #[serde(rename = "delivered_amount")]
     pub delivered_amount: Option<Amount>,

@@ -1,5 +1,8 @@
 use crate::serialize::{Serialize, Serializer};
-use crate::{AccountId, Blob, Hash128, Hash256, Transaction, TransactionCommon, TransactionType, UInt32, UInt8};
+use crate::{
+    AccountId, Blob, Hash128, Hash256, Transaction, TransactionCommon, TransactionType, UInt32,
+    UInt8,
+};
 use enumflags2::{bitflags, BitFlags};
 
 /// An `AccountSet` transaction <https://xrpl.org/accountset.html>
@@ -47,7 +50,6 @@ impl Transaction for AccountSetTransaction {
         &mut self.common
     }
 }
-
 
 /// `AccountSet` flags <https://xrpl.org/accountset.html#accountset-flags>
 #[repr(u32)]

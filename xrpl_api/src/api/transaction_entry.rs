@@ -5,7 +5,7 @@
 //!
 //! <https://xrpl.org/transaction_entry.html>
 
-use crate::{types::Meta, types::Transaction, Request};
+use crate::{types::Meta, types::Transaction, LedgerIndex, Request};
 use serde::{Deserialize, Serialize};
 
 #[derive(Default, Debug, Clone, Serialize)]
@@ -13,7 +13,7 @@ pub struct TransactionEntryRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     ledger_hash: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    ledger_index: Option<String>,
+    ledger_index: Option<LedgerIndex>,
     /// Unique hash of the transaction you are looking up.
     tx_hash: String,
 }
@@ -27,16 +27,16 @@ impl Request for TransactionEntryRequest {
 }
 
 impl TransactionEntryRequest {
-    pub fn new(tx_hash: &str) -> Self {
+    pub fn new(tx_hash: impl Into<String>) -> Self {
         Self {
-            tx_hash: tx_hash.to_owned(),
+            tx_hash: tx_hash.into(),
             ..Default::default()
         }
     }
 
-    pub fn ledger_index(self, ledger_index: &str) -> Self {
+    pub fn ledger_index(self, ledger_index: LedgerIndex) -> Self {
         Self {
-            ledger_index: Some(ledger_index.to_owned()),
+            ledger_index: Some(ledger_index),
             ..self
         }
     }

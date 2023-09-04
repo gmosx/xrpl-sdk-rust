@@ -36,7 +36,6 @@ impl Transaction for OfferCreateTransaction {
     }
 }
 
-
 /// `OfferCreate` flags <https://xrpl.org/offercreate.html#offercreate-flags>
 #[bitflags]
 #[repr(u32)]

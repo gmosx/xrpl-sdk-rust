@@ -1,6 +1,6 @@
 //! <https://xrpl.org/account_info.html>
 
-use crate::{Request, RetrieveLedgerSpec, ReturnLedgerSpec, WithLedgerSpec};
+use crate::{AccountRoot, Request, RetrieveLedgerSpec, ReturnLedgerSpec, WithLedgerSpec};
 use serde::{Deserialize, Serialize};
 
 #[derive(Default, Debug, Clone, Serialize)]
@@ -10,8 +10,6 @@ pub struct AccountInfoRequest {
     pub queue: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub signer_lists: Option<bool>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub strict: Option<bool>,
     #[serde(flatten)]
     pub ledger_spec: RetrieveLedgerSpec,
 }
@@ -42,32 +40,13 @@ impl AccountInfoRequest {
         }
     }
 
-    pub fn strict(self, strict: bool) -> Self {
-        Self {
-            strict: Some(strict),
-            ..self
-        }
-    }
     // #TODO more builder methods
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct AccountData {
-    // TODO!
-    #[serde(rename = "Account")]
-    pub account: String,
-
-    #[serde(rename = "Balance")]
-    pub balance: String,
-
-    #[serde(rename = "Sequence")]
-    pub sequence: u32,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct AccountInfoResponse {
     // #TODO add missing fields!
-    pub account_data: AccountData,
+    pub account_data: AccountRoot,
     #[serde(flatten)]
     pub ledger_spec: ReturnLedgerSpec,
 }
