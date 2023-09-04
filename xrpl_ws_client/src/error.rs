@@ -1,8 +1,9 @@
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 // #TODO: Connection
 
-#[derive(Error, Debug)]
+#[derive(Error, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Error {
     #[error("internal error: {0}")]
     Internal(String),
