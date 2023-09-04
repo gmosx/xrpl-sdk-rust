@@ -4,14 +4,11 @@ use xrpl_types::{Blob, Hash256, Transaction};
 use xrpl_types::serialize::Serialize;
 use crate::{BinaryCodecError, hash, serialize};
 
-/// Unsigned single signer transactions prefix <https://xrpl.org/basic-data-types.html#hash-prefixes>
-const HASH_PREFIX_UNSIGNED_TRANSACTION_SINGLE: [u8; 4] = [0x53, 0x54, 0x58, 0x00];
-
 /// Sign given transaction with secp256k1 <https://xrpl.org/cryptographic-keys.html#signing-algorithms>
 pub fn sign_transaction<T: Transaction + Serialize>(transaction: &mut T, public_key: &PublicKey, secret_key: &SecretKey) -> Result<(), BinaryCodecError> {
     transaction.common_mut().signing_pub_key = Some(Blob(public_key.serialize_compressed().to_vec()));
     let serialized = serialize::serialize(transaction)?;
-    let signature = signature(HASH_PREFIX_UNSIGNED_TRANSACTION_SINGLE, &serialized, secret_key);
+    let signature = signature(hash::HASH_PREFIX_UNSIGNED_TRANSACTION_SINGLE, &serialized, secret_key);
     transaction.common_mut().txn_signature = Some(signature);
     Ok(())
 }
