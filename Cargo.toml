@@ -1,5 +1,7 @@
 [workspace]
 
+resolver = "2"
+
 members = [
     "xrpl_types",
     "xrpl_api",

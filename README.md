@@ -56,17 +56,13 @@ if let Some(msg) = client.messages.next().await {
 
 ## Links
 
-- [Github Repository](https://github.com/gmosx/xrpl-sdk-rust)
+- [XRP Ledger SDK](https://github.com/gmosx/xrpl-sdk-rust)
+- [Kraken SDK](https://github.com/gmosx/kraken-sdk-rust)
 
 ## Status
 
 This work is under active development (pre-alpha) and the API is expected to
 change. It's not considered ready for use in production.
-
-### Roadmap
-
-- Support for WebSocket API
-- Introduce XRPL command line client (CLI)
 
 ## Contributing
 

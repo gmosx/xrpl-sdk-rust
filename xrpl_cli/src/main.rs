@@ -141,29 +141,34 @@ async fn main() -> anyhow::Result<()> {
         )
         .subcommand(
             Command::new("trustlines")
-                .about("lines")
-                .arg(
-                    Arg::new("limit")
-                        .short('l')
-                        .long("limit")
-                        .value_name("LIMIT")
-                        .help("The maximum count of trustlines returned")
-                        .required(false)
-                        .action(ArgAction::Set),
-                )
-                .arg(
-                    Arg::new("json")
-                        .short('j')
-                        .long("json")
-                        .help("Format response as JSON")
-                        .action(ArgAction::SetTrue),
-                )
-                .arg(
-                    Arg::new("pretty")
-                        .short('p')
-                        .long("pretty")
-                        .help("Pretty-print the response")
-                        .action(ArgAction::SetTrue),
+                .alias("lines")
+                .about("Account trustlines")
+                .subcommand(
+                    Command::new("list")
+                        .about("List account trustlines")
+                        .arg(
+                            Arg::new("limit")
+                                .short('l')
+                                .long("limit")
+                                .value_name("LIMIT")
+                                .help("The maximum count of trustlines returned")
+                                .required(false)
+                                .action(ArgAction::Set),
+                        )
+                        .arg(
+                            Arg::new("json")
+                                .short('j')
+                                .long("json")
+                                .help("Format response as JSON")
+                                .action(ArgAction::SetTrue),
+                        )
+                        .arg(
+                            Arg::new("pretty")
+                                .short('p')
+                                .long("pretty")
+                                .help("Pretty-print the response")
+                                .action(ArgAction::SetTrue),
+                        ),
                 ),
         );
 
