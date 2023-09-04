@@ -248,10 +248,10 @@ impl Serializer {
         &mut self,
         field_name: &str,
         field_type: TypeCode,
-        serialize_closure: impl FnOnce(&mut Serializer) -> Result<(), BinaryCodecError>,
+        serialize_field_data_closure: impl FnOnce(&mut Serializer) -> Result<(), BinaryCodecError>,
     ) -> Result<(), BinaryCodecError> {
         let start_index = self.start_field(field_name, field_type)?;
-        serialize_closure(self)?;
+        serialize_field_data_closure(self)?;
         self.end_field(start_index);
 
         Ok(())
