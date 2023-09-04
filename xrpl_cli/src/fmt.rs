@@ -57,7 +57,7 @@ pub fn amount_from_str(s: impl AsRef<str>) -> Option<xrpl_types::Amount> {
         return xrpl_types::Amount::drops((f64::from_str(value).ok()? * 1_000_000.0) as u64).ok();
     }
 
-    let mut currency_parts = currency.split(".");
+    let mut currency_parts = currency.split('.');
 
     let Some(currency) = currency_parts.next() else {
             return None;

@@ -10,7 +10,7 @@ pub struct FieldInfo {
 
 pub fn field_info(field_name: &str) -> Option<&'static FieldInfo> {
     FIELD_INFO
-        .get_or_init(|| create_field_info_map())
+        .get_or_init(create_field_info_map)
         .get(field_name)
 }
 

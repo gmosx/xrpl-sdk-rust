@@ -31,8 +31,8 @@ fn signature(prefix: [u8; 4], data: &[u8], secret_key: &SecretKey) -> Blob {
 
 #[cfg(test)]
 mod tests {
-    use enumflags2::BitFlags;
     use super::*;
+    use enumflags2::BitFlags;
     use xrpl_types::{AccountId, Amount, DropsAmount, PaymentTransaction};
 
     #[test]
@@ -41,7 +41,14 @@ mod tests {
         let secret_key = "165F2F406B5DCC37E666B7A0C9686CD4C92B67D5D362C618A96627E394F2FF45";
 
         let secret_key = SecretKey::parse_slice(&hex::decode(secret_key).unwrap()).unwrap();
-        let public_key = PublicKey::parse_compressed(&hex::decode(public_key).unwrap().as_slice().try_into().unwrap()).unwrap();
+        let public_key = PublicKey::parse_compressed(
+            &hex::decode(public_key)
+                .unwrap()
+                .as_slice()
+                .try_into()
+                .unwrap(),
+        )
+        .unwrap();
 
         let mut tx = PaymentTransaction::new(
             AccountId::from_address("rB48JG388ovDA9fmPJbqgnSK3tnndSxgAe").unwrap(),
@@ -55,9 +62,8 @@ mod tests {
 
         sign_transaction(&mut tx, &public_key, &secret_key).unwrap();
 
-        let tx_hex = hex::encode_upper(&serialize::serialize(&tx).unwrap());
+        let tx_hex = hex::encode_upper(serialize::serialize(&tx).unwrap());
 
         assert_eq!(tx_hex, "120000228000000024011769EB201B01176A3F6140000000014FB18068400000000000000C7321037D37332B158AC75D7BA8E7EF1F3F4C7C0FA7B4BD8818B9C03545D3AED40BB3A974463044022059E8475EF21F380A0A8FF70FF976F53DFB2EEAADD98860F642BF4004A008BEF7022014279499218DD1460B753135AEAED5A63935ACE5975869C3204886B1F346569E811471CFCE39CE9B97E7E519AF8B282DDBE140A278748314F667B0CA50CC7709A220B0561B85E53A48461FA8");
     }
-
 }

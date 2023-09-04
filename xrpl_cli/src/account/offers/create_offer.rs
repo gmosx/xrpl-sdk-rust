@@ -26,11 +26,8 @@ pub async fn create_offer(
     let taker_gets = amount_from_str(taker_gets_spec).expect("invalid taker gets amount");
 
     // #warning this is an order from the TAKER side!
-    let mut tx = OfferCreateTransaction::new(
-        AccountId::from_address(account.as_ref())?,
-        taker_pays,
-        taker_gets,
-    );
+    let mut tx =
+        OfferCreateTransaction::new(AccountId::from_address(account)?, taker_pays, taker_gets);
 
     client.prepare_transaction(tx.common_mut()).await?;
 
@@ -38,7 +35,8 @@ pub async fn create_offer(
     // The secret/private key is 32 bytes, the public key is 33 bytes.
 
     let secret_key = SecretKey::parse_slice(&hex::decode(secret_key.as_ref())?)?;
-    let public_key = PublicKey::parse_compressed(&hex::decode(public_key.as_ref())?.as_slice().try_into()?)?;
+    let public_key =
+        PublicKey::parse_compressed(&hex::decode(public_key.as_ref())?.as_slice().try_into()?)?;
 
     sign::sign_transaction(&mut tx, &public_key, &secret_key)?;
 
