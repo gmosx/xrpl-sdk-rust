@@ -3,7 +3,7 @@ use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use std::time::Duration;
 use tracing::debug;
 use xrpl_api::{AccountInfoRequest, Request, ServerInfoRequest};
-use xrpl_types::Transaction;
+use xrpl_types::{DropsAmount, TransactionCommon};
 
 pub const GENERAL_PURPOSE_MAINNET_URL: &str = "https://s1.ripple.com:51234";
 pub const FULL_HISTORY_MAINNET_URL: &str = "https://s2.ripple.com:51234";
@@ -171,11 +171,13 @@ impl Client {
     /// auto-filling required fields.
     ///
     /// <https://xrpl.org/reliable-transaction-submission.html>
-    pub async fn prepare_transaction(&self, tx: Transaction) -> Result<Transaction> {
+    pub async fn prepare_transaction(&self, tx: &mut TransactionCommon) -> Result<()> {
         let mut tx = tx;
 
         if tx.sequence.is_none() {
-            let resp = self.call(AccountInfoRequest::new(&tx.account)).await?;
+            let resp = self
+                .call(AccountInfoRequest::new(&tx.account.to_address()))
+                .await?;
 
             tx.sequence = Some(resp.account_data.sequence);
         }
@@ -191,10 +193,15 @@ impl Client {
 
             // The recommendation for backend applications is to use (last validated ledger index + 4).
             tx.last_ledger_sequence = Some(resp.info.validated_ledger.seq + 4);
-            tx.fee = Some((resp.info.validated_ledger.base_fee_xrp * 1_000_000.0) as u64);
+            tx.fee = Some(
+                DropsAmount::from_drops(
+                    (resp.info.validated_ledger.base_fee_xrp * 1_000_000.0) as u64,
+                )
+                .map_err(|err| Error::Internal(format!("Not a valid drops value: {}", err)))?,
+            );
         }
 
-        Ok(tx)
+        Ok(())
     }
 
     // #TODO add additional helpers, like .submit(), and other requests with standard params.

@@ -5,10 +5,10 @@
 
 use crate::{
     types::{Meta, Transaction},
-    Request, RequestPagination, ResponsePagination, WithRequestPagination, WithResponsePagination,
+    LedgerIndex, Request, RequestPagination, ResponsePagination, WithRequestPagination,
+    WithResponsePagination,
 };
 use serde::{Deserialize, Serialize};
-use xrpl_types::LedgerIndex;
 
 #[derive(Default, Debug, Clone, Serialize)]
 pub struct AccountTxRequest {

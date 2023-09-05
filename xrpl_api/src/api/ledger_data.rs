@@ -5,11 +5,11 @@
 //! <https://xrpl.org/ledger_data.html>
 
 use crate::{
-    LedgerObject, ObjectType, Request, RequestPagination, ResponsePagination, RetrieveLedgerSpec,
-    ReturnLedgerSpec, WithLedgerSpec, WithRequestPagination, WithResponsePagination,
+    LedgerIndex, LedgerObject, ObjectType, Request, RequestPagination, ResponsePagination,
+    RetrieveLedgerSpec, ReturnLedgerSpec, WithLedgerSpec, WithRequestPagination,
+    WithResponsePagination,
 };
 use serde::{Deserialize, Serialize};
-use xrpl_types::LedgerIndex;
 
 // TIP: Better use the more specialized methods, like `get_offer_object`.
 

@@ -1,5 +1,5 @@
+use crate::Amount;
 use serde::{Deserialize, Serialize};
-use xrpl_types::Amount;
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub enum AffectedNode {

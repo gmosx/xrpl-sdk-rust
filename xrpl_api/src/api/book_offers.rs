@@ -4,9 +4,8 @@
 //! <https://xrpl.org/book_offers.html>
 
 use serde::{Deserialize, Serialize};
-use xrpl_types::Currency;
 
-use crate::{Offer, Request, RetrieveLedgerSpec, ReturnLedgerSpec, WithLedgerSpec};
+use crate::{Currency, Offer, Request, RetrieveLedgerSpec, ReturnLedgerSpec, WithLedgerSpec};
 
 #[derive(Default, Debug, Clone, Serialize)]
 pub struct BookOffersRequest {
@@ -68,42 +67,3 @@ pub struct BookOffersResponse {
     #[serde(flatten)]
     pub ledger_spec: ReturnLedgerSpec,
 }
-
-// impl Client {
-//     /// Returns the offers on a book. Please note that the term book, on XRPL,
-//     /// refers to one-side of an order book (a queue).
-//     pub fn book_offers(&self, taker_gets: &Currency, taker_pays: &Currency) -> BookOffersRequest {
-//         BookOffersRequest {
-//             client: self.clone(),
-//             params: BookOffersParams {
-//                 ledger_hash: None,
-//                 ledger_index: None,
-//                 limit: None,
-//                 taker: None,
-//                 taker_gets: CurrencyParams::from_currency(taker_gets),
-//                 taker_pays: CurrencyParams::from_currency(taker_pays),
-//             },
-//         }
-//     }
-// }
-
-// #[cfg(test)]
-// mod tests {
-//     use crate::client::Client;
-//     use xrpl_types::Currency;
-
-//     #[tokio::test]
-//     async fn book_offers_works() {
-//         let client = Client::default();
-
-//         let resp = client
-//             .book_offers(
-//                 &Currency::xrp(),
-//                 &Currency::issued("USD", "rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B"),
-//             )
-//             .send()
-//             .await;
-
-//         dbg!(&resp);
-//     }
-// }

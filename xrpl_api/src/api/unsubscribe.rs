@@ -1,8 +1,7 @@
 //! <https://xrpl.org/unsubscribe.html>
 
-use crate::Request;
+use crate::{Book, Request};
 use serde::{Deserialize, Serialize};
-use xrpl_types::Book;
 
 #[derive(Default, Debug, Clone, Serialize)]
 pub struct UnsubscribeRequest {

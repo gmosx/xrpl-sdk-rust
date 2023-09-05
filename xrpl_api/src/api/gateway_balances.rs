@@ -3,10 +3,9 @@
 //!
 //! <https://xrpl.org/gateway_balances>
 
-use crate::{Request, RetrieveLedgerSpec, ReturnLedgerSpec, WithLedgerSpec};
+use crate::{Amount, Request, RetrieveLedgerSpec, ReturnLedgerSpec, WithLedgerSpec};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use xrpl_types::Amount;
 
 #[derive(Default, Debug, Clone, Serialize)]
 pub struct GatewayBalancesRequest {

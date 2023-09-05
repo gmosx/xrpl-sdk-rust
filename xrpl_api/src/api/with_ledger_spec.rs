@@ -1,6 +1,5 @@
-use crate::Request;
+use crate::{LedgerIndex, LedgerSpec, Request};
 use serde::{Deserialize, Serialize};
-use xrpl_types::{LedgerIndex, LedgerSpec};
 
 /// Request that allows specifying ledger index to execute
 /// request on. See <https://xrpl.org/basic-data-types.html#specifying-ledgers>.

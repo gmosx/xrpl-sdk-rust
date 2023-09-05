@@ -1,8 +1,9 @@
 use clap::ArgMatches;
+use libsecp256k1::{PublicKey, SecretKey};
 
-use xrpl_binary_codec::{sign::sign_transaction, util::serialize_transaction_to_hex};
+use xrpl_binary_codec::{serialize, sign};
 use xrpl_http_client::{Client, SubmitRequest};
-use xrpl_types::Transaction;
+use xrpl_types::{AccountId, OfferCreateTransaction, Transaction};
 
 use crate::fmt::amount_from_str;
 
@@ -25,24 +26,23 @@ pub async fn create_offer(
     let taker_gets = amount_from_str(taker_gets_spec).expect("invalid taker gets amount");
 
     // #warning this is an order from the TAKER side!
-    let tx = Transaction::offer_create(&account, taker_pays, taker_gets);
+    let mut tx =
+        OfferCreateTransaction::new(AccountId::from_address(account)?, taker_pays, taker_gets);
 
-    let tx = client.prepare_transaction(tx).await?;
+    client.prepare_transaction(tx.common_mut()).await?;
 
     // #insight
     // The secret/private key is 32 bytes, the public key is 33 bytes.
 
-    let public_key = public_key.as_ref();
-    let secret_key = secret_key.as_ref();
+    let secret_key = SecretKey::parse_slice(&hex::decode(secret_key.as_ref())?)?;
+    let public_key =
+        PublicKey::parse_compressed(&hex::decode(public_key.as_ref())?.as_slice().try_into()?)?;
 
-    let public_key = hex::decode(public_key)?;
-    let secret_key = hex::decode(secret_key)?;
+    sign::sign_transaction(&mut tx, &public_key, &secret_key)?;
 
-    let tx = sign_transaction(tx, &public_key, &secret_key);
+    let tx_blob = serialize::serialize(&tx)?;
 
-    let tx_blob = serialize_transaction_to_hex(&tx);
-
-    let req = SubmitRequest::new(&tx_blob);
+    let req = SubmitRequest::new(hex::encode(&tx_blob));
     let resp = client.call(req).await?;
 
     println!("{resp}");

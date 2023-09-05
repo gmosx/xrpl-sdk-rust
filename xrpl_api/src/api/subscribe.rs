@@ -3,12 +3,8 @@
 //!
 //! <https://xrpl.org/subscribe.html>
 
-use crate::{
-    types::{Meta, Transaction},
-    Request, ReturnLedgerSpec,
-};
+use crate::{Currency, Request};
 use serde::{Deserialize, Serialize};
-use xrpl_types::{Book, LedgerTimestamp};
 
 #[derive(Default, Debug, Clone, Serialize)]
 pub struct SubscribeRequest {
@@ -26,6 +22,58 @@ pub struct SubscribeRequest {
     url_username: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     url_password: Option<String>,
+}
+
+/// A book on the ledger.
+#[derive(Debug, Clone, Serialize)]
+pub struct Book {
+    /// Specification of which currency the account taking the Offer would pay.
+    pub taker_gets: Currency,
+    /// Specification of which currency the account taking the Offer would receive.
+    pub taker_pays: Currency,
+    /// Unique account address to use as a perspective for viewing offers, in the XRP Ledger's base58 format.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub taker: Option<String>,
+    /// If true, return the current state of the order book once when you subscribe before sending updates.
+    /// The default is false.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub snapshot: Option<bool>,
+    /// If true, return both sides of the order book. The default is false.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub both: Option<bool>,
+}
+
+impl Book {
+    pub fn new(taker_gets: Currency, taker_pays: Currency) -> Self {
+        Self {
+            taker_gets,
+            taker_pays,
+            taker: None,
+            snapshot: None,
+            both: None,
+        }
+    }
+
+    pub fn snapshot(self, snapshot: bool) -> Self {
+        Self {
+            snapshot: Some(snapshot),
+            ..self
+        }
+    }
+
+    pub fn taker(self, taker: impl Into<String>) -> Self {
+        Self {
+            taker: Some(taker.into()),
+            ..self
+        }
+    }
+
+    pub fn both(self, both: bool) -> Self {
+        Self {
+            both: Some(both),
+            ..self
+        }
+    }
 }
 
 impl Request for SubscribeRequest {
@@ -93,36 +141,3 @@ impl SubscribeRequest {
 pub struct SubscribeResponse {}
 
 // Streaming Events
-
-#[derive(Debug, Deserialize)]
-pub struct LedgerClosedEvent {
-    pub fee_base: u32,
-    pub fee_ref: u32,
-    pub ledger_hash: String,
-    pub ledger_index: u32,
-    pub ledger_time: LedgerTimestamp,
-    pub reserve_base: u32,
-    pub reserve_inc: u32,
-    pub txn_count: u32,
-    pub validated_ledgers: String,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct ValidationReceivedEvent {
-    pub base_fee: u32,
-    pub cookie: Option<String>,
-    pub flags: u32,
-    pub ledger_hash: String,
-    pub ledger_index: String,
-    pub signature: String,
-    // #TODO add missing fields
-}
-
-#[derive(Debug, Deserialize)]
-pub struct TransactionEvent {
-    pub engine_result: String,
-    pub transaction: Transaction,
-    pub meta: Meta,
-    #[serde(flatten)]
-    pub ledger_spec: ReturnLedgerSpec,
-}

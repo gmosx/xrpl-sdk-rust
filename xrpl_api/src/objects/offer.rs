@@ -1,6 +1,7 @@
+use crate::Amount;
 use enumflags2::{bitflags, BitFlags};
 use serde::{Deserialize, Serialize};
-use xrpl_types::{Amount, LedgerTimestamp};
+use xrpl_types::LedgerTimestamp;
 
 /// The object was placed as a passive offer
 pub const LSF_PASSIVE: u32 = 0x00010000;
