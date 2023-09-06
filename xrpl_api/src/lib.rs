@@ -8,8 +8,9 @@ mod api;
 mod events;
 /// Objects on the XRP Ledger (<https://xrpl.org/ledger-object-types.html>).
 mod objects;
-/// Data types used on the XRP Ledger. This can be both basic data types (<https://xrpl.org/basic-data-types.html>)
-/// and also complex data types used in the API like transaction (<https://xrpl.org/transaction-formats.html>)
+/// Data types used on the XRP Ledger. This can be both basic data types
+/// (<https://xrpl.org/basic-data-types.html>) and also complex data types used
+/// in the API like transaction (<https://xrpl.org/transaction-formats.html>)
 mod types;
 
 pub use api::*;
