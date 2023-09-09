@@ -1,7 +1,7 @@
 [package]
 name = "xrpl_cli"
 description = "A CLI for the XRP Ledger"
-version = "0.14.0"
+version = "0.15.0"
 license = "Apache-2.0"
 repository = "https://github.com/gmosx/xrpl-sdk-rust/tree/main/xrpl_http_client"
 keywords = ["xrpl", "ledger", "cli"]
@@ -20,10 +20,10 @@ hex = "0.4"
 libsecp256k1 = "0.7.1"
 prettytable-rs = "0.10"
 rust_decimal = "1.32.0"
-xrpl_binary_codec = { path = "../xrpl_binary_codec", version = "0.14" }
-xrpl_types = { path = "../xrpl_types", version = "0.14" }
-xrpl_api = { path = "../xrpl_api", version = "0.14" }
-xrpl_http_client = { path = "../xrpl_http_client", version = "0.14" }
+xrpl_binary_codec = { path = "../xrpl_binary_codec", version = "0.15" }
+xrpl_types = { path = "../xrpl_types", version = "0.15" }
+xrpl_api = { path = "../xrpl_api", version = "0.15" }
+xrpl_http_client = { path = "../xrpl_http_client", version = "0.15" }
 
 [dev-dependencies]
 assert_matches = "1.5.0"
