@@ -1,5 +1,5 @@
+use crate::Amount;
 use serde::{Deserialize, Serialize};
-use xrpl_types::Amount;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct NFTokenOffer {

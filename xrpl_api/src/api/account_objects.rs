@@ -1,9 +1,8 @@
 //! <https://xrpl.org/account_objects.html>
 
 use crate::{
-    types::LedgerObject, ObjectType, Request, RequestPagination, ResponsePagination,
-    RetrieveLedgerSpec, ReturnLedgerSpec, WithLedgerSpec, WithRequestPagination,
-    WithResponsePagination,
+    LedgerObject, ObjectType, Request, RequestPagination, ResponsePagination, RetrieveLedgerSpec,
+    ReturnLedgerSpec, WithLedgerSpec, WithRequestPagination, WithResponsePagination,
 };
 use serde::{Deserialize, Serialize};
 

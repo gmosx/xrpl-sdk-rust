@@ -1,8 +1,9 @@
 use clap::ArgMatches;
+use libsecp256k1::{PublicKey, SecretKey};
 
-use xrpl_binary_codec::{sign::sign_transaction, util::serialize_transaction_to_hex};
+use xrpl_binary_codec::{serialize, sign};
 use xrpl_http_client::{Client, SubmitRequest};
-use xrpl_types::Transaction;
+use xrpl_types::{AccountId, OfferCancelTransaction, Transaction};
 
 // xrpl account <ADDRESS> --public-key="..." --secret-key="..." offers remove <OFFER_SEQUENCE>
 
@@ -21,24 +22,22 @@ pub async fn remove_offer(
 
     let client = Client::new();
 
-    let tx = Transaction::offer_cancel(account, offer_sequence);
+    let mut tx = OfferCancelTransaction::new(AccountId::from_address(account)?, offer_sequence);
 
-    let tx = client.prepare_transaction(tx).await?;
+    client.prepare_transaction(tx.common_mut()).await?;
 
     // #insight
     // The secret/private key is 32 bytes, the public key is 33 bytes.
 
-    let public_key = public_key.as_ref();
-    let secret_key = secret_key.as_ref();
+    let secret_key = SecretKey::parse_slice(&hex::decode(secret_key.as_ref())?)?;
+    let public_key =
+        PublicKey::parse_compressed(&hex::decode(public_key.as_ref())?.as_slice().try_into()?)?;
 
-    let public_key = hex::decode(public_key)?;
-    let secret_key = hex::decode(secret_key)?;
+    sign::sign_transaction(&mut tx, &public_key, &secret_key)?;
 
-    let tx = sign_transaction(tx, &public_key, &secret_key);
+    let tx_blob = serialize::serialize(&tx)?;
 
-    let tx_blob = serialize_transaction_to_hex(&tx);
-
-    let req = SubmitRequest::new(&tx_blob);
+    let req = SubmitRequest::new(hex::encode(&tx_blob));
     let resp = client.call(req).await?;
 
     println!("{resp}");

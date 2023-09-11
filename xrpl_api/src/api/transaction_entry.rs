@@ -5,9 +5,8 @@
 //!
 //! <https://xrpl.org/transaction_entry.html>
 
-use crate::{types::Meta, types::Transaction, Request};
+use crate::{types::Meta, types::Transaction, LedgerIndex, Request};
 use serde::{Deserialize, Serialize};
-use xrpl_types::LedgerIndex;
 
 #[derive(Default, Debug, Clone, Serialize)]
 pub struct TransactionEntryRequest {

@@ -114,3 +114,9 @@ pub use with_ledger_spec::*;
 
 pub mod with_pagination;
 pub use with_pagination::*;
+
+pub trait Request {
+    type Response;
+
+    fn method(&self) -> String;
+}

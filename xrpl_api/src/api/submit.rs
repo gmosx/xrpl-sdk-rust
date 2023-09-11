@@ -46,9 +46,9 @@ impl Request for SubmitRequest {
 }
 
 impl SubmitRequest {
-    pub fn new(tx_blob: &str) -> Self {
+    pub fn new(tx_blob: impl Into<String>) -> Self {
         Self {
-            tx_blob: tx_blob.to_owned(),
+            tx_blob: tx_blob.into(),
             ..Default::default()
         }
     }

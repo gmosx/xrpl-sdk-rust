@@ -10,7 +10,6 @@ pub struct TransactionCommon {
     pub sequence: u32,
     #[serde(rename = "AccountTxnID")]
     pub account_txn_id: Option<String>,
-    pub flags: Option<u32>,
     pub last_ledger_sequence: Option<u32>,
     // pub memos: Option<Vec<Memo>>,
     pub memos: Option<Vec<serde_json::Value>>,
@@ -26,7 +25,7 @@ pub struct TransactionCommon {
 
     /// Transaction hash
     #[serde(rename = "hash")]
-    pub hash: String,
+    pub hash: Option<String>,
 
     /// The ledger index of the ledger that includes this transaction.
     #[serde(rename = "ledger_index")]
