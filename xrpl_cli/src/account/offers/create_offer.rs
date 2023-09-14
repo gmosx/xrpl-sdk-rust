@@ -45,7 +45,7 @@ pub async fn create_offer(
     let req = SubmitRequest::new(hex::encode(&tx_blob));
     let resp = client.call(req).await?;
 
-    println!("{resp}");
+    println!("{resp:?}");
 
     Ok(())
 }
