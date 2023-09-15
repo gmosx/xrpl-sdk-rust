@@ -30,11 +30,11 @@ use serde::{Deserialize, Serialize};
 pub struct SubmitRequest {
     /// Hex representation of the signed transaction to submit. This can be a
     /// multi-signed transaction.
-    tx_blob: String,
+    pub tx_blob: String,
     /// (Optional, defaults to false) If true, and the transaction fails locally,
     /// do not retry or relay the transaction to other servers.
     #[serde(skip_serializing_if = "Option::is_none")]
-    fail_hard: Option<bool>,
+    pub fail_hard: Option<bool>,
 }
 
 impl Request for SubmitRequest {
@@ -50,6 +50,13 @@ impl SubmitRequest {
         Self {
             tx_blob: tx_blob.into(),
             ..Default::default()
+        }
+    }
+
+    pub fn fail_hard(self, fail_hard: bool) -> Self {
+        Self {
+            fail_hard: Some(fail_hard),
+            ..self
         }
     }
 }
