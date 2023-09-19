@@ -1,7 +1,7 @@
 use crate::Amount;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
 pub enum AffectedNode {
     CreatedNode {
         #[serde(rename = "LedgerEntryType")]
@@ -37,7 +37,7 @@ pub enum AffectedNode {
     },
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "PascalCase")]
 pub struct Meta {
     pub affected_nodes: Vec<AffectedNode>,

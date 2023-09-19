@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use xrpl_types::PaymentFlags;
 
 /// An `Payment` transaction <https://xrpl.org/payment.html>
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "PascalCase")]
 pub struct PaymentTransaction {
     #[serde(flatten)]
@@ -13,9 +13,13 @@ pub struct PaymentTransaction {
     pub flags: BitFlags<PaymentFlags>,
     pub amount: Amount,
     pub destination: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub destination_tag: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub invoice_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub send_max: Option<Amount>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub deliver_min: Option<Amount>,
 }
 
