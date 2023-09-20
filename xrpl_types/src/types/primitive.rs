@@ -1,7 +1,7 @@
 use std::fmt::{Debug, Formatter};
 use crate::Error;
 
-#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
+#[derive(Clone, Copy, Eq, PartialEq, Hash)]
 pub struct AccountId(pub [u8; 20]);
 
 impl AccountId {
@@ -161,6 +161,18 @@ impl Debug for Blob {
     }
 }
 
+impl Debug for AccountId {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        if f.alternate() {
+            write!(f, "0x")?;
+        }
+        for i in &self.0 {
+            write!(f, "{:02X}", i)?;
+        }
+        Ok(())
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -197,6 +209,13 @@ mod test {
         assert_matches!(result, Err(Error::InvalidData(message)) => {
            assert!(message.contains("address does not encode exactly 20 bytes"), "message: {message}")
         });
+    }
+
+    #[test]
+    fn test_account_id_debug() {
+        let account_id = AccountId([0x4b, 0x4e, 0x9c, 0x06, 0xf2, 0x42, 0x96, 0x07, 0x4f, 0x7b, 0xc4, 0x8f, 0x92, 0xa9, 0x79, 0x16, 0xc6, 0xdc, 0x5e, 0xa9]);
+        assert_eq!(format!("{:?}", account_id), "4B4E9C06F24296074F7BC48F92A97916C6DC5EA9");
+        assert_eq!(format!("{:#?}", account_id), "0x4B4E9C06F24296074F7BC48F92A97916C6DC5EA9");
     }
 
     #[test]
