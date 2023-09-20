@@ -1,3 +1,4 @@
+use std::fmt::{Debug, Formatter};
 use crate::Error;
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
@@ -31,16 +32,16 @@ impl AccountId {
     }
 }
 
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Clone, Eq, PartialEq, Hash)]
 pub struct Blob(pub Vec<u8>);
 
-#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
+#[derive(Clone, Copy, Eq, PartialEq, Hash)]
 pub struct Hash128(pub [u8; 16]);
 
-#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
+#[derive(Clone, Copy, Eq, PartialEq, Hash)]
 pub struct Hash160(pub [u8; 20]);
 
-#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
+#[derive(Clone, Copy, Eq, PartialEq, Hash)]
 pub struct Hash256(pub [u8; 32]);
 
 pub type UInt8 = u8;
@@ -112,6 +113,54 @@ impl Blob {
     }
 }
 
+impl Debug for Hash128 {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        if f.alternate() {
+            write!(f, "0x")?;
+        }
+        for i in &self.0 {
+            write!(f, "{:02X}", i)?;
+        }
+        Ok(())
+    }
+}
+
+impl Debug for Hash160 {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        if f.alternate() {
+            write!(f, "0x")?;
+        }
+        for i in &self.0 {
+            write!(f, "{:02X}", i)?;
+        }
+        Ok(())
+    }
+}
+
+impl Debug for Hash256 {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        if f.alternate() {
+            write!(f, "0x")?;
+        }
+        for i in &self.0 {
+            write!(f, "{:02X}", i)?;
+        }
+        Ok(())
+    }
+}
+
+impl Debug for Blob {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        if f.alternate() {
+            write!(f, "0x")?;
+        }
+        for i in &self.0 {
+            write!(f, "{:02X}", i)?;
+        }
+        Ok(())
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -180,6 +229,13 @@ mod test {
     }
 
     #[test]
+    fn test_hash128_debug() {
+        let hash = Hash128([0xA0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xA1]);
+        assert_eq!(format!("{:?}", hash), "A00000000000000000000000000000A1");
+        assert_eq!(format!("{:#?}", hash), "0xA00000000000000000000000000000A1");
+    }
+
+    #[test]
     fn test_hash160_from_hex() {
         let hash = Hash160::from_hex("A0000000000000000000000000000000000000A1").unwrap();
         assert_eq!(
@@ -195,6 +251,15 @@ mod test {
         ])
         .to_hex();
         assert_eq!(hex, "A0000000000000000000000000000000000000A1");
+    }
+
+    #[test]
+    fn test_hash160_debug() {
+        let hash = Hash160([
+            0xA0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xA1,
+        ]);
+        assert_eq!(format!("{:?}", hash), "A0000000000000000000000000000000000000A1");
+        assert_eq!(format!("{:#?}", hash), "0xA0000000000000000000000000000000000000A1");
     }
 
     #[test]
@@ -225,6 +290,16 @@ mod test {
     }
 
     #[test]
+    fn test_hash256_debug() {
+        let hash = Hash256([
+            0xA0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0xA1,
+        ]);
+        assert_eq!(format!("{:?}", hash), "A0000000000000000000000000000000000000000000000000000000000000A1");
+        assert_eq!(format!("{:#?}", hash), "0xA0000000000000000000000000000000000000000000000000000000000000A1");
+    }
+
+    #[test]
     fn test_blob_from_hex() {
         let hash = Blob::from_hex("A00000A1").unwrap();
         assert_eq!(hash.0, [0xA0, 0, 0, 0xA1]);
@@ -234,5 +309,12 @@ mod test {
     fn test_blob_to_hex() {
         let hex = Blob(vec![0xA0, 0, 0, 0xA1]).to_hex();
         assert_eq!(hex, "A00000A1");
+    }
+
+    #[test]
+    fn test_blob_debug() {
+        let blob = Blob(vec![0xA0, 0, 0, 0xA1]);
+        assert_eq!(format!("{:?}", blob), "A00000A1");
+        assert_eq!(format!("{:#?}", blob), "0xA00000A1");
     }
 }
