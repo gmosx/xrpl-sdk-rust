@@ -1,5 +1,5 @@
-use std::fmt::{Debug, Formatter};
 use crate::Error;
+use std::fmt::{Debug, Formatter};
 
 #[derive(Clone, Copy, Eq, PartialEq, Hash)]
 pub struct AccountId(pub [u8; 20]);
@@ -62,7 +62,7 @@ impl Hash128 {
     }
 
     pub fn to_hex(&self) -> String {
-        hex::encode_upper(&self.0)
+        hex::encode_upper(self.0)
     }
 }
 
@@ -79,7 +79,7 @@ impl Hash160 {
     }
 
     pub fn to_hex(&self) -> String {
-        hex::encode_upper(&self.0)
+        hex::encode_upper(self.0)
     }
 }
 
@@ -96,7 +96,7 @@ impl Hash256 {
     }
 
     pub fn to_hex(&self) -> String {
-        hex::encode_upper(&self.0)
+        hex::encode_upper(self.0)
     }
 }
 
@@ -213,9 +213,18 @@ mod test {
 
     #[test]
     fn test_account_id_debug() {
-        let account_id = AccountId([0x4b, 0x4e, 0x9c, 0x06, 0xf2, 0x42, 0x96, 0x07, 0x4f, 0x7b, 0xc4, 0x8f, 0x92, 0xa9, 0x79, 0x16, 0xc6, 0xdc, 0x5e, 0xa9]);
-        assert_eq!(format!("{:?}", account_id), "4B4E9C06F24296074F7BC48F92A97916C6DC5EA9");
-        assert_eq!(format!("{:#?}", account_id), "0x4B4E9C06F24296074F7BC48F92A97916C6DC5EA9");
+        let account_id = AccountId([
+            0x4b, 0x4e, 0x9c, 0x06, 0xf2, 0x42, 0x96, 0x07, 0x4f, 0x7b, 0xc4, 0x8f, 0x92, 0xa9,
+            0x79, 0x16, 0xc6, 0xdc, 0x5e, 0xa9,
+        ]);
+        assert_eq!(
+            format!("{:?}", account_id),
+            "4B4E9C06F24296074F7BC48F92A97916C6DC5EA9"
+        );
+        assert_eq!(
+            format!("{:#?}", account_id),
+            "0x4B4E9C06F24296074F7BC48F92A97916C6DC5EA9"
+        );
     }
 
     #[test]
@@ -277,8 +286,14 @@ mod test {
         let hash = Hash160([
             0xA0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xA1,
         ]);
-        assert_eq!(format!("{:?}", hash), "A0000000000000000000000000000000000000A1");
-        assert_eq!(format!("{:#?}", hash), "0xA0000000000000000000000000000000000000A1");
+        assert_eq!(
+            format!("{:?}", hash),
+            "A0000000000000000000000000000000000000A1"
+        );
+        assert_eq!(
+            format!("{:#?}", hash),
+            "0xA0000000000000000000000000000000000000A1"
+        );
     }
 
     #[test]
@@ -314,8 +329,14 @@ mod test {
             0xA0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0xA1,
         ]);
-        assert_eq!(format!("{:?}", hash), "A0000000000000000000000000000000000000000000000000000000000000A1");
-        assert_eq!(format!("{:#?}", hash), "0xA0000000000000000000000000000000000000000000000000000000000000A1");
+        assert_eq!(
+            format!("{:?}", hash),
+            "A0000000000000000000000000000000000000000000000000000000000000A1"
+        );
+        assert_eq!(
+            format!("{:#?}", hash),
+            "0xA0000000000000000000000000000000000000000000000000000000000000A1"
+        );
     }
 
     #[test]
