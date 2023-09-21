@@ -45,10 +45,6 @@ impl TxRequest {
 
 #[derive(Debug, Deserialize)]
 pub struct TxResponse {
-    pub date: Option<LedgerTimestamp>,
-    pub hash: String,
-    pub ledger_index: Option<u32>,
-    pub validated: bool,
     #[serde(flatten)]
     pub tx: Transaction,
 }
