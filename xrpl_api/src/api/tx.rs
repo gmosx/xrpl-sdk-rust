@@ -5,7 +5,6 @@
 
 use crate::{types::Transaction, Request};
 use serde::{Deserialize, Serialize};
-use xrpl_types::LedgerTimestamp;
 
 #[derive(Default, Debug, Clone, Serialize)]
 pub struct TxRequest {
