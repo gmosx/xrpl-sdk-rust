@@ -172,7 +172,7 @@ impl Client {
     ///
     /// <https://xrpl.org/reliable-transaction-submission.html>
     pub async fn prepare_transaction(&self, tx: &mut TransactionCommon) -> Result<()> {
-        let mut tx = tx;
+        let tx = tx;
 
         if tx.sequence.is_none() {
             let resp = self
