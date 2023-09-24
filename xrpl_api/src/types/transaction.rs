@@ -13,7 +13,7 @@ pub use variants::payment::*;
 pub use variants::trust_set::*;
 
 /// Ledger transaction. See <https://xrpl.org/transaction-formats.html>
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, PartialEq)]
 #[serde(tag = "TransactionType")]
 pub enum Transaction {
     AccountDelete(AccountDeleteTransaction),

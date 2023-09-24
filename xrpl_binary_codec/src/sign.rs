@@ -1,10 +1,9 @@
 use crate::{hash, serialize, BinaryCodecError};
 use libsecp256k1::{Message, PublicKey, SecretKey};
-use xrpl_types::serialize::Serialize;
 use xrpl_types::{Blob, Transaction};
 
 /// Sign given transaction with secp256k1 <https://xrpl.org/cryptographic-keys.html#signing-algorithms>
-pub fn sign_transaction<T: Transaction + Serialize>(
+pub fn sign_transaction<T: Transaction>(
     transaction: &mut T,
     public_key: &PublicKey,
     secret_key: &SecretKey,

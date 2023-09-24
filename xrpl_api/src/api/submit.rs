@@ -23,18 +23,18 @@
 //!
 //! <https://xrpl.org/submit.html>
 
-use crate::Request;
-use serde::Serialize;
+use crate::{Request, Transaction, TransactionResult};
+use serde::{Deserialize, Serialize};
 
 #[derive(Default, Debug, Clone, Serialize)]
 pub struct SubmitRequest {
     /// Hex representation of the signed transaction to submit. This can be a
     /// multi-signed transaction.
-    tx_blob: String,
+    pub tx_blob: String,
     /// (Optional, defaults to false) If true, and the transaction fails locally,
     /// do not retry or relay the transaction to other servers.
     #[serde(skip_serializing_if = "Option::is_none")]
-    fail_hard: Option<bool>,
+    pub fail_hard: Option<bool>,
 }
 
 impl Request for SubmitRequest {
@@ -52,15 +52,73 @@ impl SubmitRequest {
             ..Default::default()
         }
     }
+
+    pub fn fail_hard(self, fail_hard: bool) -> Self {
+        Self {
+            fail_hard: Some(fail_hard),
+            ..self
+        }
+    }
 }
 
-// #[derive(Debug, Deserialize)]
-// pub struct SubmitResponse {
-//     pub accepted: Option<bool>,
-//     pub applied: bool,
-//     pub engine_result: String,
-//     pub status: String,
-// }
+#[derive(Debug, Clone, Deserialize)]
+pub struct SubmitResponse {
+    pub engine_result: TransactionResult,
+    pub engine_result_code: i32,
+    pub engine_result_message: String,
+    pub tx_blob: String,
+    pub tx_json: Transaction,
+    pub accepted: bool,
+    pub account_sequence_available: u32,
+    pub account_sequence_next: u32,
+    pub applied: bool,
+    pub broadcast: bool,
+    pub kept: bool,
+    pub queued: bool,
+    pub open_ledger_cost: String,
+    pub validated_ledger_index: u32,
+}
 
-// #todo implement typed response
-pub type SubmitResponse = serde_json::Value;
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_deserialize_submit_response() {
+        let json = r#"
+{
+    "accepted" : true,
+    "account_sequence_available" : 362,
+    "account_sequence_next" : 362,
+    "applied" : true,
+    "broadcast" : true,
+    "engine_result": "tesSUCCESS",
+    "engine_result_code": 0,
+    "engine_result_message": "The transaction was applied. Only final in a validated ledger.",
+    "kept" : true,
+    "open_ledger_cost": "10",
+    "queued" : false,
+    "tx_blob": "1200002280000000240000016861D4838D7EA4C6800000000000000000000000000055534400000000004B4E9C06F24296074F7BC48F92A97916C6DC5EA9684000000000002710732103AB40A0490F9B7ED8DF29D246BF2D6269820A0EE7742ACDD457BEA7C7D0931EDB7446304402200E5C2DD81FDF0BE9AB2A8D797885ED49E804DBF28E806604D878756410CA98B102203349581946B0DDA06B36B35DBC20EDA27552C1F167BCF5C6ECFF49C6A46F858081144B4E9C06F24296074F7BC48F92A97916C6DC5EA983143E9D4A2B8AA0780F682D136F7A56D6724EF53754",
+    "tx_json": {
+      "Account": "rf1BiGeXwwQoi8Z2ueFYTEXSwuJYfV2Jpn",
+      "Amount": {
+        "currency": "USD",
+        "issuer": "rf1BiGeXwwQoi8Z2ueFYTEXSwuJYfV2Jpn",
+        "value": "1"
+      },
+      "Destination": "ra5nK24KXen9AHvsdFTKHSANinZseWnPcX",
+      "Fee": "10000",
+      "Flags": 2147483648,
+      "Sequence": 360,
+      "SigningPubKey": "03AB40A0490F9B7ED8DF29D246BF2D6269820A0EE7742ACDD457BEA7C7D0931EDB",
+      "TransactionType": "Payment",
+      "TxnSignature": "304402200E5C2DD81FDF0BE9AB2A8D797885ED49E804DBF28E806604D878756410CA98B102203349581946B0DDA06B36B35DBC20EDA27552C1F167BCF5C6ECFF49C6A46F8580",
+      "hash": "4D5D90890F8D49519E4151938601EF3D0B30B16CD6A519D9C99102C9FA77F7E0"
+    },
+    "validated_ledger_index" : 21184416
+}
+"#;
+
+        let _submit_response: SubmitResponse = serde_json::from_str(json).unwrap();
+    }
+}

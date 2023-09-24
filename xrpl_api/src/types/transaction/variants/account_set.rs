@@ -4,23 +4,32 @@ use serde::{Deserialize, Serialize};
 use xrpl_types::AccountSetTransactionFlags;
 
 /// An `AccountSet` transaction <https://xrpl.org/accountset.html>
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "PascalCase")]
 pub struct AccountSetTransaction {
     #[serde(flatten)]
     pub common: TransactionCommon,
     #[serde(default)]
     pub flags: BitFlags<AccountSetTransactionFlags>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub clear_flag: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub domain: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub email_hash: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub message_key: Option<String>,
-    #[serde(rename = "NFTokenMinter")]
+    #[serde(rename = "NFTokenMinter", skip_serializing_if = "Option::is_none")]
     pub nf_token_minter: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub set_flag: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub transfer_rate: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub tick_size: Option<u8>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub wallet_locator: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub wallet_size: Option<u32>,
 }
 

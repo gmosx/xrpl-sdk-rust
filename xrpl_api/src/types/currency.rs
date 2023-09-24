@@ -2,7 +2,7 @@ use serde::{Serialize, Serializer};
 
 /// An XRP Ledger currency. Can be either an Issued Currency (IOU) or the native
 /// XRP digital asset. See <https://xrpl.org/currency-formats.html#specifying-without-amounts>
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Default, Clone, Debug, PartialEq, Eq)]
 pub enum Currency {
     Issued {
         /// Currency code, see <https://xrpl.org/currency-formats.html#currency-codes>
@@ -10,13 +10,8 @@ pub enum Currency {
         /// Issuer of token, see <https://xrpl.org/currency-formats.html#specifying-without-amounts>
         issuer: String,
     },
+    #[default]
     Xrp,
-}
-
-impl Default for Currency {
-    fn default() -> Self {
-        Currency::Xrp
-    }
 }
 
 impl Currency {
