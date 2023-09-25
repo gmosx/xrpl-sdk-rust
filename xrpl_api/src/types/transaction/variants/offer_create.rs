@@ -4,14 +4,16 @@ use serde::{Deserialize, Serialize};
 use xrpl_types::{LedgerTimestamp, OfferCreateFlags};
 
 /// An `OfferCreate` transaction <https://xrpl.org/offercreate.html>
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "PascalCase")]
 pub struct OfferCreateTransaction {
     #[serde(flatten)]
     pub common: TransactionCommon,
     #[serde(default)]
     pub flags: BitFlags<OfferCreateFlags>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub expiration: Option<LedgerTimestamp>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub offer_sequence: Option<u32>,
     pub taker_gets: Amount,
     pub taker_pays: Amount,

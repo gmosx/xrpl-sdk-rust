@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use xrpl_types::TrustSetFlags;
 
 /// A `TrustSet` transaction <https://xrpl.org/trustset.html>
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "PascalCase")]
 pub struct TrustSetTransaction {
     #[serde(flatten)]
@@ -12,7 +12,9 @@ pub struct TrustSetTransaction {
     #[serde(default)]
     pub flags: BitFlags<TrustSetFlags>,
     pub limit_amount: IssuedAmount,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub quality_in: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub quality_out: Option<u32>,
 }
 

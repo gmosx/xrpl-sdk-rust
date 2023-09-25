@@ -597,6 +597,7 @@ mod tests {
 
     /// Tests length prefix according to <https://xrpl.org/serialization.html#length-prefixing>
     #[test]
+    #[allow(clippy::erasing_op, clippy::identity_op)]
     fn test_push_vl_prefix() {
         // test range 0 to 192
         let mut s = serializer();
@@ -711,7 +712,7 @@ mod tests {
             bytes,
             [0xD5, 0xC3, 0x8D, 0x7E, 0xA4, 0xC6, 0x80, 0x00,],
             "actual: {}",
-            hex::encode(&bytes),
+            hex::encode(bytes),
         );
     }
 
@@ -726,7 +727,7 @@ mod tests {
             bytes,
             [0x95, 0xC3, 0x8D, 0x7E, 0xA4, 0xC6, 0x80, 0x00,],
             "actual: {}",
-            hex::encode(&bytes),
+            hex::encode(bytes),
         );
     }
 
@@ -763,7 +764,7 @@ mod tests {
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x12
             ],
             "actual: {}",
-            hex::encode(&bytes),
+            hex::encode(bytes),
         );
     }
 

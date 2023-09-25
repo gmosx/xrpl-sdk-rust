@@ -1,11 +1,12 @@
 mod common;
 mod variants;
 
+use crate::serialize::Serialize;
 pub use common::*;
 pub use variants::*;
 
 /// XRPL transaction
-pub trait Transaction {
+pub trait Transaction: Serialize {
     fn common(&self) -> &TransactionCommon;
     fn common_mut(&mut self) -> &mut TransactionCommon;
 }

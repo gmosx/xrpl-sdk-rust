@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use xrpl_types::OfferCancelFlags;
 
 /// An `OfferCancel` transaction <https://xrpl.org/offercancel.html>
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
 #[serde(rename_all = "PascalCase")]
 pub struct OfferCancelTransaction {
     #[serde(flatten)]
