@@ -69,6 +69,10 @@ pub struct FeeResponse {
     /// Various information about the transaction cost (the Fee field of a
     /// transaction), in drops of XRP.
     pub drops: Drops,
+    /// The approximate number of transactions expected to be included in the current ledger. This is based on the number of transactions in the previous ledger.
+    pub expected_ledger_size: String,
+    /// The Ledger Index of the current open ledger these stats describe.
+    pub ledger_current_index: u32,
     /// Various information about the transaction cost, in fee levels. The ratio
     /// in fee levels applies to any transaction relative to the minimum cost
     /// of that particular transaction.
