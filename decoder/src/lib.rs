@@ -547,7 +547,7 @@ mod tests {
 
         let field_lookup = get_field_lookup();
         let parser = &mut BinaryParser::new(hex::decode(encoded_account_id).unwrap(), field_lookup.field_map);
-        let field_type = Hash256::from_parser(&mut *parser, None).unwrap();
+        let field_type = Hash256::from_parser(parser, None).unwrap();
         let str_val = field_type.to_string();
         assert_eq!(encoded_account_id, str_val);
     }
@@ -558,7 +558,7 @@ mod tests {
 
         let field_lookup = get_field_lookup();
         let parser = &mut BinaryParser::new(hex::decode(encoded_account_id_obj).unwrap(), field_lookup.field_map.clone());
-        let field_type = STObject::from_parser(&mut *parser, None).unwrap();
+        let field_type = STObject::from_parser(parser, None).unwrap();
         let str_val = field_type.to_string();
         assert_eq!(encoded_account_id_obj, str_val);
 
@@ -576,7 +576,7 @@ mod tests {
 
         let field_lookup = get_field_lookup();
         let parser = &mut BinaryParser::new(hex::decode(encoded_account_id).unwrap(), field_lookup.field_map);
-        let field_type = AccountID::from_parser(&mut *parser, None).unwrap();
+        let field_type = AccountID::from_parser(parser, None).unwrap();
         let str_val = field_type.to_string();
         assert_eq!(encoded_account_id, str_val);
     }
@@ -587,7 +587,7 @@ mod tests {
 
         let field_lookup = get_field_lookup();
         let parser = &mut BinaryParser::new(hex::decode(encoded_account_id_obj).unwrap(), field_lookup.field_map.clone());
-        let field_type = STObject::from_parser(&mut *parser, None).unwrap();
+        let field_type = STObject::from_parser(parser, None).unwrap();
         let str_val = field_type.to_string();
         assert_eq!(encoded_account_id_obj, str_val);
 
@@ -605,7 +605,7 @@ mod tests {
 
         let field_lookup = get_field_lookup();
         let parser = &mut BinaryParser::new(hex::decode(encoded_signing_pub_key).unwrap(), field_lookup.field_map);
-        let field_type = Blob::from_parser(&mut *parser, Some(33)).unwrap(); // NOTE: hardcoded hint size
+        let field_type = Blob::from_parser(parser, Some(33)).unwrap(); // NOTE: hardcoded hint size
         let str_val = field_type.to_string();
         assert_eq!(encoded_signing_pub_key, str_val);
     }
@@ -616,7 +616,7 @@ mod tests {
 
         let field_lookup = get_field_lookup();
         let parser = &mut BinaryParser::new(hex::decode(encoded_signing_pub_key_obj).unwrap(), field_lookup.field_map.clone());
-        let field_type = STObject::from_parser(&mut *parser, None).unwrap();
+        let field_type = STObject::from_parser(parser, None).unwrap();
         let str_val = field_type.to_string();
         assert_eq!(encoded_signing_pub_key_obj, str_val);
 
@@ -634,7 +634,7 @@ mod tests {
 
         let field_lookup = get_field_lookup();
         let parser = &mut BinaryParser::new(hex::decode(encoded_tx_sig).unwrap(), field_lookup.field_map);
-        let field_type = Blob::from_parser(&mut *parser, Some(71)).unwrap(); // NOTE: hardcoded hint size
+        let field_type = Blob::from_parser(parser, Some(71)).unwrap(); // NOTE: hardcoded hint size
         let str_val = field_type.to_string();
         assert_eq!(encoded_tx_sig, str_val);
     }
@@ -645,7 +645,7 @@ mod tests {
 
         let field_lookup = get_field_lookup();
         let parser = &mut BinaryParser::new(hex::decode(encoded_tx_sig_obj).unwrap(), field_lookup.field_map.clone());
-        let field_type = STObject::from_parser(&mut *parser, None).unwrap();
+        let field_type = STObject::from_parser(parser, None).unwrap();
         let str_val = field_type.to_string();
         assert_eq!(encoded_tx_sig_obj, str_val);
 
@@ -662,7 +662,7 @@ mod tests {
 
     //     let field_lookup = get_field_lookup();
     //     let parser = &mut BinaryParser::new(hex::decode(encoded_tx_memos_arr).unwrap(), field_lookup.field_map.clone());
-    //     let field_type = STArray::from_parser(&mut *parser, None).unwrap();
+    //     let field_type = STArray::from_parser(parser, None).unwrap();
     //     let mut str_val = field_type.to_string();
     //     assert_eq!(encoded_tx_memos_arr, str_val);
     // }
@@ -673,7 +673,7 @@ mod tests {
 
         let field_lookup = get_field_lookup();
         let parser = &mut BinaryParser::new(hex::decode(encoded_tx_obj).unwrap(), field_lookup.field_map.clone());
-        let field_type = STObject::from_parser(&mut *parser, None).unwrap();
+        let field_type = STObject::from_parser(parser, None).unwrap();
         let str_val = field_type.to_string();
         assert_eq!(encoded_tx_obj, str_val);
 
@@ -697,7 +697,7 @@ mod tests {
 
         let field_lookup = get_field_lookup();
         let parser = &mut BinaryParser::new(hex::decode(encoded_tx_obj).unwrap(), field_lookup.field_map.clone());
-        let field_type = STObject::from_parser(&mut *parser, None).unwrap();
+        let field_type = STObject::from_parser(parser, None).unwrap();
         let str_val = field_type.to_string();
         assert_eq!(encoded_tx_obj, str_val);
 
