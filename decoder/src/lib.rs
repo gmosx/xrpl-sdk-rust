@@ -1,22 +1,17 @@
 use std::collections::HashMap;
-use std::error::Error;
-use std::convert::TryInto;
 use std::str::FromStr;
 
 use serde_json::Value;
 use sha2::Digest;
-use std::any::Any;
-use std::any::TypeId;
 
-pub trait SerializedType: Sized + Clone + ToString + AsRef<[u8]> + FromStr + Default + std::fmt::Debug {
+pub trait SerializedType: Sized + ToString + AsRef<[u8]> {
     type Parser: Sized;
-    type Field: Sized;
 
     fn from_parser(parser: &mut Self::Parser, hint: Option<usize>) -> Result<Self, &'static str>;
     fn to_bytes_sink(&self, sink: &mut Vec<Vec<u8>>) {
         sink.push(self.as_ref().to_vec());
     }
-    fn to_json(&self, _field: &Self::Field) -> Result<Value, &'static str> {
+    fn to_json(&self, _field: &FieldLookup) -> Result<Value, &'static str> {
         Ok(Value::String(self.to_string()))
     }
 }
@@ -263,7 +258,6 @@ impl Hash256 {
 }
 impl SerializedType for Hash256 {
     type Parser = BinaryParser;
-    type Field = FieldLookup;
     fn from_parser(parser: &mut Self::Parser, _hint: Option<usize>) -> Result<Self, &'static str> {
         parser.read(Self::WIDTH).map(|bytes| Self(bytes))
     }
@@ -294,11 +288,10 @@ impl AccountID {
 }
 impl SerializedType for AccountID {
     type Parser = BinaryParser;
-    type Field = FieldLookup;
     fn from_parser(parser: &mut Self::Parser, _hint: Option<usize>) -> Result<Self, &'static str> {
         parser.read(Self::WIDTH).map(|bytes| Self(bytes))
     }
-    fn to_json(&self, _: &Self::Field) -> Result<Value, &'static str> {
+    fn to_json(&self, _: &FieldLookup) -> Result<Value, &'static str> {
         let mut hasher = sha2::Sha256::new();
         
         // init buffer with total length (ACCOUNT_ID (1) self.0 bytes len (20) and checksum (4))
@@ -347,7 +340,6 @@ impl FromStr for AccountID {
 pub struct Blob(Vec<u8>);
 impl SerializedType for Blob {
     type Parser = BinaryParser;
-    type Field = FieldLookup;
     fn from_parser(parser: &mut Self::Parser, hint: Option<usize>) -> Result<Self, &'static str> {
         let hint = hint.ok_or("Blob hint not found")?;
         parser.read(hint).map(|bytes| Self(bytes))
@@ -380,7 +372,6 @@ impl STObject {
 }
 impl SerializedType for STObject {
     type Parser = BinaryParser;
-    type Field = FieldLookup;
     fn from_parser(parser: &mut Self::Parser, _hint: Option<usize>) -> Result<Self, &'static str> {
         let mut sink: Vec<Vec<u8>> = Vec::new();
         loop {
@@ -401,7 +392,7 @@ impl SerializedType for STObject {
         let concatenated_sink: Vec<u8> = sink.into_iter().flatten().collect();
         Ok(Self(concatenated_sink))
     }
-    fn to_json(&self, field_lookup: &Self::Field) -> Result<Value, &'static str> {
+    fn to_json(&self, field_lookup: &FieldLookup) -> Result<Value, &'static str> {
         let mut object_parser = BinaryParser::new(self.0.clone(), field_lookup.field_map.clone());
         let mut accumulator: HashMap<String, Value> = HashMap::new();
         
@@ -445,7 +436,6 @@ impl STArray {
 }
 impl SerializedType for STArray {
     type Parser = BinaryParser;
-    type Field = FieldLookup;
     fn from_parser(parser: &mut Self::Parser, _hint: Option<usize>) -> Result<Self, &'static str> {
         let mut bytes = Vec::new();
         
@@ -463,7 +453,7 @@ impl SerializedType for STArray {
         
         Ok(Self(bytes))
     }
-    fn to_json(&self, field_lookup: &Self::Field) -> Result<Value, &'static str> {
+    fn to_json(&self, field_lookup: &FieldLookup) -> Result<Value, &'static str> {
         let mut result = Vec::new();
         let mut array_parser = BinaryParser::new(self.0.clone(), field_lookup.field_map.clone());
 
