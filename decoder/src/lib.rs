@@ -252,14 +252,12 @@ impl  FieldLookup {
 }
 
 #[derive(Clone, Debug, Default)]
-pub struct Hash256(Vec<u8>);
-impl Hash256 {
-    pub const WIDTH: usize = 32;
-}
+pub struct Hash256(pub [u8; 32]);
 impl SerializedType for Hash256 {
     type Parser = BinaryParser;
     fn from_parser(parser: &mut Self::Parser, _hint: Option<usize>) -> Result<Self, &'static str> {
-        parser.read(Self::WIDTH).map(|bytes| Self(bytes))
+        let bytes = parser.read(32)?.try_into().map_err(|_| "Invalid length")?;
+        Ok(Self(bytes))
     }
 }
 impl AsRef<[u8]> for Hash256 {
@@ -275,13 +273,16 @@ impl ToString for Hash256 {
 impl FromStr for Hash256 {
     type Err = &'static str;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let bytes = hex::decode(s).map_err(|_| "Invalid hex string")?;
+        let bytes = hex::decode(s)
+            .map_err(|_| "Invalid hex string")?
+            .try_into()
+            .map_err(|_| "Invalid length")?;
         Ok(Self(bytes))
     }
 }
 
 #[derive(Clone, Debug, Default)]
-pub struct AccountID(Vec<u8>);
+pub struct AccountID(pub [u8; 20]);
 impl AccountID {
     pub const ACCOUNT_ID_BUF: &[u8] = &[0];
     pub const WIDTH: usize = 20;
@@ -289,7 +290,8 @@ impl AccountID {
 impl SerializedType for AccountID {
     type Parser = BinaryParser;
     fn from_parser(parser: &mut Self::Parser, _hint: Option<usize>) -> Result<Self, &'static str> {
-        parser.read(Self::WIDTH).map(|bytes| Self(bytes))
+        let bytes = parser.read(20)?.try_into().map_err(|_| "Invalid length")?;
+        Ok(Self(bytes))
     }
     fn to_json(&self, _: &FieldLookup) -> Result<Value, &'static str> {
         let mut hasher = sha2::Sha256::new();
@@ -331,7 +333,10 @@ impl ToString for AccountID {
 impl FromStr for AccountID {
     type Err = &'static str;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let bytes = hex::decode(s).map_err(|_| "Invalid hex string")?;
+        let bytes = hex::decode(s)
+            .map_err(|_| "Invalid hex string")?
+            .try_into()
+            .map_err(|_| "Invalid length")?;
         Ok(Self(bytes))
     }
 }
