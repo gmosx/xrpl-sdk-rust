@@ -16,10 +16,29 @@ pub trait SerializedType: Sized + ToString + AsRef<[u8]> {
     }
 }
 
+/// Field data type codes <https://xrpl.org/serialization.html#type-list>
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd)]
+#[repr(u8)]
+pub enum TypeCode {
+    // Discriminant values can be found at https://xrpl.org/serialization.html#type-list and also at https://github.com/XRPLF/xrpl.js/blob/main/packages/ripple-binary-codec/src/enums/definitions.json
+    AccountId = 8,
+    Amount = 6,
+    Blob = 7,
+    Hash128 = 4,
+    Hash160 = 17,
+    Hash256 = 5,
+    UInt8 = 16,
+    UInt16 = 1,
+    UInt32 = 2,
+    UInt64 = 3,
+    Array = 15,
+    Object = 14,
+}
+
 pub struct FieldInfo {
-    nth: u16,
+    field_code: u8,
     is_vl_encoded: bool,
-    field_type: String,
+    field_type: TypeCode,
 }
 
 #[derive(Debug, Clone)]
@@ -203,23 +222,22 @@ pub struct FieldLookup {
     field_map: HashMap<String, FieldInstance>,
 }
 
-impl  FieldLookup {
-    pub fn new(types: HashMap<String, u32>, fields: Vec<(String, FieldInfo)>) -> Self {
+impl FieldLookup {
+    pub fn new(fields: Vec<(String, FieldInfo)>) -> Self {
         let mut field_map = HashMap::new();
         for (name, info) in fields {
-            let type_ordinal = types[&info.field_type];
-            let header = Self::field_header(type_ordinal, info.nth);
-            let serialized_type = match info.field_type.as_str() {
-                "Hash256" => DynamicSerializedType::Hash256(Hash256::default()),
-                "Blob" => DynamicSerializedType::Blob(Blob::default()),
-                "AccountID" => DynamicSerializedType::AccountID(AccountID::default()),
-                "STObject" => DynamicSerializedType::STObject(STObject::default()),
-                "STArray" => DynamicSerializedType::STArray(STArray::default()),
-                _ => panic!("Unknown field type"),
+            let header = Self::field_header(info.field_type as u32, info.field_code);
+            let serialized_type = match info.field_type {
+                TypeCode::Hash256 => DynamicSerializedType::Hash256(Hash256::default()),
+                TypeCode::Blob => DynamicSerializedType::Blob(Blob::default()),
+                TypeCode::AccountId => DynamicSerializedType::AccountID(AccountID::default()),
+                TypeCode::Object => DynamicSerializedType::STObject(STObject::default()),
+                TypeCode::Array => DynamicSerializedType::STArray(STArray::default()),
+                _ => unimplemented!(),
             };
             let field = FieldInstance {
                 is_variable_length_encoded: info.is_vl_encoded,
-                ordinal: (type_ordinal << 16) | (info.nth as u32),
+                ordinal: ((info.field_type as u32) << 16) | (info.field_code as u32),
                 name: name.clone(),
                 header,
                 serialized_type,
@@ -230,7 +248,7 @@ impl  FieldLookup {
         Self { field_map }
     }
 
-    fn field_header(type_: u32, nth: u16) -> Vec<u8> {
+    fn field_header(type_: u32, nth: u8) -> Vec<u8> {
         let mut header = Vec::new();
         if type_ < 16 {
             if nth < 16 {
@@ -503,32 +521,25 @@ mod tests {
     use serde_json::from_str;
 
     fn get_field_lookup() -> FieldLookup {
-        let types = vec![
-            ("Hash256".to_string(), 5),
-            ("Blob".to_string(), 7),
-            ("AccountID".to_string(), 8),
-            ("STObject".to_string(), 14),
-            ("STArray".to_string(), 15),
-        ].into_iter().collect();
         let fields = vec![
             // ("TransactionType".to_string(), FieldInfo { nth: 2, is_vl_encoded: false, field_type: "Hash256".to_string() }),
             // ("Flags".to_string(), FieldInfo { nth: 2, is_vl_encoded: false, field_type: "Hash256".to_string() }),
             // ("Sequence".to_string(), FieldInfo { nth: 2, is_vl_encoded: false, field_type: "Hash256".to_string() }),
             // ("LastLedgerSequence".to_string(), FieldInfo { nth: 2, is_vl_encoded: false, field_type: "Hash256".to_string() }),
             
-            ("AccountTxnID".to_string(), FieldInfo { nth: 9, is_vl_encoded: false, field_type: "Hash256".to_string() }),
-            ("SigningPubKey".to_string(), FieldInfo { nth: 3, is_vl_encoded: true, field_type: "Blob".to_string() }),
-            ("TxnSignature".to_string(), FieldInfo { nth: 4, is_vl_encoded: true, field_type: "Blob".to_string() }),
-            ("MemoType".to_string(), FieldInfo { nth: 12, is_vl_encoded: true, field_type: "Blob".to_string() }),
-            ("MemoData".to_string(), FieldInfo { nth: 13, is_vl_encoded: true, field_type: "Blob".to_string() }),
-            ("MemoFormat".to_string(), FieldInfo { nth: 14, is_vl_encoded: true, field_type: "Blob".to_string() }),
-            ("Account".to_string(), FieldInfo { nth: 1, is_vl_encoded: true, field_type: "AccountID".to_string() }),
-            ("Memo".to_string(), FieldInfo { nth: 10, is_vl_encoded: false, field_type: "STObject".to_string() }),
-            ("Memos".to_string(), FieldInfo { nth: 9, is_vl_encoded: false, field_type: "STArray".to_string() }),
-            ("ObjectEndMarker".to_string(), FieldInfo { nth: 1, is_vl_encoded: false, field_type: "STObject".to_string() }),
-            ("ArrayEndMarker".to_string(), FieldInfo { nth: 1, is_vl_encoded: false, field_type: "STArray".to_string() }),
+            ("AccountTxnID".to_string(), FieldInfo { field_code: 9, is_vl_encoded: false, field_type: TypeCode::Hash256 }),
+            ("SigningPubKey".to_string(), FieldInfo { field_code: 3, is_vl_encoded: true, field_type: TypeCode::Blob }),
+            ("TxnSignature".to_string(), FieldInfo { field_code: 4, is_vl_encoded: true, field_type: TypeCode::Blob }),
+            ("MemoType".to_string(), FieldInfo { field_code: 12, is_vl_encoded: true, field_type: TypeCode::Blob }),
+            ("MemoData".to_string(), FieldInfo { field_code: 13, is_vl_encoded: true, field_type: TypeCode::Blob }),
+            ("MemoFormat".to_string(), FieldInfo { field_code: 14, is_vl_encoded: true, field_type: TypeCode::Blob }),
+            ("Account".to_string(), FieldInfo { field_code: 1, is_vl_encoded: true, field_type: TypeCode::AccountId }),
+            ("Memo".to_string(), FieldInfo { field_code: 10, is_vl_encoded: false, field_type: TypeCode::Object }),
+            ("Memos".to_string(), FieldInfo { field_code: 9, is_vl_encoded: false, field_type: TypeCode::Array }),
+            ("ObjectEndMarker".to_string(), FieldInfo { field_code: 1, is_vl_encoded: false, field_type: TypeCode::Object }),
+            ("ArrayEndMarker".to_string(), FieldInfo { field_code: 1, is_vl_encoded: false, field_type: TypeCode::Array }),
         ];
-        FieldLookup::new(types, fields)
+        FieldLookup::new(fields)
     }
 
     #[test]
