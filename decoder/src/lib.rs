@@ -4,99 +4,198 @@ use std::str::FromStr;
 use serde_json::Value;
 use sha2::Digest;
 
-pub trait SerializedType: Sized + ToString + AsRef<[u8]> {
-    type Parser: Sized;
+use xrpl_binary_codec::serializer::field_info::{FieldInfo, create_field_info_map};
+use xrpl_binary_codec::serializer::field_id::{FieldId, TypeCode};
 
-    fn from_parser(parser: &mut Self::Parser, hint: Option<usize>) -> Result<Self, &'static str>;
-    fn to_bytes_sink(&self, sink: &mut Vec<Vec<u8>>) {
-        sink.push(self.as_ref().to_vec());
-    }
-    fn to_json(&self, _field: &FieldLookup) -> Result<Value, &'static str> {
-        Ok(Value::String(self.to_string()))
-    }
-}
-
-/// Field data type codes <https://xrpl.org/serialization.html#type-list>
-#[derive(Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd)]
-#[repr(u8)]
-pub enum TypeCode {
-    // Discriminant values can be found at https://xrpl.org/serialization.html#type-list and also at https://github.com/XRPLF/xrpl.js/blob/main/packages/ripple-binary-codec/src/enums/definitions.json
-    AccountId = 8,
-    Amount = 6,
-    Blob = 7,
-    Hash128 = 4,
-    Hash160 = 17,
-    Hash256 = 5,
-    UInt8 = 16,
-    UInt16 = 1,
-    UInt32 = 2,
-    UInt64 = 3,
-    Array = 15,
-    Object = 14,
-}
-
-pub struct FieldInfo {
-    field_code: u8,
-    is_vl_encoded: bool,
-    field_type: TypeCode,
-}
+use std::convert::TryFrom;
+use std::convert::TryInto;
 
 #[derive(Debug, Clone)]
-enum DynamicSerializedType {
-    Hash256(Hash256),
-    Blob(Blob),
-    AccountID(AccountID),
-    STObject(STObject),
-    STArray(STArray),
+pub struct SerializedData {
+    type_code: TypeCode,
+    data: Vec<u8>,
 }
-impl DynamicSerializedType {
-    fn from_parser_dispatch(field: &FieldInstance, parser: &mut BinaryParser) -> Result<DynamicSerializedType, &'static str> {
-        match &field.serialized_type {  // Use the stored serialized_type
-            DynamicSerializedType::Hash256(_) => Ok(DynamicSerializedType::Hash256(parser.read_field_value::<Hash256>(&field)?)),
-            DynamicSerializedType::Blob(_) => Ok(DynamicSerializedType::Blob(parser.read_field_value::<Blob>(&field)?)),
-            DynamicSerializedType::AccountID(_) => Ok(DynamicSerializedType::AccountID(parser.read_field_value::<AccountID>(&field)?)),
-            DynamicSerializedType::STObject(_) => Ok(DynamicSerializedType::STObject(parser.read_field_value::<STObject>(&field)?)),
-            DynamicSerializedType::STArray(_) => Ok(DynamicSerializedType::STArray(parser.read_field_value::<STArray>(&field)?)),
-        }
-    }
-    fn to_json_dispatch(&self, field_lookup: &FieldLookup) -> Result<Value, &'static str> {
-        match self {
-            DynamicSerializedType::Hash256(val) => val.to_json(field_lookup),
-            DynamicSerializedType::Blob(val) => val.to_json(field_lookup),
-            DynamicSerializedType::AccountID(val) => val.to_json(field_lookup),
-            DynamicSerializedType::STObject(val) => val.to_json(field_lookup),
-            DynamicSerializedType::STArray(val) => val.to_json(field_lookup),
-        }
-    }
-    fn to_bytes_sink(&self, sink: &mut Vec<Vec<u8>>) {
-        match self {
-            DynamicSerializedType::Hash256(val) => val.to_bytes_sink(sink),
-            DynamicSerializedType::Blob(val) => val.to_bytes_sink(sink),
-            DynamicSerializedType::AccountID(val) => val.to_bytes_sink(sink),
-            DynamicSerializedType::STObject(val) => val.to_bytes_sink(sink),
-            DynamicSerializedType::STArray(val) => val.to_bytes_sink(sink),
-        }
+
+impl From<TypeCode> for SerializedData {
+    fn from(type_code: TypeCode) -> Self {
+        Self { type_code, data: vec![] }
     }
 }
-impl AsRef<[u8]> for DynamicSerializedType {
-    fn as_ref(&self) -> &[u8] {
-        match self {
-            DynamicSerializedType::Hash256(val) => val.as_ref(),
-            DynamicSerializedType::Blob(val) => val.as_ref(),
-            DynamicSerializedType::AccountID(val) => val.as_ref(),
-            DynamicSerializedType::STObject(val) => val.as_ref(),
-            DynamicSerializedType::STArray(val) => val.as_ref(),
+
+impl SerializedData {
+    pub const ACCOUNT_ID_BUF: &[u8] = &[0];
+
+    pub const OBJECT_NAME: &str = "STObject";
+    pub const OBJECT_END_MARKER_NAME: &str = "ObjectEndMarker";
+    pub const OBJECT_END_MARKER_BYTE: &[u8] = &[0xE1];
+
+    pub const ARRAY_END_MARKER: &[u8] = &[0xf1];
+    pub const ARRAY_END_MARKER_NAME: &str = "ArrayEndMarker";
+    pub const OBJECT_END_MARKER_ARRAY: &[u8] = &[0xE1];
+
+    pub fn from_parser(&self, parser: &mut BinaryParser, hint: Option<usize>) -> Result<Self, &'static str> {
+        match self.type_code {
+            TypeCode::Hash256 => {
+                let bytes: [u8; 32] = parser.read(32)?.try_into().map_err(|_| "Invalid length")?;
+                Ok(Self{ type_code: self.type_code, data: bytes.to_vec() })
+            },
+            TypeCode::AccountId => {
+                let bytes: [u8; 20] = parser.read(20)?.try_into().map_err(|_| "Invalid length")?;
+                Ok(Self{ type_code: self.type_code, data: bytes.to_vec() })
+            },
+            TypeCode::Blob => {
+                let hint = hint.ok_or("Blob hint not found")?;
+                let bytes = parser.read(hint)?;
+                Ok(Self{ type_code: self.type_code, data: bytes })
+            },
+            TypeCode::Object => {
+                let mut sink: Vec<Vec<u8>> = Vec::new();
+                loop {
+                    if parser.end() {
+                        break;
+                    }
+                    let field = parser.read_field()?;
+                    if field.name == Self::OBJECT_END_MARKER_NAME {
+                        break;
+                    }
+                    let data = parser.read_field_value(&field)?;
+                    write_field_and_value(&mut sink, &field, data)?;
+                    if field.name == Self::OBJECT_NAME {
+                        sink.push(Self::OBJECT_END_MARKER_BYTE.to_vec());
+                    }
+                }
+                let concatenated_sink: Vec<u8> = sink.into_iter().flatten().collect();
+                Ok(Self{ type_code: self.type_code, data: concatenated_sink })
+            },
+            TypeCode::Array => {
+                let mut bytes = Vec::new();
+                
+                while !parser.end() {
+                    let field = parser.read_field()?;
+                    if field.name == Self::ARRAY_END_MARKER_NAME {
+                        break;
+                    }
+                    bytes.extend_from_slice(&field.header);
+                    let data = parser.read_field_value(&field)?;
+                    bytes.extend_from_slice(data.as_ref());
+                    bytes.extend_from_slice(Self::OBJECT_END_MARKER_ARRAY);
+                }
+                bytes.extend_from_slice(Self::ARRAY_END_MARKER);
+                Ok(Self{ type_code: self.type_code, data: bytes })
+            },
+            _ => Ok(Self { type_code: TypeCode::Blob, data: vec![] }), // TODO: default other types to Blob for now
+        }
+    }
+
+    pub fn to_json(&self, field_lookup: &FieldLookup) -> Result<Value, &'static str> {
+        match self.type_code {
+            TypeCode::Hash256 => Ok(Value::String(self.to_string())),
+            TypeCode::AccountId => Ok(Value::String(self.to_string())),
+            TypeCode::Blob => Ok(Value::String(self.to_string())),
+            TypeCode::Object => {
+                let mut object_parser = BinaryParser::new(self.data.to_vec(), field_lookup.field_map.clone());
+                let mut accumulator: HashMap<String, Value> = HashMap::new();
+                
+                while !object_parser.end() {
+                    let field: FieldInstance = object_parser.read_field()?; {
+                        if field.name == "ObjectEndMarker" {
+                            break;
+                        }
+                        let data = object_parser.read_field_value(&field)?;
+                        let json_value = Self { type_code: field.info.field_type, data }.to_json(field_lookup)?;
+                        accumulator.insert(field.name, json_value);
+                    }
+                }
+                Ok(Value::Object(accumulator.into_iter().collect()))
+            },
+            TypeCode::Array => {
+                let mut result = Vec::new();
+                let mut array_parser = BinaryParser::new(self.data.to_vec(), field_lookup.field_map.clone());
+        
+                while !array_parser.end() {
+                    let field = array_parser.read_field()?;
+                    if field.name == Self::ARRAY_END_MARKER_NAME {
+                        break;
+                    }
+                    let mut obj = HashMap::new();
+                    let data = array_parser.read_field_value(&field)?;
+                    // let json_value = to_json_value(field.info.field_type, &data, field_lookup)?;
+                    let json_value = Self { type_code: field.info.field_type, data }.to_json(field_lookup)?;
+                    obj.insert(
+                        field.name.clone(),
+                        json_value,
+                    );
+                    result.push(Value::Object(obj.into_iter().collect()));
+                }
+                Ok(Value::Array(result))
+            },
+            _ => Ok(Value::String(self.to_string())), // TODO: default other types to Blob for now
         }
     }
 }
+impl AsRef<[u8]> for SerializedData {
+    fn as_ref(&self) -> &[u8] { &self.data }
+}
+impl ToString for SerializedData {
+    fn to_string(&self) -> String {
+        match self.type_code {
+            TypeCode::AccountId => {
+                let mut hasher = sha2::Sha256::new();
+        
+                // init buffer with total length (ACCOUNT_ID (1) self.0 bytes len (20) and checksum (4))
+                let mut buffer = Vec::with_capacity(Self::ACCOUNT_ID_BUF.len() + self.data.len() + 4);
+                buffer.extend_from_slice(Self::ACCOUNT_ID_BUF);
+                buffer.extend_from_slice(&self.data);
+                
+                // first SHA-256 hash
+                hasher.update(&buffer);
+                let first_hash = hasher.finalize_reset();
+                
+                // second SHA-256 hash
+                hasher.update(&first_hash);
+                let second_hash = hasher.finalize();
+                
+                // take the first 4 bytes as a check and append to buffer
+                buffer.extend_from_slice(&second_hash[0..4]);
+                
+                // Base58 encode the final buffer
+                let encoded_buf = bs58::encode(buffer)
+                    .with_alphabet(bs58::Alphabet::RIPPLE)
+                    .into_string();
+
+                encoded_buf
+            },
+            _ => hex::encode_upper(&self.data),
+        }
+    }
+}
+
+// pub trait SerializedType: Sized + ToString + AsRef<[u8]> {
+//     type Parser: Sized;
+
+//     fn from_parser(parser: &mut Self::Parser, hint: Option<usize>) -> Result<Self, &'static str>;
+//     fn to_json(&self, _field: &FieldLookup) -> Result<Value, &'static str> {
+//         Ok(Value::String(self.to_string()))
+//     }
+// }
+
+// fn to_json_value(code: TypeCode, data: &[u8], field_lookup: &FieldLookup) -> Result<Value, &'static str> {
+//     match code {
+//         TypeCode::Hash256 => Ok(Value::String(Hash256::try_from(data)?.to_string())),
+//         TypeCode::Blob => Ok(Value::String(Blob::try_from(data)?.to_string())),
+//         TypeCode::AccountId => Ok(Value::String(AccountID::try_from(data)?.to_string())),
+//         TypeCode::Object => STObject::try_from(data)?.to_json(&field_lookup),
+//         TypeCode::Array => STArray::try_from(data)?.to_json(&field_lookup),
+//         _ => Ok(Value::String(Blob::try_from(data)?.to_string())), // TODO: default other types to Blob for now
+//     }
+// }
 
 #[derive(Debug, Clone)]
 pub struct FieldInstance {
-    is_variable_length_encoded: bool,
+    info: FieldInfo,
     ordinal: u32,
     name: String,
     header: Vec<u8>,
-    serialized_type: DynamicSerializedType,
 }
 
 fn encode_variable_length(length: usize) -> Result<Vec<u8>, &'static str> {
@@ -120,15 +219,14 @@ fn encode_variable_length(length: usize) -> Result<Vec<u8>, &'static str> {
     }
 }
 
-fn write_field_and_value(sink: &mut Vec<Vec<u8>>, field: &FieldInstance, value: DynamicSerializedType) -> Result<(), &'static str> {
+fn write_field_and_value(sink: &mut Vec<Vec<u8>>, field: &FieldInstance, bytes: Vec<u8>) -> Result<(), &'static str> {
     sink.push(field.header.clone());
-    if field.is_variable_length_encoded {
-        let bytes = value.as_ref().to_vec();
+    if field.info.is_vl_encoded {
         let vl = encode_variable_length(bytes.len())?;
         sink.push(vl);
         sink.push(bytes);
     } else {
-        value.to_bytes_sink(sink);
+        sink.push(bytes);
     }
     Ok(())
 }
@@ -201,355 +299,346 @@ impl BinaryParser {
 
     fn read_field(&mut self) -> Result<FieldInstance, &'static str> {
         let ordinal = self.read_field_ordinal()?;
-        println!("ordinal: {}", ordinal);
         self.field
             .get(&ordinal.to_string())
             .cloned()
             .ok_or("Field not found")
     }
 
-    fn read_field_value<T: SerializedType<Parser=Self>>(&mut self, field: &FieldInstance) -> Result<T, &'static str> {
-        let size_hint = if field.is_variable_length_encoded {
+    fn read_field_value(&mut self, field: &FieldInstance) -> Result<Vec<u8>, &'static str> {
+        let size_hint = if field.info.is_vl_encoded {
             Some(self.read_variable_length()?)
         } else {
             None
         };
-        T::from_parser(self, size_hint)
+        let serialized_type = SerializedData::from(field.info.field_type).from_parser(self, size_hint)?;
+        Ok(serialized_type.data)
     }
 }
+
+
 
 pub struct FieldLookup {
     field_map: HashMap<String, FieldInstance>,
 }
-
-impl FieldLookup {
-    pub fn new(fields: Vec<(String, FieldInfo)>) -> Self {
+impl From<HashMap<String, FieldInfo>> for FieldLookup {
+    fn from(field_info_map: HashMap<String, FieldInfo>) -> Self {
         let mut field_map = HashMap::new();
-        for (name, info) in fields {
-            let header = Self::field_header(info.field_type as u32, info.field_code);
-            let serialized_type = match info.field_type {
-                TypeCode::Hash256 => DynamicSerializedType::Hash256(Hash256::default()),
-                TypeCode::Blob => DynamicSerializedType::Blob(Blob::default()),
-                TypeCode::AccountId => DynamicSerializedType::AccountID(AccountID::default()),
-                TypeCode::Object => DynamicSerializedType::STObject(STObject::default()),
-                TypeCode::Array => DynamicSerializedType::STArray(STArray::default()),
-                _ => unimplemented!(),
-            };
+        for (name, info) in field_info_map {
+            let field_type = info.field_type;
+            let code = info.field_code.0;
+            let header: Vec<u8> = FieldId::from(info.clone()).into();
             let field = FieldInstance {
-                is_variable_length_encoded: info.is_vl_encoded,
-                ordinal: ((info.field_type as u32) << 16) | (info.field_code as u32),
+                info,
+                ordinal: ((field_type as u32) << 16) | (code as u32),
                 name: name.clone(),
                 header,
-                serialized_type,
             };
             field_map.insert(name.clone(), field.clone());
             field_map.insert(field.ordinal.to_string(), field);
         }
         Self { field_map }
     }
-
-    fn field_header(type_: u32, nth: u8) -> Vec<u8> {
-        let mut header = Vec::new();
-        if type_ < 16 {
-            if nth < 16 {
-                header.push(((type_ << 4) | nth as u32) as u8);
-            } else {
-                header.push((type_ << 4) as u8);
-                header.push(nth as u8);
-            }
-        } else if nth < 16 {
-            header.push(nth as u8);
-            header.push(type_ as u8);
-        } else {
-            header.push(0);
-            header.push(type_ as u8);
-            header.push(nth as u8);
-        }
-        header
-    }
 }
 
-#[derive(Clone, Debug, Default)]
-pub struct Hash256(pub [u8; 32]);
-impl SerializedType for Hash256 {
-    type Parser = BinaryParser;
-    fn from_parser(parser: &mut Self::Parser, _hint: Option<usize>) -> Result<Self, &'static str> {
-        let bytes = parser.read(32)?.try_into().map_err(|_| "Invalid length")?;
-        Ok(Self(bytes))
-    }
-}
-impl AsRef<[u8]> for Hash256 {
-    fn as_ref(&self) -> &[u8] {
-        &self.0
-    }
-}
-impl ToString for Hash256 {
-    fn to_string(&self) -> String {
-        hex::encode_upper(&self.0)
-    }
-}
-impl FromStr for Hash256 {
-    type Err = &'static str;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let bytes = hex::decode(s)
-            .map_err(|_| "Invalid hex string")?
-            .try_into()
-            .map_err(|_| "Invalid length")?;
-        Ok(Self(bytes))
-    }
-}
+// #[derive(Clone, Debug, Default)]
+// pub struct Hash256(pub [u8; 32]);
+// impl TryFrom<&[u8]> for Hash256 {
+//     type Error = &'static str;
+//     fn try_from(bytes: &[u8]) -> Result<Self, Self::Error> {
+//         if bytes.len() != 32 {
+//             Err("Invalid length")
+//         } else {
+//             let mut buf = [0u8; 32];
+//             buf.copy_from_slice(bytes);
+//             Ok(Self(buf))
+//         }
+//     }
+// }
+// impl SerializedType for Hash256 {
+//     type Parser = BinaryParser;
+//     fn from_parser(parser: &mut Self::Parser, _hint: Option<usize>) -> Result<Self, &'static str> {
+//         let bytes = parser.read(32)?.try_into().map_err(|_| "Invalid length")?;
+//         Ok(Self(bytes))
+//     }
+// }
+// impl AsRef<[u8]> for Hash256 {
+//     fn as_ref(&self) -> &[u8] {
+//         &self.0
+//     }
+// }
+// impl ToString for Hash256 {
+//     fn to_string(&self) -> String {
+//         hex::encode_upper(&self.0)
+//     }
+// }
+// impl FromStr for Hash256 {
+//     type Err = &'static str;
+//     fn from_str(s: &str) -> Result<Self, Self::Err> {
+//         let bytes = hex::decode(s)
+//             .map_err(|_| "Invalid hex string")?
+//             .try_into()
+//             .map_err(|_| "Invalid length")?;
+//         Ok(Self(bytes))
+//     }
+// }
 
-#[derive(Clone, Debug, Default)]
-pub struct AccountID(pub [u8; 20]);
-impl AccountID {
-    pub const ACCOUNT_ID_BUF: &[u8] = &[0];
-    pub const WIDTH: usize = 20;
-}
-impl SerializedType for AccountID {
-    type Parser = BinaryParser;
-    fn from_parser(parser: &mut Self::Parser, _hint: Option<usize>) -> Result<Self, &'static str> {
-        let bytes = parser.read(20)?.try_into().map_err(|_| "Invalid length")?;
-        Ok(Self(bytes))
-    }
-    fn to_json(&self, _: &FieldLookup) -> Result<Value, &'static str> {
-        let mut hasher = sha2::Sha256::new();
+// #[derive(Clone, Debug, Default)]
+// pub struct AccountID(pub [u8; 20]);
+// impl AccountID {
+//     pub const ACCOUNT_ID_BUF: &[u8] = &[0];
+//     pub const WIDTH: usize = 20;
+// }
+// impl SerializedType for AccountID {
+//     type Parser = BinaryParser;
+//     fn from_parser(parser: &mut Self::Parser, _hint: Option<usize>) -> Result<Self, &'static str> {
+//         let bytes = parser.read(20)?.try_into().map_err(|_| "Invalid length")?;
+//         Ok(Self(bytes))
+//     }
+// }
+// impl TryFrom<&[u8]> for AccountID {
+//     type Error = &'static str;
+//     fn try_from(bytes: &[u8]) -> Result<Self, Self::Error> {
+//         if bytes.len() != 20 {
+//             Err("Invalid length")
+//         } else {
+//             let mut buf = [0u8; 20];
+//             buf.copy_from_slice(bytes);
+//             Ok(Self(buf))
+//         }
+//     }
+// }
+// impl AsRef<[u8]> for AccountID {
+//     fn as_ref(&self) -> &[u8] {
+//         &self.0
+//     }
+// }
+// impl ToString for AccountID {
+//     fn to_string(&self) -> String {
+//         let mut hasher = sha2::Sha256::new();
         
-        // init buffer with total length (ACCOUNT_ID (1) self.0 bytes len (20) and checksum (4))
-        let mut buffer = Vec::with_capacity(Self::ACCOUNT_ID_BUF.len() + self.0.len() + 4);
-        buffer.extend_from_slice(Self::ACCOUNT_ID_BUF);
-        buffer.extend_from_slice(&self.0);
+//         // init buffer with total length (ACCOUNT_ID (1) self.0 bytes len (20) and checksum (4))
+//         let mut buffer = Vec::with_capacity(Self::ACCOUNT_ID_BUF.len() + self.0.len() + 4);
+//         buffer.extend_from_slice(Self::ACCOUNT_ID_BUF);
+//         buffer.extend_from_slice(&self.0);
         
-        // first SHA-256 hash
-        hasher.update(&buffer);
-        let first_hash = hasher.finalize_reset();
+//         // first SHA-256 hash
+//         hasher.update(&buffer);
+//         let first_hash = hasher.finalize_reset();
         
-        // second SHA-256 hash
-        hasher.update(&first_hash);
-        let second_hash = hasher.finalize();
+//         // second SHA-256 hash
+//         hasher.update(&first_hash);
+//         let second_hash = hasher.finalize();
         
-        // take the first 4 bytes as a check and append to buffer
-        buffer.extend_from_slice(&second_hash[0..4]);
+//         // take the first 4 bytes as a check and append to buffer
+//         buffer.extend_from_slice(&second_hash[0..4]);
         
-        // Base58 encode the final buffer
-        let encoded_buf = bs58::encode(buffer)
-            .with_alphabet(bs58::Alphabet::RIPPLE)
-            .into_string();
+//         // Base58 encode the final buffer
+//         let encoded_buf = bs58::encode(buffer)
+//             .with_alphabet(bs58::Alphabet::RIPPLE)
+//             .into_string();
 
-        Ok(Value::String(encoded_buf))
-    }
-}
-impl AsRef<[u8]> for AccountID {
-    fn as_ref(&self) -> &[u8] {
-        &self.0
-    }
-}
-impl ToString for AccountID {
-    fn to_string(&self) -> String {
-        hex::encode_upper(&self.0)
-    }
-}
-impl FromStr for AccountID {
-    type Err = &'static str;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let bytes = hex::decode(s)
-            .map_err(|_| "Invalid hex string")?
-            .try_into()
-            .map_err(|_| "Invalid length")?;
-        Ok(Self(bytes))
-    }
-}
+//         encoded_buf
+//     }
+// }
+// impl FromStr for AccountID {
+//     type Err = &'static str;
+//     fn from_str(s: &str) -> Result<Self, Self::Err> {
+//         let bytes = hex::decode(s)
+//             .map_err(|_| "Invalid hex string")?
+//             .try_into()
+//             .map_err(|_| "Invalid length")?;
+//         Ok(Self(bytes))
+//     }
+// }
 
-#[derive(Debug, Clone, Default)]
-pub struct Blob(Vec<u8>);
-impl SerializedType for Blob {
-    type Parser = BinaryParser;
-    fn from_parser(parser: &mut Self::Parser, hint: Option<usize>) -> Result<Self, &'static str> {
-        let hint = hint.ok_or("Blob hint not found")?;
-        parser.read(hint).map(|bytes| Self(bytes))
-    }
-}
-impl AsRef<[u8]> for Blob {
-    fn as_ref(&self) -> &[u8] {
-        &self.0
-    }
-}
-impl ToString for Blob {
-    fn to_string(&self) -> String {
-        hex::encode_upper(&self.0)
-    }
-}
-impl FromStr for Blob {
-    type Err = &'static str;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let bytes = hex::decode(s).map_err(|_| "Invalid hex string")?;
-        Ok(Self(bytes))
-    }
-}
+// #[derive(Debug, Clone, Default)]
+// pub struct Blob(Vec<u8>);
+// impl SerializedType for Blob {
+//     type Parser = BinaryParser;
+//     fn from_parser(parser: &mut Self::Parser, hint: Option<usize>) -> Result<Self, &'static str> {
+//         let hint = hint.ok_or("Blob hint not found")?;
+//         parser.read(hint).map(|bytes| Self(bytes))
+//     }
+// }
+// impl TryFrom<&[u8]> for Blob {
+//     type Error = &'static str;
+//     fn try_from(bytes: &[u8]) -> Result<Self, Self::Error> {
+//         Ok(Self(bytes.to_vec()))
+//     }
+// }
+// impl AsRef<[u8]> for Blob {
+//     fn as_ref(&self) -> &[u8] {
+//         &self.0
+//     }
+// }
+// impl ToString for Blob {
+//     fn to_string(&self) -> String {
+//         hex::encode_upper(&self.0)
+//     }
+// }
+// impl FromStr for Blob {
+//     type Err = &'static str;
+//     fn from_str(s: &str) -> Result<Self, Self::Err> {
+//         let bytes = hex::decode(s).map_err(|_| "Invalid hex string")?;
+//         Ok(Self(bytes))
+//     }
+// }
 
-#[derive(Debug, Clone, Default)]
-pub struct STObject(Vec<u8>);
-impl STObject {
-    pub const OBJECT_NAME: &str = "STObject";
-    pub const OBJECT_END_MARKER_NAME: &str = "ObjectEndMarker";
-    pub const OBJECT_END_MARKER_BYTE: &[u8] = &[0xE1];
-}
-impl SerializedType for STObject {
-    type Parser = BinaryParser;
-    fn from_parser(parser: &mut Self::Parser, _hint: Option<usize>) -> Result<Self, &'static str> {
-        let mut sink: Vec<Vec<u8>> = Vec::new();
-        loop {
-            if parser.end() {
-                break;
-            }
-            let field = parser.read_field()?;
-            if field.name == Self::OBJECT_END_MARKER_NAME {
-                break;
-            }
-            let associated_value = DynamicSerializedType::from_parser_dispatch(&field, parser)?;
-            write_field_and_value(&mut sink, &field, associated_value)?;
-            if field.name == Self::OBJECT_NAME {
-                sink.push(Self::OBJECT_END_MARKER_BYTE.to_vec());
-            }
-        }
+// #[derive(Debug, Clone, Default)]
+// pub struct STObject(Vec<u8>);
+// impl STObject {
+//     pub const OBJECT_NAME: &str = "STObject";
+//     pub const OBJECT_END_MARKER_NAME: &str = "ObjectEndMarker";
+//     pub const OBJECT_END_MARKER_BYTE: &[u8] = &[0xE1];
+// }
+// impl SerializedType for STObject {
+//     type Parser = BinaryParser;
+//     fn from_parser(parser: &mut Self::Parser, _hint: Option<usize>) -> Result<Self, &'static str> {
+//         let mut sink: Vec<Vec<u8>> = Vec::new();
+//         loop {
+//             if parser.end() {
+//                 break;
+//             }
+//             let field = parser.read_field()?;
+//             if field.name == Self::OBJECT_END_MARKER_NAME {
+//                 break;
+//             }
+//             let data = parser.read_field_value(&field)?;
+//             write_field_and_value(&mut sink, &field, data)?;
+//             if field.name == Self::OBJECT_NAME {
+//                 sink.push(Self::OBJECT_END_MARKER_BYTE.to_vec());
+//             }
+//         }
 
-        let concatenated_sink: Vec<u8> = sink.into_iter().flatten().collect();
-        Ok(Self(concatenated_sink))
-    }
-    fn to_json(&self, field_lookup: &FieldLookup) -> Result<Value, &'static str> {
-        let mut object_parser = BinaryParser::new(self.0.clone(), field_lookup.field_map.clone());
-        let mut accumulator: HashMap<String, Value> = HashMap::new();
+//         let concatenated_sink: Vec<u8> = sink.into_iter().flatten().collect();
+//         Ok(Self(concatenated_sink))
+//     }
+//     fn to_json(&self, field_lookup: &FieldLookup) -> Result<Value, &'static str> {
+//         let mut object_parser = BinaryParser::new(self.0.clone(), field_lookup.field_map.clone());
+//         let mut accumulator: HashMap<String, Value> = HashMap::new();
         
-        while !object_parser.end() {
-            let field = object_parser.read_field()?; {
-                if field.name == "ObjectEndMarker" {
-                    break;
-                }
-                let associated_value = DynamicSerializedType::from_parser_dispatch(&field, &mut object_parser)?;
-                let json_value = associated_value.to_json_dispatch(field_lookup)?;
-                accumulator.insert(field.name, json_value);
-            }
-        }
-        Ok(Value::Object(accumulator.into_iter().collect()))
-    }
-}
-impl AsRef<[u8]> for STObject {
-    fn as_ref(&self) -> &[u8] {
-        &self.0
-    }
-}
-impl ToString for STObject {
-    fn to_string(&self) -> String {
-        hex::encode_upper(&self.0)
-    }
-}
-impl FromStr for STObject {
-    type Err = &'static str;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let bytes = hex::decode(s).map_err(|_| "Invalid hex string")?;
-        Ok(Self(bytes))
-    }
-}
+//         while !object_parser.end() {
+//             let field: FieldInstance = object_parser.read_field()?; {
+//                 if field.name == "ObjectEndMarker" {
+//                     break;
+//                 }
+//                 let data = object_parser.read_field_value(&field)?;
+//                 let json_value = to_json_value(field.info.field_type, &data, field_lookup)?;
+//                 accumulator.insert(field.name, json_value);
+//             }
+//         }
+//         Ok(Value::Object(accumulator.into_iter().collect()))
+//     }
+// }
+// impl TryFrom<&[u8]> for STObject {
+//     type Error = &'static str;
+//     fn try_from(bytes: &[u8]) -> Result<Self, Self::Error> {
+//         Ok(Self(bytes.to_vec()))
+//     }
+// }
+// impl AsRef<[u8]> for STObject {
+//     fn as_ref(&self) -> &[u8] {
+//         &self.0
+//     }
+// }
+// impl ToString for STObject {
+//     fn to_string(&self) -> String {
+//         hex::encode_upper(&self.0)
+//     }
+// }
+// impl FromStr for STObject {
+//     type Err = &'static str;
+//     fn from_str(s: &str) -> Result<Self, Self::Err> {
+//         let bytes = hex::decode(s).map_err(|_| "Invalid hex string")?;
+//         Ok(Self(bytes))
+//     }
+// }
 
-#[derive(Debug, Clone, Default)]
-pub struct STArray(Vec<u8>);
-impl STArray {
-    pub const ARRAY_END_MARKER: &[u8] = &[0xf1];
-    pub const ARRAY_END_MARKER_NAME: &str = "ArrayEndMarker";
-    pub const OBJECT_END_MARKER_ARRAY: &[u8] = &[0xE1];
-}
-impl SerializedType for STArray {
-    type Parser = BinaryParser;
-    fn from_parser(parser: &mut Self::Parser, _hint: Option<usize>) -> Result<Self, &'static str> {
-        let mut bytes = Vec::new();
+// #[derive(Debug, Clone, Default)]
+// pub struct STArray(Vec<u8>);
+// impl STArray {
+//     pub const ARRAY_END_MARKER: &[u8] = &[0xf1];
+//     pub const ARRAY_END_MARKER_NAME: &str = "ArrayEndMarker";
+//     pub const OBJECT_END_MARKER_ARRAY: &[u8] = &[0xE1];
+// }
+// impl SerializedType for STArray {
+//     type Parser = BinaryParser;
+//     fn from_parser(parser: &mut Self::Parser, _hint: Option<usize>) -> Result<Self, &'static str> {
+//         let mut bytes = Vec::new();
         
-        while !parser.end() {
-            let field = parser.read_field()?;
-            if field.name == Self::ARRAY_END_MARKER_NAME {
-                break;
-            }
-            bytes.extend_from_slice(&field.header);
-            let associated_value = DynamicSerializedType::from_parser_dispatch(&field, parser)?;
-            bytes.extend_from_slice(associated_value.as_ref());
-            bytes.extend_from_slice(Self::OBJECT_END_MARKER_ARRAY);
-        }
-        bytes.extend_from_slice(Self::ARRAY_END_MARKER);
+//         while !parser.end() {
+//             let field = parser.read_field()?;
+//             if field.name == Self::ARRAY_END_MARKER_NAME {
+//                 break;
+//             }
+//             bytes.extend_from_slice(&field.header);
+//             let data = parser.read_field_value(&field)?;
+//             bytes.extend_from_slice(data.as_ref());
+//             bytes.extend_from_slice(Self::OBJECT_END_MARKER_ARRAY);
+//         }
+//         bytes.extend_from_slice(Self::ARRAY_END_MARKER);
         
-        Ok(Self(bytes))
-    }
-    fn to_json(&self, field_lookup: &FieldLookup) -> Result<Value, &'static str> {
-        let mut result = Vec::new();
-        let mut array_parser = BinaryParser::new(self.0.clone(), field_lookup.field_map.clone());
+//         Ok(Self(bytes))
+//     }
+//     fn to_json(&self, field_lookup: &FieldLookup) -> Result<Value, &'static str> {
+//         let mut result = Vec::new();
+//         let mut array_parser = BinaryParser::new(self.0.clone(), field_lookup.field_map.clone());
 
-        while !array_parser.end() {
-            let field = array_parser.read_field()?;
-            if field.name == Self::ARRAY_END_MARKER_NAME {
-                break;
-            }
-            let mut obj = HashMap::new();
-            let associated_value = DynamicSerializedType::from_parser_dispatch(&field, &mut array_parser)?;
-            let json_value = associated_value.to_json_dispatch(field_lookup)?;
-            obj.insert(
-                field.name.clone(),
-                json_value,
-            );
-            result.push(Value::Object(obj.into_iter().collect()));
-        }
-        Ok(Value::Array(result))
-    }
-}
-impl AsRef<[u8]> for STArray {
-    fn as_ref(&self) -> &[u8] {
-        &self.0
-    }
-}
-impl ToString for STArray {
-    fn to_string(&self) -> String {
-        hex::encode_upper(&self.0)
-    }
-}
-impl FromStr for STArray {
-    type Err = &'static str;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let bytes = hex::decode(s).map_err(|_| "Invalid hex string")?;
-        Ok(Self(bytes))
-    }
-}
+//         while !array_parser.end() {
+//             let field = array_parser.read_field()?;
+//             if field.name == Self::ARRAY_END_MARKER_NAME {
+//                 break;
+//             }
+//             let mut obj = HashMap::new();
+//             let data = array_parser.read_field_value(&field)?;
+//             let json_value = to_json_value(field.info.field_type, &data, field_lookup)?;
+//             obj.insert(
+//                 field.name.clone(),
+//                 json_value,
+//             );
+//             result.push(Value::Object(obj.into_iter().collect()));
+//         }
+//         Ok(Value::Array(result))
+//     }
+// }
+// impl TryFrom<&[u8]> for STArray {
+//     type Error = &'static str;
+//     fn try_from(bytes: &[u8]) -> Result<Self, Self::Error> {
+//         Ok(Self(bytes.to_vec()))
+//     }
+// }
+// impl AsRef<[u8]> for STArray {
+//     fn as_ref(&self) -> &[u8] {
+//         &self.0
+//     }
+// }
+// impl ToString for STArray {
+//     fn to_string(&self) -> String {
+//         hex::encode_upper(&self.0)
+//     }
+// }
+// impl FromStr for STArray {
+//     type Err = &'static str;
+//     fn from_str(s: &str) -> Result<Self, Self::Err> {
+//         let bytes = hex::decode(s).map_err(|_| "Invalid hex string")?;
+//         Ok(Self(bytes))
+//     }
+// }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use serde_json::from_str;
 
-    fn get_field_lookup() -> FieldLookup {
-        let fields = vec![
-            // ("TransactionType".to_string(), FieldInfo { nth: 2, is_vl_encoded: false, field_type: "Hash256".to_string() }),
-            // ("Flags".to_string(), FieldInfo { nth: 2, is_vl_encoded: false, field_type: "Hash256".to_string() }),
-            // ("Sequence".to_string(), FieldInfo { nth: 2, is_vl_encoded: false, field_type: "Hash256".to_string() }),
-            // ("LastLedgerSequence".to_string(), FieldInfo { nth: 2, is_vl_encoded: false, field_type: "Hash256".to_string() }),
-            
-            ("AccountTxnID".to_string(), FieldInfo { field_code: 9, is_vl_encoded: false, field_type: TypeCode::Hash256 }),
-            ("SigningPubKey".to_string(), FieldInfo { field_code: 3, is_vl_encoded: true, field_type: TypeCode::Blob }),
-            ("TxnSignature".to_string(), FieldInfo { field_code: 4, is_vl_encoded: true, field_type: TypeCode::Blob }),
-            ("MemoType".to_string(), FieldInfo { field_code: 12, is_vl_encoded: true, field_type: TypeCode::Blob }),
-            ("MemoData".to_string(), FieldInfo { field_code: 13, is_vl_encoded: true, field_type: TypeCode::Blob }),
-            ("MemoFormat".to_string(), FieldInfo { field_code: 14, is_vl_encoded: true, field_type: TypeCode::Blob }),
-            ("Account".to_string(), FieldInfo { field_code: 1, is_vl_encoded: true, field_type: TypeCode::AccountId }),
-            ("Memo".to_string(), FieldInfo { field_code: 10, is_vl_encoded: false, field_type: TypeCode::Object }),
-            ("Memos".to_string(), FieldInfo { field_code: 9, is_vl_encoded: false, field_type: TypeCode::Array }),
-            ("ObjectEndMarker".to_string(), FieldInfo { field_code: 1, is_vl_encoded: false, field_type: TypeCode::Object }),
-            ("ArrayEndMarker".to_string(), FieldInfo { field_code: 1, is_vl_encoded: false, field_type: TypeCode::Array }),
-        ];
-        FieldLookup::new(fields)
-    }
-
     #[test]
     fn test_decode_account_txn_id() {
         // AccountTxnID encoded
         let encoded_account_id = "5916969036626990000000000000000000F236FD752B5E4C84810AB3D41A3C25";
 
-        let field_lookup = get_field_lookup();
+        let field_lookup = FieldLookup::from(create_field_info_map());
         let parser = &mut BinaryParser::new(hex::decode(encoded_account_id).unwrap(), field_lookup.field_map);
-        let field_type = Hash256::from_parser(parser, None).unwrap();
+        let field_type = SerializedData::from(TypeCode::Hash256).from_parser(parser, None).unwrap();
         let str_val = field_type.to_string();
         assert_eq!(encoded_account_id, str_val);
     }
@@ -558,9 +647,9 @@ mod tests {
     fn test_decode_account_txn_id_obj() {
         let encoded_account_id_obj = "5916969036626990000000000000000000F236FD752B5E4C84810AB3D41A3C2580";
 
-        let field_lookup = get_field_lookup();
+        let field_lookup = FieldLookup::from(create_field_info_map());
         let parser = &mut BinaryParser::new(hex::decode(encoded_account_id_obj).unwrap(), field_lookup.field_map.clone());
-        let field_type = STObject::from_parser(parser, None).unwrap();
+        let field_type = SerializedData::from(TypeCode::Object).from_parser(parser, None).unwrap();
         let str_val = field_type.to_string();
         assert_eq!(encoded_account_id_obj, str_val);
 
@@ -576,20 +665,20 @@ mod tests {
         // AccountID encoded
         let encoded_account_id = "811424A53BB5CAAD40A961836FEF648E8424846E";
 
-        let field_lookup = get_field_lookup();
+        let field_lookup = FieldLookup::from(create_field_info_map());
         let parser = &mut BinaryParser::new(hex::decode(encoded_account_id).unwrap(), field_lookup.field_map);
-        let field_type = AccountID::from_parser(parser, None).unwrap();
+        let field_type = SerializedData::from(TypeCode::AccountId).from_parser(parser, None).unwrap();
         let str_val = field_type.to_string();
-        assert_eq!(encoded_account_id, str_val);
+        assert_eq!("rUmWJKM2b87GsKeTzSw14NeuubPQc8meTL", str_val);
     }
 
     #[test]
     fn test_decode_account_id_obj() {
         let encoded_account_id_obj = "811424A53BB5CAAD40A961836FEF648E8424846EC75A";
 
-        let field_lookup = get_field_lookup();
+        let field_lookup = FieldLookup::from(create_field_info_map());
         let parser = &mut BinaryParser::new(hex::decode(encoded_account_id_obj).unwrap(), field_lookup.field_map.clone());
-        let field_type = STObject::from_parser(parser, None).unwrap();
+        let field_type = SerializedData::from(TypeCode::Object).from_parser(parser, None).unwrap();
         let str_val = field_type.to_string();
         assert_eq!(encoded_account_id_obj, str_val);
 
@@ -605,9 +694,9 @@ mod tests {
         // SigningPubKey encoded
         let encoded_signing_pub_key = "732102A6934E87988466B98B51F2EB09E5BC4C09E46EB5F1FE08723DF8AD23D5BB";
 
-        let field_lookup = get_field_lookup();
+        let field_lookup = FieldLookup::from(create_field_info_map());
         let parser = &mut BinaryParser::new(hex::decode(encoded_signing_pub_key).unwrap(), field_lookup.field_map);
-        let field_type = Blob::from_parser(parser, Some(33)).unwrap(); // NOTE: hardcoded hint size
+        let field_type = SerializedData::from(TypeCode::Blob).from_parser(parser, Some(encoded_signing_pub_key.len() / 2)).unwrap(); // NOTE: hardcoded hint size
         let str_val = field_type.to_string();
         assert_eq!(encoded_signing_pub_key, str_val);
     }
@@ -616,9 +705,9 @@ mod tests {
     fn test_decode_signing_pub_key_obj() {
         let encoded_signing_pub_key_obj = "732102A6934E87988466B98B51F2EB09E5BC4C09E46EB5F1FE08723DF8AD23D5BB9C6A";
 
-        let field_lookup = get_field_lookup();
+        let field_lookup = FieldLookup::from(create_field_info_map());
         let parser = &mut BinaryParser::new(hex::decode(encoded_signing_pub_key_obj).unwrap(), field_lookup.field_map.clone());
-        let field_type = STObject::from_parser(parser, None).unwrap();
+        let field_type = SerializedData::from(TypeCode::Object).from_parser(parser, None).unwrap();
         let str_val = field_type.to_string();
         assert_eq!(encoded_signing_pub_key_obj, str_val);
 
@@ -634,9 +723,9 @@ mod tests {
         // TxnSignature encoded
         let encoded_tx_sig = "74473045022100FB7583772B8F348F4789620C5571146B6517887AC231B38E29D7688D73F9D2510220615DC87698A2BA64DF2CA83BD9A214002F74C2D615CA20E328AC4AB5E4CD";
 
-        let field_lookup = get_field_lookup();
+        let field_lookup = FieldLookup::from(create_field_info_map());
         let parser = &mut BinaryParser::new(hex::decode(encoded_tx_sig).unwrap(), field_lookup.field_map);
-        let field_type = Blob::from_parser(parser, Some(71)).unwrap(); // NOTE: hardcoded hint size
+        let field_type = SerializedData::from(TypeCode::Blob).from_parser(parser, Some(encoded_tx_sig.len() / 2)).unwrap(); // NOTE: hardcoded hint size
         let str_val = field_type.to_string();
         assert_eq!(encoded_tx_sig, str_val);
     }
@@ -645,9 +734,9 @@ mod tests {
     fn test_decode_txn_signature_obj() {
         let encoded_tx_sig_obj = "74473045022100FB7583772B8F348F4789620C5571146B6517887AC231B38E29D7688D73F9D2510220615DC87698A2BA64DF2CA83BD9A214002F74C2D615CA20E328AC4AB5E4CDE8BC";
 
-        let field_lookup = get_field_lookup();
+        let field_lookup = FieldLookup::from(create_field_info_map());
         let parser = &mut BinaryParser::new(hex::decode(encoded_tx_sig_obj).unwrap(), field_lookup.field_map.clone());
-        let field_type = STObject::from_parser(parser, None).unwrap();
+        let field_type = SerializedData::from(TypeCode::Object).from_parser(parser, None).unwrap();
         let str_val = field_type.to_string();
         assert_eq!(encoded_tx_sig_obj, str_val);
 
@@ -662,7 +751,7 @@ mod tests {
     // fn test_decode_memos_array() {
     //     let encoded_tx_memos_arr = "7C1F687474703A2F2F6578616D706C652E636F6D2F6D656D6F2F67656E657269637D0472656E74F1E1F1F1E1F1";
 
-    //     let field_lookup = get_field_lookup();
+    //     let field_lookup = FieldLookup::from(create_field_info_map());
     //     let parser = &mut BinaryParser::new(hex::decode(encoded_tx_memos_arr).unwrap(), field_lookup.field_map.clone());
     //     let field_type = STArray::from_parser(parser, None).unwrap();
     //     let mut str_val = field_type.to_string();
@@ -673,9 +762,9 @@ mod tests {
     fn test_decode_memos_txn_obj() {
         let encoded_tx_obj = "F9EA7C1F687474703A2F2F6578616D706C652E636F6D2F6D656D6F2F67656E657269637D0472656E74E1F1";
 
-        let field_lookup = get_field_lookup();
+        let field_lookup = FieldLookup::from(create_field_info_map());
         let parser = &mut BinaryParser::new(hex::decode(encoded_tx_obj).unwrap(), field_lookup.field_map.clone());
-        let field_type = STObject::from_parser(parser, None).unwrap();
+        let field_type = SerializedData::from(TypeCode::Object).from_parser(parser, None).unwrap();
         let str_val = field_type.to_string();
         assert_eq!(encoded_tx_obj, str_val);
 
@@ -697,9 +786,9 @@ mod tests {
     fn test_decode_txn_obj() {
         let encoded_tx_obj = "5916969036626990000000000000000000F236FD752B5E4C84810AB3D41A3C2580732102A6934E87988466B98B51F2EB09E5BC4C09E46EB5F1FE08723DF8AD23D5BB9C6A74473045022100FB7583772B8F348F4789620C5571146B6517887AC231B38E29D7688D73F9D2510220615DC87698A2BA64DF2CA83BD9A214002F74C2D615CA20E328AC4AB5E4CDE8BC811424A53BB5CAAD40A961836FEF648E8424846EC75AF9EA7C1F687474703A2F2F6578616D706C652E636F6D2F6D656D6F2F67656E657269637D0472656E74E1F1";
 
-        let field_lookup = get_field_lookup();
+        let field_lookup = FieldLookup::from(create_field_info_map());
         let parser = &mut BinaryParser::new(hex::decode(encoded_tx_obj).unwrap(), field_lookup.field_map.clone());
-        let field_type = STObject::from_parser(parser, None).unwrap();
+        let field_type = SerializedData::from(TypeCode::Object).from_parser(parser, None).unwrap();
         let str_val = field_type.to_string();
         assert_eq!(encoded_tx_obj, str_val);
 

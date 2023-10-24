@@ -10,3 +10,5 @@ bs58 = "0.5.0"
 hex = "0.4.3"
 serde_json = "1.0.107"
 sha2 = "0.10.8"
+
+xrpl_binary_codec = { path = "../xrpl_binary_codec" }
