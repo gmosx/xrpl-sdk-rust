@@ -3,6 +3,7 @@
 
 mod error;
 pub mod serialize;
+pub mod deserialize;
 /// Types in internal canonical binary format <https://xrpl.org/serialization.html#type-list>
 mod types;
 
