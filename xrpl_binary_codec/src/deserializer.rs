@@ -6,6 +6,7 @@ use crate::serializer::{
     field_id::{FieldId, TypeCode},
     field_info::FieldInfo,
 };
+pub use xrpl_types::deserialize::Deserializer;
 use xrpl_types::{
     AccountId, Amount, Blob, Hash128, Hash160, Hash256,
     UInt16, UInt32, UInt8, Uint64
@@ -31,7 +32,7 @@ pub struct FieldInstance {
 }
 
 #[derive(Debug, Clone, Default)]
-pub struct Deserializer {
+pub struct XrplDeserializer {
     cursor: Cursor<Vec<u8>>,
     field_ordinal_lookup: HashMap<u32, FieldInstance>,
 }
@@ -260,6 +261,109 @@ impl Deserializer {
     }
 
     fn deserialize_object(&mut self) -> Result<Vec<u8>, BinaryCodecError> {
+        let mut sink: Vec<Vec<u8>> = Vec::new();
+        while !self.end() {
+            let field = self.read_field()?;
+            if field.name == constants::OBJECT_END_MARKER_NAME {
+                break;
+            }
+            let data = self.read_field_value(&field.info)?;
+            sink.push(FieldId::from(field.info.clone()).into()); // push header
+            if field.info.is_vl_encoded {
+                let vl = encode_variable_length(data.len())?;
+                sink.push(vl);
+            }
+            sink.push(data);
+            if field.name == constants::OBJECT_NAME {
+                sink.push(constants::OBJECT_END_MARKER_BYTE.to_vec());
+            }
+        }
+        let concatenated_sink: Vec<u8> = sink.into_iter().flatten().collect();
+        Ok(concatenated_sink)
+    }
+}
+
+impl xrpl_types::deserialize::Deserializer for XrplDeserializer {
+    type Error = BinaryCodecError;
+    type DeserializeArray = Vec<u8>;
+    type DeserializeObject = Vec<u8>;
+
+    fn deserialize_account_id(&mut self) -> Result<AccountId, Self::Error> {
+        let mut bytes = [0u8; 20];
+        self.cursor.read_exact(&mut bytes).map_err(|e| BinaryCodecError::InsufficientBytes(e.to_string()))?;
+        Ok(AccountId(bytes))
+    }
+
+    fn deserialize_amount(&mut self) -> Result<Amount, Self::Error> {
+        unimplemented!()
+    }
+
+    fn deserialize_blob(&mut self, len: usize) -> Result<Blob, Self::Error> {
+        let mut bytes = vec![0u8; len]; 
+        self.cursor.read_exact(&mut bytes).map_err(|e| BinaryCodecError::InsufficientBytes(e.to_string()))?;
+        Ok(Blob(bytes))
+    }
+
+    fn deserialize_hash128(&mut self) -> Result<Hash128, Self::Error> {
+        let mut bytes = [0u8; 16];
+        self.cursor.read_exact(&mut bytes).map_err(|e| BinaryCodecError::InsufficientBytes(e.to_string()))?;
+        Ok(Hash128(bytes))
+    }
+
+    fn deserialize_hash160(&mut self) -> Result<Hash160, Self::Error> {
+        let mut bytes = [0u8; 20];
+        self.cursor.read_exact(&mut bytes).map_err(|e| BinaryCodecError::InsufficientBytes(e.to_string()))?;
+        Ok(Hash160(bytes))
+    }
+
+    fn deserialize_hash256(&mut self) -> Result<Hash256, Self::Error> {
+        let mut bytes = [0u8; 32];
+        self.cursor.read_exact(&mut bytes).map_err(|e| BinaryCodecError::InsufficientBytes(e.to_string()))?;
+        Ok(Hash256(bytes))
+    }
+
+    fn deserialize_uint8(&mut self) -> Result<UInt8, Self::Error> {
+        let mut bytes = [0u8; 1];
+        self.cursor.read_exact(&mut bytes).map_err(|e| BinaryCodecError::InsufficientBytes(e.to_string()))?;
+        Ok(UInt8::from_be_bytes(bytes))
+    }
+
+    fn deserialize_uint16(&mut self) -> Result<UInt16, Self::Error> {
+        let mut bytes = [0u8; 2];
+        self.cursor.read_exact(&mut bytes).map_err(|e| BinaryCodecError::InsufficientBytes(e.to_string()))?;
+        Ok(UInt16::from_be_bytes(bytes))
+    }
+
+    fn deserialize_uint32(&mut self) -> Result<UInt32, Self::Error> {
+        let mut bytes = [0u8; 4];
+        self.cursor.read_exact(&mut bytes).map_err(|e| BinaryCodecError::InsufficientBytes(e.to_string()))?;
+        Ok(UInt32::from_be_bytes(bytes))
+    }
+
+    fn deserialize_uint64(&mut self) -> Result<Uint64, Self::Error> {
+        let mut bytes = [0u8; 8];
+        self.cursor.read_exact(&mut bytes).map_err(|e| BinaryCodecError::InsufficientBytes(e.to_string()))?;
+        Ok(Uint64::from_be_bytes(bytes))
+    }
+
+    fn deserialize_array(&mut self) -> Result<Self::DeserializeArray, Self::Error> {
+        let mut bytes = Vec::new();
+        while !self.end() {
+            let field = self.read_field()?;
+            if field.name == constants::ARRAY_END_MARKER_NAME {
+                break;
+            }
+            let header: Vec<u8> = FieldId::from(field.info.clone()).into();
+            bytes.extend_from_slice(&header);
+            let data = self.read_field_value(&field.info)?;
+            bytes.extend_from_slice(data.as_ref());
+            bytes.extend_from_slice(constants::OBJECT_END_MARKER_ARRAY);
+        }
+        bytes.extend_from_slice(constants::ARRAY_END_MARKER);
+        Ok(bytes)
+    }
+
+    fn deserialize_object(&mut self) -> Result<Self::DeserializeObject, Self::Error> {
         let mut sink: Vec<Vec<u8>> = Vec::new();
         while !self.end() {
             let field = self.read_field()?;
