@@ -6,7 +6,6 @@ use crate::serializer::{
     field_id::{FieldId, TypeCode},
     field_info::FieldInfo,
 };
-pub use xrpl_types::deserialize::Deserializer;
 use xrpl_types::{
     AccountId, Amount, Blob, Hash128, Hash160, Hash256,
     UInt16, UInt32, UInt8, Uint64
@@ -32,7 +31,7 @@ pub struct FieldInstance {
 }
 
 #[derive(Debug, Clone, Default)]
-pub struct XrplDeserializer {
+pub struct Deserializer {
     cursor: Cursor<Vec<u8>>,
     field_ordinal_lookup: HashMap<u32, FieldInstance>,
 }
@@ -283,7 +282,7 @@ impl Deserializer {
     }
 }
 
-impl xrpl_types::deserialize::Deserializer for XrplDeserializer {
+impl xrpl_types::deserialize::Deserializer for Deserializer {
     type Error = BinaryCodecError;
     type DeserializeArray = Vec<u8>;
     type DeserializeObject = Vec<u8>;
