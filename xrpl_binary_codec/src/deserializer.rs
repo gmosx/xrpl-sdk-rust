@@ -7,9 +7,8 @@ use crate::serializer::{
     field_id::{FieldCode, FieldId, TypeCode},
     field_info::FieldInfo,
 };
-pub use xrpl_types::deserialize::Deserializer;
 use xrpl_types::{
-    deserialize::{Deserialize, DeserializeArray, DeserializeObject},
+    deserialize::{Deserialize, Deserializer},
     AccountId, Amount, Blob, CurrencyCode, DropsAmount, Hash128, Hash160, Hash256, IssuedValue,
     UInt16, UInt32, UInt8, Uint64
 };
