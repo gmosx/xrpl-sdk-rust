@@ -7,6 +7,7 @@ use crate::serializer::{
     field_id::{FieldCode, FieldId, TypeCode},
     field_info::FieldInfo,
 };
+pub use xrpl_types::deserialize::Deserializer;
 use xrpl_types::{
     deserialize::{Deserialize, DeserializeArray, DeserializeObject},
     AccountId, Amount, Blob, CurrencyCode, DropsAmount, Hash128, Hash160, Hash256, IssuedValue,
@@ -35,17 +36,15 @@ pub struct FieldInstance {
 }
 
 #[derive(Debug, Clone, Default)]
-pub struct Deserializer {
+pub struct XrplDeserializer {
     cursor: Cursor<Vec<u8>>,
     field_ordinal_lookup: HashMap<u32, FieldInstance>,
-    #[cfg(feature = "json")]
-    field_lookup: HashMap<String, FieldInfo>,
 }
 
-impl Deserializer {
-    fn new(bytes: Vec<u8>, field_info_map: HashMap<String, FieldInfo>) -> Self {
+impl XrplDeserializer {
+    pub fn new(bytes: Vec<u8>, field_info_map: &HashMap<String, FieldInfo>) -> Self {
         let mut field_ordinal_lookup = HashMap::new();
-        for (name, info) in &field_info_map {
+        for (name, info) in field_info_map {
             let ordinal = info.ordinal();
             let field = FieldInstance {
                 info: info.clone(),
@@ -56,8 +55,6 @@ impl Deserializer {
         Self {
             cursor: Cursor::new(bytes),
             field_ordinal_lookup,
-            #[cfg(feature = "json")]
-            field_lookup: field_info_map,
         }
     }
 
@@ -143,114 +140,9 @@ impl Deserializer {
     pub fn end(&mut self) -> bool {
         self.cursor.position() == self.cursor.get_ref().len() as u64
     }
-}
-
-// impl xrpl_types::deserialize::Deserializer for Deserializer {
-impl Deserializer {
-    // type Error = BinaryCodecError;
-    // type DeserializeArray = ArrayDeserializer;
-    // type DeserializeObject = ObjectDeserializer;
-
-    fn deserialize_account_id(&mut self) -> Result<AccountId, BinaryCodecError> {
-        let mut bytes = [0u8; 20];
-        self.cursor.read_exact(&mut bytes).map_err(|e| BinaryCodecError::InsufficientBytes(e.to_string()))?;
-        Ok(AccountId(bytes))
-    }
-
-    fn deserialize_amount(&mut self) -> Result<Amount, BinaryCodecError> {
-        unimplemented!()
-    }
-
-    fn deserialize_blob(&mut self, len: usize) -> Result<Blob, BinaryCodecError> {
-        let mut bytes = vec![0u8; len]; 
-        self.cursor.read_exact(&mut bytes).map_err(|e| BinaryCodecError::InsufficientBytes(e.to_string()))?;
-        Ok(Blob(bytes))
-    }
-
-    fn deserialize_hash128(&mut self) -> Result<Hash128, BinaryCodecError> {
-        let mut bytes = [0u8; 16];
-        self.cursor.read_exact(&mut bytes).map_err(|e| BinaryCodecError::InsufficientBytes(e.to_string()))?;
-        Ok(Hash128(bytes))
-    }
-
-    fn deserialize_hash160(&mut self) -> Result<Hash160, BinaryCodecError> {
-        let mut bytes = [0u8; 20];
-        self.cursor.read_exact(&mut bytes).map_err(|e| BinaryCodecError::InsufficientBytes(e.to_string()))?;
-        Ok(Hash160(bytes))
-    }
-
-    fn deserialize_hash256(&mut self) -> Result<Hash256, BinaryCodecError> {
-        let mut bytes = [0u8; 32];
-        self.cursor.read_exact(&mut bytes).map_err(|e| BinaryCodecError::InsufficientBytes(e.to_string()))?;
-        Ok(Hash256(bytes))
-    }
-
-    fn deserialize_uint8(&mut self) -> Result<UInt8, BinaryCodecError> {
-        let mut bytes = [0u8; 1];
-        self.cursor.read_exact(&mut bytes).map_err(|e| BinaryCodecError::InsufficientBytes(e.to_string()))?;
-        Ok(UInt8::from_be_bytes(bytes))
-    }
-
-    fn deserialize_uint16(&mut self) -> Result<UInt16, BinaryCodecError> {
-        let mut bytes = [0u8; 2];
-        self.cursor.read_exact(&mut bytes).map_err(|e| BinaryCodecError::InsufficientBytes(e.to_string()))?;
-        Ok(UInt16::from_be_bytes(bytes))
-    }
-
-    fn deserialize_uint32(&mut self) -> Result<UInt32, BinaryCodecError> {
-        let mut bytes = [0u8; 4];
-        self.cursor.read_exact(&mut bytes).map_err(|e| BinaryCodecError::InsufficientBytes(e.to_string()))?;
-        Ok(UInt32::from_be_bytes(bytes))
-    }
-
-    fn deserialize_uint64(&mut self) -> Result<Uint64, BinaryCodecError> {
-        let mut bytes = [0u8; 8];
-        self.cursor.read_exact(&mut bytes).map_err(|e| BinaryCodecError::InsufficientBytes(e.to_string()))?;
-        Ok(Uint64::from_be_bytes(bytes))
-    }
-
-    fn deserialize_array(&mut self) -> Result<Vec<u8>, BinaryCodecError> {
-        let mut bytes = Vec::new();
-        while !self.end() {
-            let field = self.read_field()?;
-            if field.name == constants::ARRAY_END_MARKER_NAME {
-                break;
-            }
-            let header: Vec<u8> = FieldId::from(field.info.clone()).into();
-            bytes.extend_from_slice(&header);
-            let data = self.read_field_value(&field.info)?;
-            bytes.extend_from_slice(data.as_ref());
-            bytes.extend_from_slice(constants::OBJECT_END_MARKER_ARRAY);
-        }
-        bytes.extend_from_slice(constants::ARRAY_END_MARKER);
-        Ok(bytes)
-    }
-
-    // fn deserialize_object<T: Deserialize>(&mut self, field_name: &str) -> Result<T, BinaryCodecError> {
-    fn deserialize_object(&mut self) -> Result<Vec<u8>, BinaryCodecError> {
-        let mut sink: Vec<Vec<u8>> = Vec::new();
-        while !self.end() {
-            let field = self.read_field()?;
-            if field.name == constants::OBJECT_END_MARKER_NAME {
-                break;
-            }
-            let data = self.read_field_value(&field.info)?;
-            sink.push(FieldId::from(field.info.clone()).into()); // push header
-            if field.info.is_vl_encoded {
-                let vl = encode_variable_length(data.len())?;
-                sink.push(vl);
-            }
-            sink.push(data);
-            if field.name == constants::OBJECT_NAME {
-                sink.push(constants::OBJECT_END_MARKER_BYTE.to_vec());
-            }
-        }
-        let concatenated_sink: Vec<u8> = sink.into_iter().flatten().collect();
-        Ok(concatenated_sink)
-    }
 
     #[cfg(feature = "json")]
-    pub fn to_json(&mut self, type_code: &TypeCode, data: &[u8]) -> Result<Value, BinaryCodecError> {
+    fn to_json(&mut self, type_code: &TypeCode, data: &[u8]) -> Result<Value, BinaryCodecError> {
         match type_code {
             TypeCode::Hash256 => Ok(Value::String(hex::encode_upper(&data))),
             TypeCode::AccountId => {
@@ -293,6 +185,109 @@ impl Deserializer {
     }
 }
 
+impl xrpl_types::deserialize::Deserializer for XrplDeserializer {
+    type Error = BinaryCodecError;
+    type DeserializeArray = Vec<u8>;
+    type DeserializeObject = Vec<u8>;
+
+    fn deserialize_account_id(&mut self) -> Result<AccountId, Self::Error> {
+        let mut bytes = [0u8; 20];
+        self.cursor.read_exact(&mut bytes).map_err(|e| BinaryCodecError::InsufficientBytes(e.to_string()))?;
+        Ok(AccountId(bytes))
+    }
+
+    fn deserialize_amount(&mut self) -> Result<Amount, Self::Error> {
+        unimplemented!()
+    }
+
+    fn deserialize_blob(&mut self, len: usize) -> Result<Blob, Self::Error> {
+        let mut bytes = vec![0u8; len]; 
+        self.cursor.read_exact(&mut bytes).map_err(|e| BinaryCodecError::InsufficientBytes(e.to_string()))?;
+        Ok(Blob(bytes))
+    }
+
+    fn deserialize_hash128(&mut self) -> Result<Hash128, Self::Error> {
+        let mut bytes = [0u8; 16];
+        self.cursor.read_exact(&mut bytes).map_err(|e| BinaryCodecError::InsufficientBytes(e.to_string()))?;
+        Ok(Hash128(bytes))
+    }
+
+    fn deserialize_hash160(&mut self) -> Result<Hash160, Self::Error> {
+        let mut bytes = [0u8; 20];
+        self.cursor.read_exact(&mut bytes).map_err(|e| BinaryCodecError::InsufficientBytes(e.to_string()))?;
+        Ok(Hash160(bytes))
+    }
+
+    fn deserialize_hash256(&mut self) -> Result<Hash256, Self::Error> {
+        let mut bytes = [0u8; 32];
+        self.cursor.read_exact(&mut bytes).map_err(|e| BinaryCodecError::InsufficientBytes(e.to_string()))?;
+        Ok(Hash256(bytes))
+    }
+
+    fn deserialize_uint8(&mut self) -> Result<UInt8, Self::Error> {
+        let mut bytes = [0u8; 1];
+        self.cursor.read_exact(&mut bytes).map_err(|e| BinaryCodecError::InsufficientBytes(e.to_string()))?;
+        Ok(UInt8::from_be_bytes(bytes))
+    }
+
+    fn deserialize_uint16(&mut self) -> Result<UInt16, Self::Error> {
+        let mut bytes = [0u8; 2];
+        self.cursor.read_exact(&mut bytes).map_err(|e| BinaryCodecError::InsufficientBytes(e.to_string()))?;
+        Ok(UInt16::from_be_bytes(bytes))
+    }
+
+    fn deserialize_uint32(&mut self) -> Result<UInt32, Self::Error> {
+        let mut bytes = [0u8; 4];
+        self.cursor.read_exact(&mut bytes).map_err(|e| BinaryCodecError::InsufficientBytes(e.to_string()))?;
+        Ok(UInt32::from_be_bytes(bytes))
+    }
+
+    fn deserialize_uint64(&mut self) -> Result<Uint64, Self::Error> {
+        let mut bytes = [0u8; 8];
+        self.cursor.read_exact(&mut bytes).map_err(|e| BinaryCodecError::InsufficientBytes(e.to_string()))?;
+        Ok(Uint64::from_be_bytes(bytes))
+    }
+
+    fn deserialize_array(&mut self) -> Result<Self::DeserializeArray, Self::Error> {
+        let mut bytes = Vec::new();
+        while !self.end() {
+            let field = self.read_field()?;
+            if field.name == constants::ARRAY_END_MARKER_NAME {
+                break;
+            }
+            let header: Vec<u8> = FieldId::from(field.info.clone()).into();
+            bytes.extend_from_slice(&header);
+            let data = self.read_field_value(&field.info)?;
+            bytes.extend_from_slice(data.as_ref());
+            bytes.extend_from_slice(constants::OBJECT_END_MARKER_ARRAY);
+        }
+        bytes.extend_from_slice(constants::ARRAY_END_MARKER);
+        Ok(bytes)
+    }
+
+    fn deserialize_object(&mut self) -> Result<Self::DeserializeObject, Self::Error> {
+        let mut sink: Vec<Vec<u8>> = Vec::new();
+        while !self.end() {
+            let field = self.read_field()?;
+            if field.name == constants::OBJECT_END_MARKER_NAME {
+                break;
+            }
+            let data = self.read_field_value(&field.info)?;
+            sink.push(FieldId::from(field.info.clone()).into()); // push header
+            if field.info.is_vl_encoded {
+                let vl = encode_variable_length(data.len())?;
+                sink.push(vl);
+            }
+            sink.push(data);
+            if field.name == constants::OBJECT_NAME {
+                sink.push(constants::OBJECT_END_MARKER_BYTE.to_vec());
+            }
+        }
+        let concatenated_sink: Vec<u8> = sink.into_iter().flatten().collect();
+        Ok(concatenated_sink)
+    }
+}
+
 fn encode_variable_length(length: usize) -> Result<Vec<u8>, BinaryCodecError> {
     let mut len_bytes = vec![0u8; 3];
     if length <= 192 {
@@ -320,14 +315,14 @@ mod tests {
 
     use super::*;
     use serde_json::from_str;
-    use crate::serializer::field_info::create_field_info_map;
+    use crate::serializer::field_info::field_info_lookup;
 
     #[test]
     fn test_decode_account_txn_id() {
         // AccountTxnID encoded
         let encoded_account_id = "5916969036626990000000000000000000F236FD752B5E4C84810AB3D41A3C25";
 
-        let deserializer = &mut Deserializer::new(hex::decode(encoded_account_id).unwrap(), create_field_info_map());
+        let deserializer = &mut XrplDeserializer::new(hex::decode(encoded_account_id).unwrap(), field_info_lookup());
         let data = deserializer.deserialize_hash256().unwrap();
         let hex_val = hex::encode_upper(&data.0);
         assert_eq!(encoded_account_id, hex_val);
@@ -337,12 +332,12 @@ mod tests {
     fn test_decode_account_txn_id_obj() {
         let encoded_account_id_obj = "5916969036626990000000000000000000F236FD752B5E4C84810AB3D41A3C2580";
 
-        let deserializer = &mut Deserializer::new(hex::decode(encoded_account_id_obj).unwrap(), create_field_info_map());
+        let deserializer = &mut XrplDeserializer::new(hex::decode(encoded_account_id_obj).unwrap(), field_info_lookup());
         let data = deserializer.deserialize_object().unwrap();
         let hex_val = hex::encode_upper(&data);
         assert_eq!(encoded_account_id_obj, hex_val);
 
-        let deserializer_2 = &mut Deserializer::new(data.clone(), create_field_info_map());
+        let deserializer_2 = &mut XrplDeserializer::new(data.clone(), field_info_lookup());
         let json_val = deserializer_2.to_json(&TypeCode::Object, &data).unwrap();
         let expected_val = r#"{
             "AccountTxnID": "16969036626990000000000000000000F236FD752B5E4C84810AB3D41A3C2580"
@@ -355,7 +350,7 @@ mod tests {
         // AccountID encoded
         let encoded_account_id = "811424A53BB5CAAD40A961836FEF648E8424846E";
 
-        let deserializer = &mut Deserializer::new(hex::decode(encoded_account_id).unwrap(), create_field_info_map());
+        let deserializer = &mut XrplDeserializer::new(hex::decode(encoded_account_id).unwrap(), field_info_lookup());
         let account_id = deserializer.deserialize_account_id().unwrap();
         let want_acc_id = "rUmWJKM2b87GsKeTzSw14NeuubPQc8meTL";
         assert_eq!(want_acc_id, account_id.to_address());
@@ -365,12 +360,12 @@ mod tests {
     fn test_decode_account_id_obj() {
         let encoded_account_id_obj = "811424A53BB5CAAD40A961836FEF648E8424846EC75A";
 
-        let deserializer = &mut Deserializer::new(hex::decode(encoded_account_id_obj).unwrap(), create_field_info_map());
+        let deserializer = &mut XrplDeserializer::new(hex::decode(encoded_account_id_obj).unwrap(), field_info_lookup());
         let data = deserializer.deserialize_object().unwrap();
         let hex_val = hex::encode_upper(&data);
         assert_eq!(encoded_account_id_obj, hex_val);
 
-        let deserializer = &mut Deserializer::new(hex::decode(encoded_account_id_obj).unwrap(), create_field_info_map());
+        let deserializer = &mut XrplDeserializer::new(hex::decode(encoded_account_id_obj).unwrap(), field_info_lookup());
         let json_val = deserializer.to_json(&TypeCode::Object, &data).unwrap();
         let expected_val = r#"{
             "Account": "rhLmGWkHr59h9ffYgPEAqZnqiQZMGb71yo"
@@ -383,7 +378,7 @@ mod tests {
         // TxnSignature encoded
         let encoded_tx_sig = "74473045022100FB7583772B8F348F4789620C5571146B6517887AC231B38E29D7688D73F9D2510220615DC87698A2BA64DF2CA83BD9A214002F74C2D615CA20E328AC4AB5E4CD";
 
-        let deserializer = &mut Deserializer::new(hex::decode(encoded_tx_sig).unwrap(), create_field_info_map());
+        let deserializer = &mut XrplDeserializer::new(hex::decode(encoded_tx_sig).unwrap(), field_info_lookup());
         let blob = deserializer.deserialize_blob(encoded_tx_sig.len() / 2).unwrap();
         let hex_val = hex::encode_upper(&blob.0);
         assert_eq!(encoded_tx_sig, hex_val);
@@ -393,12 +388,12 @@ mod tests {
     fn test_decode_txn_signature_obj() {
         let encoded_tx_sig_obj = "74473045022100FB7583772B8F348F4789620C5571146B6517887AC231B38E29D7688D73F9D2510220615DC87698A2BA64DF2CA83BD9A214002F74C2D615CA20E328AC4AB5E4CDE8BC";
 
-        let deserializer = &mut Deserializer::new(hex::decode(encoded_tx_sig_obj).unwrap(), create_field_info_map());
+        let deserializer = &mut XrplDeserializer::new(hex::decode(encoded_tx_sig_obj).unwrap(), field_info_lookup());
         let data = deserializer.deserialize_object().unwrap();
         let str_val = hex::encode_upper(&data);
         assert_eq!(encoded_tx_sig_obj, str_val);
 
-        let deserializer = &mut Deserializer::new(hex::decode(encoded_tx_sig_obj).unwrap(), create_field_info_map());
+        let deserializer = &mut XrplDeserializer::new(hex::decode(encoded_tx_sig_obj).unwrap(), field_info_lookup());
         let json_val = deserializer.to_json(&TypeCode::Object, &data).unwrap();
         let expected_val = r#"{
             "TxnSignature": "3045022100FB7583772B8F348F4789620C5571146B6517887AC231B38E29D7688D73F9D2510220615DC87698A2BA64DF2CA83BD9A214002F74C2D615CA20E328AC4AB5E4CDE8BC"
@@ -410,7 +405,7 @@ mod tests {
     fn test_decode_memos_array() {
         let encoded_tx_memos_arr = "7C1F687474703A2F2F6578616D706C652E636F6D2F6D656D6F2F67656E657269637D0472656E74F1E1F1F1E1F1";
 
-        let deserializer = &mut Deserializer::new(hex::decode(encoded_tx_memos_arr).unwrap(), create_field_info_map());
+        let deserializer = &mut XrplDeserializer::new(hex::decode(encoded_tx_memos_arr).unwrap(), field_info_lookup());
         let data = deserializer.deserialize_object().unwrap();
         let hex_val = hex::encode_upper(&data);
         assert_eq!(encoded_tx_memos_arr, hex_val);
@@ -420,12 +415,12 @@ mod tests {
     fn test_decode_memos_txn_obj() {
         let encoded_tx_obj = "F9EA7C1F687474703A2F2F6578616D706C652E636F6D2F6D656D6F2F67656E657269637D0472656E74E1F1";
 
-        let deserializer = &mut Deserializer::new(hex::decode(encoded_tx_obj).unwrap(), create_field_info_map());
+        let deserializer = &mut XrplDeserializer::new(hex::decode(encoded_tx_obj).unwrap(), field_info_lookup());
         let data = deserializer.deserialize_object().unwrap();
         let hex_val = hex::encode_upper(&data);
         assert_eq!(encoded_tx_obj, hex_val);
 
-        let deserializer = &mut Deserializer::new(hex::decode(encoded_tx_obj).unwrap(), create_field_info_map());
+        let deserializer = &mut XrplDeserializer::new(hex::decode(encoded_tx_obj).unwrap(), field_info_lookup());
         let json_val = deserializer.to_json(&TypeCode::Object, &data).unwrap();
         let expected_val = r#"{
             "Memos": [
@@ -445,7 +440,7 @@ mod tests {
     fn test_custom_tx() {
         let encoded_obj = "EA7D0472656E74E1";
 
-        let deserializer = &mut Deserializer::new(hex::decode(encoded_obj).unwrap(), create_field_info_map());
+        let deserializer = &mut XrplDeserializer::new(hex::decode(encoded_obj).unwrap(), field_info_lookup());
         let json_val = deserializer.to_json(&TypeCode::Object, &hex::decode(encoded_obj).unwrap()).unwrap();
         let expected_val = r#"{
             "Memo": {
@@ -459,12 +454,12 @@ mod tests {
     fn test_decode_txn_obj() {
         let encoded_tx_obj = "5916969036626990000000000000000000F236FD752B5E4C84810AB3D41A3C2580732102A6934E87988466B98B51F2EB09E5BC4C09E46EB5F1FE08723DF8AD23D5BB9C6A74473045022100FB7583772B8F348F4789620C5571146B6517887AC231B38E29D7688D73F9D2510220615DC87698A2BA64DF2CA83BD9A214002F74C2D615CA20E328AC4AB5E4CDE8BC811424A53BB5CAAD40A961836FEF648E8424846EC75AF9EA7C1F687474703A2F2F6578616D706C652E636F6D2F6D656D6F2F67656E657269637D0472656E74E1F1";
         
-        let deserializer = &mut Deserializer::new(hex::decode(encoded_tx_obj).unwrap(), create_field_info_map());
+        let deserializer = &mut XrplDeserializer::new(hex::decode(encoded_tx_obj).unwrap(), field_info_lookup());
         let data = deserializer.deserialize_object().unwrap();
         let str_val = hex::encode_upper(&data);
         assert_eq!(encoded_tx_obj, str_val);
 
-        let deserializer = &mut Deserializer::new(hex::decode(encoded_tx_obj).unwrap(), create_field_info_map());
+        let deserializer = &mut XrplDeserializer::new(hex::decode(encoded_tx_obj).unwrap(), field_info_lookup());
         let json_val = deserializer.to_json(&TypeCode::Object, &data).unwrap();
         let expected_val = r#"{
             "AccountTxnID": "16969036626990000000000000000000F236FD752B5E4C84810AB3D41A3C2580",

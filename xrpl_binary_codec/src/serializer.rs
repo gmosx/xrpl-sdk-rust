@@ -7,8 +7,8 @@ use xrpl_types::{
     UInt16, UInt32, UInt8,
 };
 
-mod field_id;
-mod field_info;
+pub mod field_id;
+pub mod field_info;
 
 #[derive(Debug, Default)]
 pub struct Serializer {
@@ -304,23 +304,8 @@ impl Serializer {
     fn push_field_id(&mut self, field_id: FieldId) -> Result<(), BinaryCodecError> {
         // rippled implementation: https://github.com/seelabs/rippled/blob/cecc0ad75849a1d50cc573188ad301ca65519a5b/src/ripple/protocol/impl/Serializer.cpp#L117-L148
 
-        let type_code = field_id.type_code as u8;
-        let field_code = field_id.field_code.0;
-
-        if type_code < 16 && field_code < 16 {
-            self.push(type_code << 4 | field_code)?;
-        } else if type_code < 16 {
-            self.push(type_code << 4)?;
-            self.push(field_code)?;
-        } else if field_code < 16 {
-            self.push(field_code)?;
-            self.push(type_code)?;
-        } else {
-            self.push(0)?;
-            self.push(type_code)?;
-            self.push(field_code)?;
-        }
-        Ok(())
+        let header: Vec<u8> = field_id.into();
+        Ok(self.push_slice(&header)?)
     }
 
     /// Push length prefix according to <https://xrpl.org/serialization.html#length-prefixing>
