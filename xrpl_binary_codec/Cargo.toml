@@ -10,7 +10,7 @@ edition = "2021"
 
 [dependencies]
 serde = { version = "1", features = ["derive"] }
-serde_json = "1"
+serde_json = { version = "1", optional = true }
 hex = "0.4"
 bs58 = { version = "0.5.0", features = ["check"] }
 sha2 = "0.10.7"
@@ -19,6 +19,11 @@ xrpl_types = { path = "../xrpl_types", version = "0.15" }
 thiserror = "1.0.44"
 ascii = "1.1.0"
 enumflags2 = { version = "0.7.7" }
+byteorder = "1.5.0"
+
+[features]
+default = ["json"]
+json = ["serde_json"]
 
 [dev-dependencies]
 assert_matches = "1.5.0"
