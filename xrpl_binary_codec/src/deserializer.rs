@@ -453,7 +453,6 @@ mod tests {
             }
         }"#;
         assert_eq!(from_str::<Value>(expected_val).unwrap(), json_val);
-        assert!(false, "✅ testing failure; this is successful!");
     }
 
     #[test]
