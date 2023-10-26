@@ -14,7 +14,7 @@ serde_json = { version = "1", optional = true }
 hex = "0.4"
 bs58 = { version = "0.5.0", features = ["check"] }
 sha2 = "0.10.7"
-libsecp256k1 = { version = "0.7.1", default-features = false, features = ["hmac"] }
+libsecp256k1 = { version = "0.7.1", features = ["hmac"] }
 xrpl_types = { path = "../xrpl_types", version = "0.15" }
 thiserror = "1.0.44"
 ascii = "1.1.0"
