@@ -1,4 +1,6 @@
 //! Binary serialization for XRPL Protocol objects.
+#![allow(stable_features)]
+#![feature(once_cell)]
 
 pub mod deserializer;
 mod error;
