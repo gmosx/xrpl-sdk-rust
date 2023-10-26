@@ -1,15 +1,14 @@
 use std::collections::HashMap;
 use std::io::Cursor;
 use std::io::Read;
-use sha2::Digest;
 use crate::error::BinaryCodecError;
 use crate::serializer::{
-    field_id::{FieldCode, FieldId, TypeCode},
+    field_id::{FieldId, TypeCode},
     field_info::FieldInfo,
 };
 use xrpl_types::{
-    deserialize::{Deserialize, Deserializer},
-    AccountId, Amount, Blob, CurrencyCode, DropsAmount, Hash128, Hash160, Hash256, IssuedValue,
+    deserialize::Deserializer,
+    AccountId, Amount, Blob, Hash128, Hash160, Hash256,
     UInt16, UInt32, UInt8, Uint64
 };
 
@@ -17,8 +16,6 @@ use xrpl_types::{
 use serde_json::Value;
 
 mod constants {
-    pub const ACCOUNT_ID_BUF: &[u8] = &[0];
-
     pub const OBJECT_NAME: &str = "STObject";
     pub const OBJECT_END_MARKER_NAME: &str = "ObjectEndMarker";
     pub const OBJECT_END_MARKER_BYTE: &[u8] = &[0xE1];
@@ -57,6 +54,7 @@ impl XrplDeserializer {
         }
     }
 
+    #[allow(dead_code)]
     fn read(&mut self, n: usize) -> Result<Vec<u8>, BinaryCodecError> {
         let mut buf = vec![0; n];
         self.cursor.read_exact(&mut buf).map_err(|_| BinaryCodecError::InsufficientBytes("read".into()))?;
@@ -119,7 +117,7 @@ impl XrplDeserializer {
             None
         };
         let position = self.cursor.position() as usize;
-        let bytes = match info.field_type {
+        let _bytes = match info.field_type {
             TypeCode::Hash256 => self.deserialize_hash256()?.0.to_vec(),
             TypeCode::AccountId => self.deserialize_account_id()?.0.to_vec(),
             TypeCode::Blob => {
@@ -140,6 +138,7 @@ impl XrplDeserializer {
         self.cursor.position() == self.cursor.get_ref().len() as u64
     }
 
+    #[allow(dead_code)]
     #[cfg(feature = "json")]
     fn to_json(&mut self, type_code: &TypeCode, data: &[u8]) -> Result<Value, BinaryCodecError> {
         match type_code {
@@ -310,8 +309,6 @@ fn encode_variable_length(length: usize) -> Result<Vec<u8>, BinaryCodecError> {
 
 #[cfg(test)]
 mod tests {
-    use std::vec;
-
     use super::*;
     use serde_json::from_str;
     use crate::serializer::field_info::field_info_lookup;
