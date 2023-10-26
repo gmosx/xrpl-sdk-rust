@@ -4,10 +4,13 @@ pub mod deserializer;
 mod error;
 pub mod hash;
 pub mod serialize;
-#[allow(dead_code, unused_imports, unused_variables)]
 pub mod deserialize;
 /// Implements serialization according to <https://xrpl.org/serialization.html>
 pub mod serializer;
+<<<<<<< HEAD
+=======
+pub mod deserializer;
+>>>>>>> 7e18a1b (dead code cleanup)
 pub mod sign;
 
 pub use error::*;
