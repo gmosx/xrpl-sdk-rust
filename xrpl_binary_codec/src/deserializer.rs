@@ -293,59 +293,59 @@ impl xrpl_types::deserialize::Deserializer for Deserializer {
         Ok(AccountId(bytes))
     }
 
-    fn deserialize_amount(&mut self) -> Result<Amount, Self::Error> {
+    fn deserialize_amount(&mut self) -> Result<Amount, BinaryCodecError> {
         unimplemented!()
     }
 
-    fn deserialize_blob(&mut self, len: usize) -> Result<Blob, Self::Error> {
+    fn deserialize_blob(&mut self, len: usize) -> Result<Blob, BinaryCodecError> {
         let mut bytes = vec![0u8; len]; 
         self.cursor.read_exact(&mut bytes).map_err(|e| BinaryCodecError::InsufficientBytes(e.to_string()))?;
         Ok(Blob(bytes))
     }
 
-    fn deserialize_hash128(&mut self) -> Result<Hash128, Self::Error> {
+    fn deserialize_hash128(&mut self) -> Result<Hash128, BinaryCodecError> {
         let mut bytes = [0u8; 16];
         self.cursor.read_exact(&mut bytes).map_err(|e| BinaryCodecError::InsufficientBytes(e.to_string()))?;
         Ok(Hash128(bytes))
     }
 
-    fn deserialize_hash160(&mut self) -> Result<Hash160, Self::Error> {
+    fn deserialize_hash160(&mut self) -> Result<Hash160, BinaryCodecError> {
         let mut bytes = [0u8; 20];
         self.cursor.read_exact(&mut bytes).map_err(|e| BinaryCodecError::InsufficientBytes(e.to_string()))?;
         Ok(Hash160(bytes))
     }
 
-    fn deserialize_hash256(&mut self) -> Result<Hash256, Self::Error> {
+    fn deserialize_hash256(&mut self) -> Result<Hash256, BinaryCodecError> {
         let mut bytes = [0u8; 32];
         self.cursor.read_exact(&mut bytes).map_err(|e| BinaryCodecError::InsufficientBytes(e.to_string()))?;
         Ok(Hash256(bytes))
     }
 
-    fn deserialize_uint8(&mut self) -> Result<UInt8, Self::Error> {
+    fn deserialize_uint8(&mut self) -> Result<UInt8, BinaryCodecError> {
         let mut bytes = [0u8; 1];
         self.cursor.read_exact(&mut bytes).map_err(|e| BinaryCodecError::InsufficientBytes(e.to_string()))?;
         Ok(UInt8::from_be_bytes(bytes))
     }
 
-    fn deserialize_uint16(&mut self) -> Result<UInt16, Self::Error> {
+    fn deserialize_uint16(&mut self) -> Result<UInt16, BinaryCodecError> {
         let mut bytes = [0u8; 2];
         self.cursor.read_exact(&mut bytes).map_err(|e| BinaryCodecError::InsufficientBytes(e.to_string()))?;
         Ok(UInt16::from_be_bytes(bytes))
     }
 
-    fn deserialize_uint32(&mut self) -> Result<UInt32, Self::Error> {
+    fn deserialize_uint32(&mut self) -> Result<UInt32, BinaryCodecError> {
         let mut bytes = [0u8; 4];
         self.cursor.read_exact(&mut bytes).map_err(|e| BinaryCodecError::InsufficientBytes(e.to_string()))?;
         Ok(UInt32::from_be_bytes(bytes))
     }
 
-    fn deserialize_uint64(&mut self) -> Result<Uint64, Self::Error> {
+    fn deserialize_uint64(&mut self) -> Result<Uint64, BinaryCodecError> {
         let mut bytes = [0u8; 8];
         self.cursor.read_exact(&mut bytes).map_err(|e| BinaryCodecError::InsufficientBytes(e.to_string()))?;
         Ok(Uint64::from_be_bytes(bytes))
     }
 
-    fn deserialize_array(&mut self) -> Result<Self::DeserializeArray, Self::Error> {
+    fn deserialize_array(&mut self) -> Result<Vec<u8>, BinaryCodecError> {
         let mut bytes = Vec::new();
         while !self.end() {
             let field = self.read_field()?;
@@ -362,7 +362,7 @@ impl xrpl_types::deserialize::Deserializer for Deserializer {
         Ok(bytes)
     }
 
-    fn deserialize_object(&mut self) -> Result<Self::DeserializeObject, Self::Error> {
+    fn deserialize_object(&mut self) -> Result<Vec<u8>, BinaryCodecError> {
         let mut sink: Vec<Vec<u8>> = Vec::new();
         while !self.end() {
             let field = self.read_field()?;
