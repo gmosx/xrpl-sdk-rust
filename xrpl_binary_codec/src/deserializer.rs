@@ -139,7 +139,7 @@ impl Deserializer {
 
     #[allow(dead_code)]
     #[cfg(feature = "json")]
-    fn to_json(&mut self, type_code: &TypeCode, data: &[u8]) -> Result<Value, BinaryCodecError> {
+    pub fn to_json(&mut self, type_code: &TypeCode, data: &[u8]) -> Result<Value, BinaryCodecError> {
         match type_code {
             TypeCode::Hash256 => Ok(Value::String(hex::encode_upper(&data))),
             TypeCode::AccountId => {
