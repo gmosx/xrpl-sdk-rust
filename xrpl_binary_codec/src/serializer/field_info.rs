@@ -1,6 +1,10 @@
+use crate::alloc::string::{String, ToString};
 use crate::serializer::field_id::{FieldCode, TypeCode};
+
+#[cfg(feature = "std")]
 use std::collections::HashMap;
-use std::sync::OnceLock;
+#[cfg(not(feature = "std"))]
+use hashbrown::HashMap;
 
 #[derive(Debug, Clone)]
 pub struct FieldInfo {
@@ -15,15 +19,25 @@ impl FieldInfo {
     }
 }
 
-pub fn field_info_lookup() -> &'static HashMap<std::string::String, FieldInfo> {
+#[cfg(feature = "std")]
+static FIELD_INFO: std::sync::OnceLock<HashMap<String, FieldInfo>> = std::sync::OnceLock::new();
+
+#[cfg(feature = "std")]
+pub fn field_info_lookup() -> &'static HashMap<String, FieldInfo> {
     FIELD_INFO.get_or_init(create_field_info_map)
+}
+
+#[cfg(not(feature = "std"))]
+static FIELD_INFO: spin::Once<HashMap<String, FieldInfo>> = spin::Once::new();
+
+#[cfg(not(feature = "std"))]
+pub fn field_info_lookup() -> &'static HashMap<String, FieldInfo> {
+    FIELD_INFO.call_once(|| create_field_info_map())
 }
 
 pub fn field_info(field_name: &str) -> Option<&'static FieldInfo> {
     field_info_lookup().get(field_name)
 }
-
-static FIELD_INFO: OnceLock<HashMap<String, FieldInfo>> = OnceLock::new();
 
 macro_rules! insert_field_info {
     ($map:ident, $field_name:literal, $field_code:literal, $field_type:ident) => {
