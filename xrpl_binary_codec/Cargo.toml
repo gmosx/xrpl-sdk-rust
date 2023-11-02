@@ -9,16 +9,20 @@ authors = ["Georgios Moschovitis <george.moschovitis@gmail.com>"]
 edition = "2021"
 
 [dependencies]
-serde = { version = "1", features = ["derive"] }
-serde_json = "1"
-hex = "0.4"
-bs58 = { version = "0.5.0", features = ["check"] }
-sha2 = "0.10.7"
-libsecp256k1 = "0.7.1"
-xrpl_types = { path = "../xrpl_types", version = "0.15" }
+serde_json = { version = "1", default-features = false }
+hex = { version = "0.4", default-features = false }
+sha2 = { version = "0.10.7", default-features = false }
+libsecp256k1 = { version = "0.7.1", default-features = false, features = ["static-context", "hmac"] }
+xrpl_types = { path = "../xrpl_types", version = "0.15", default-features = false }
 thiserror = "1.0.44"
-ascii = "1.1.0"
-enumflags2 = { version = "0.7.7" }
+
+[features]
+default = ["std"]
+std = ["hex/std", "serde_json/std", "json"]
+wasm32 = ["hex/alloc", "xrpl_types/wasm32", "serde_json/alloc", "json"]
+json = []
 
 [dev-dependencies]
+ascii = "1.1.0"
 assert_matches = "1.5.0"
+enumflags2 = { version = "0.7.7" }

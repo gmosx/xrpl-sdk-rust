@@ -1,5 +1,7 @@
 use std::fmt;
 
+use super::field_info::FieldInfo;
+
 /// Field data type codes <https://xrpl.org/serialization.html#type-list>
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd)]
 #[repr(u8)]
@@ -52,5 +54,39 @@ impl FieldId {
             type_code,
             field_code,
         }
+    }
+}
+
+impl From<FieldInfo> for FieldId {
+    fn from(field_info: FieldInfo) -> Self {
+        Self {
+            type_code: field_info.field_type,
+            field_code: field_info.field_code,
+        }
+    }
+}
+
+// rippled implementation: https://github.com/seelabs/rippled/blob/cecc0ad75849a1d50cc573188ad301ca65519a5b/src/ripple/protocol/impl/Serializer.cpp#L117-L148
+impl Into<Vec<u8>> for FieldId {
+    fn into(self) -> Vec<u8> {
+        let mut header = Vec::new();
+
+        let type_code = self.type_code as u8;
+        let field_code = self.field_code.0;
+
+        if type_code < 16 && field_code < 16 {
+            header.push(type_code << 4 | field_code);
+        } else if type_code < 16 {
+            header.push(type_code << 4);
+            header.push(field_code);
+        } else if field_code < 16 {
+            header.push(field_code);
+            header.push(type_code);
+        } else {
+            header.push(0);
+            header.push(type_code);
+            header.push(field_code);
+        }
+        header
     }
 }
