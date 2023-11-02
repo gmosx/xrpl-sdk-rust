@@ -1,3 +1,4 @@
+use crate::alloc::vec::Vec;
 use crate::serializer::Serializer;
 use crate::BinaryCodecError;
 use xrpl_types::serialize::Serialize;
