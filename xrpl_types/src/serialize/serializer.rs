@@ -1,10 +1,10 @@
 use crate::serialize::Serialize;
 use crate::{AccountId, Amount, Blob, Hash128, Hash160, Hash256, UInt16, UInt32, UInt8, Uint64};
-use std::error::Error;
+use core::fmt;
 
 /// Serialize for XRPL types and objects
 pub trait Serializer {
-    type Error: Error;
+    type Error: fmt::Debug + fmt::Display;
     type SerializeArray<'a>: SerializeArray<Error = Self::Error>
     where
         Self: 'a;
@@ -40,7 +40,7 @@ pub trait Serializer {
 }
 
 pub trait SerializeArray {
-    type Error: Error;
+    type Error: fmt::Debug + fmt::Display;
 
     fn serialize_object<T: Serialize>(
         &mut self,
