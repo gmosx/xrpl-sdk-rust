@@ -1,7 +1,7 @@
+use crate::alloc::{format, string::ToString};
 use crate::Error;
+use core::{fmt, fmt::{Debug, Display, Formatter}, str::FromStr};
 use ascii::{AsciiChar, AsciiStr, AsciiString};
-use std::fmt::{Display, Formatter};
-use std::str::FromStr;
 
 /// Currency code <https://xrpl.org/currency-formats.html#currency-codes>
 #[derive(Debug, Eq, PartialEq, Clone, Copy)]
@@ -68,12 +68,12 @@ impl FromStr for CurrencyCode {
     }
 }
 
-impl Display for CurrencyCode {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+impl fmt::Display for CurrencyCode {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
             CurrencyCode::Xrp => f.write_str("XRP"),
-            CurrencyCode::Standard(code) => code.fmt(f),
-            CurrencyCode::NonStandard(code) => code.fmt(f),
+            CurrencyCode::Standard(code) => Display::fmt(&code, f),
+            CurrencyCode::NonStandard(code) => Display::fmt(&code, f),
         }
     }
 }
@@ -123,8 +123,8 @@ impl AsRef<str> for StandardCurrencyCode {
 }
 
 impl Display for StandardCurrencyCode {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        self.as_ascii_str().fmt(f)
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        Display::fmt(self.as_ascii_str(), f)
     }
 }
 
@@ -155,7 +155,7 @@ impl AsRef<[u8]> for NonStandardCurrencyCode {
 }
 
 impl Display for NonStandardCurrencyCode {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         f.write_str(&hex::encode_upper(self.as_bytes()))
     }
 }
@@ -172,7 +172,7 @@ fn to_3_ascii_chars(str: &str) -> Result<[AsciiChar; 3], Error> {
 mod test {
     use super::*;
     use assert_matches::assert_matches;
-    use std::str::FromStr;
+    use alloc::str::FromStr;
 
     #[test]
     fn test_non_standard_code_from_bytes() {
