@@ -1,3 +1,4 @@
+use crate::alloc::string::ToString;
 use crate::{AccountId, CurrencyCode, Error};
 
 /// Currency: XRP or issued token. See <https://xrpl.org/currency-formats.html#specifying-without-amounts>

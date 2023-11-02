@@ -1,3 +1,4 @@
+use crate::alloc::vec::Vec;
 use crate::serialize::{Serialize, SerializeArray, Serializer};
 use crate::{AccountId, Amount, Blob, DropsAmount, Hash256, UInt32};
 
