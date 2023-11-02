@@ -1,6 +1,4 @@
-use std::collections::HashMap;
-use std::io::Cursor;
-use std::io::Read;
+use crate::alloc::{string::String, vec, vec::Vec};
 use crate::error::BinaryCodecError;
 use crate::serializer::{
     field_id::{FieldId, TypeCode},
@@ -10,6 +8,12 @@ use xrpl_types::{
     AccountId, Amount, Blob, Hash128, Hash160, Hash256,
     UInt16, UInt32, UInt8, Uint64
 };
+
+use bytes::{Buf, Bytes};
+#[cfg(feature = "std")]
+use std::collections::HashMap;
+#[cfg(not(feature = "std"))]
+use hashbrown::HashMap;
 
 #[cfg(feature = "json")]
 use serde_json::Value;
@@ -32,7 +36,7 @@ pub struct FieldInstance {
 
 #[derive(Debug, Clone, Default)]
 pub struct Deserializer {
-    cursor: Cursor<Vec<u8>>,
+    bytes: Bytes,
     field_ordinal_lookup: HashMap<u32, FieldInstance>,
 }
 
@@ -48,22 +52,26 @@ impl Deserializer {
             field_ordinal_lookup.insert(ordinal, field);
         }
         Self {
-            cursor: Cursor::new(bytes),
+            bytes: Bytes::from(bytes),
             field_ordinal_lookup,
         }
     }
 
     #[allow(dead_code)]
     fn read(&mut self, n: usize) -> Result<Vec<u8>, BinaryCodecError> {
-        let mut buf = vec![0; n];
-        self.cursor.read_exact(&mut buf).map_err(|_| BinaryCodecError::InsufficientBytes("read".into()))?;
-        Ok(buf)
+        if self.bytes.remaining() < n {
+            return Err(BinaryCodecError::InsufficientBytes("read".into()));
+        }
+        let bytes = self.bytes.split_to(n);
+        Ok(bytes.to_vec())
     }
 
     fn read_u8(&mut self) -> Result<u8, BinaryCodecError> {
-        let mut buf = [0u8; 1];
-        self.cursor.read_exact(&mut buf).map_err(|_| BinaryCodecError::InsufficientBytes("read_u8".into()))?;
-        Ok(buf[0])
+        if self.bytes.has_remaining() {
+            Ok(self.bytes.get_u8())
+        } else {
+            Err(BinaryCodecError::InsufficientBytes("read_u8".into()))
+        }
     }
 
     fn read_variable_length(&mut self) -> Result<usize, BinaryCodecError> {
@@ -115,8 +123,7 @@ impl Deserializer {
         } else {
             None
         };
-        let position = self.cursor.position() as usize;
-        let _bytes = match info.field_type {
+        let bytes = match info.field_type {
             TypeCode::Hash256 => self.deserialize_hash256()?.0.to_vec(),
             TypeCode::AccountId => self.deserialize_account_id()?.0.to_vec(),
             TypeCode::Blob => {
@@ -127,17 +134,13 @@ impl Deserializer {
             TypeCode::Array => self.deserialize_array()?,
             _ => vec![], // TODO: default other types to Blob for now
         };
-        let position_upd = self.cursor.position() as usize;
-        // TODO: look and use bytes read instead? i.e return back tuple first and validate
-        Ok(self.cursor.get_ref()[position..position_upd].to_vec())
-        // Ok(bytes)
+        Ok(bytes)
     }
 
     pub fn end(&mut self) -> bool {
-        self.cursor.position() == self.cursor.get_ref().len() as u64
+        self.bytes.remaining() == 0
     }
 
-    #[allow(dead_code)]
     #[cfg(feature = "json")]
     pub fn to_json(&mut self, type_code: &TypeCode, data: &[u8]) -> Result<Value, BinaryCodecError> {
         match type_code {
@@ -149,8 +152,8 @@ impl Deserializer {
             TypeCode::Blob => Ok(Value::String(hex::encode_upper(&data))),
             TypeCode::Object => {
                 let mut accumulator: HashMap<String, Value> = HashMap::new();
-                self.cursor = Cursor::new(data.to_vec());
-                while !self.end() {
+                self.bytes = Bytes::from(data.to_vec());
+                while self.bytes.remaining() > 0 {
                     let field: FieldInstance = self.read_field()?;
                     if field.name == constants::OBJECT_END_MARKER_NAME {
                         break;
@@ -162,16 +165,16 @@ impl Deserializer {
                 Ok(Value::Object(accumulator.into_iter().collect()))
             },
             TypeCode::Array => {
-                self.cursor = Cursor::new(data.to_vec());
                 let mut result = Vec::new();
-                while !self.end() {
+                self.bytes = Bytes::from(data.to_vec());
+                while self.bytes.remaining() > 0 {
                     let field = self.read_field()?;
                     if field.name == constants::ARRAY_END_MARKER_NAME {
                         break;
                     }
                     let data_read = self.read_field_value(&field.info)?;
                     let json_value = self.to_json(&field.info.field_type, &data_read)?;
-
+    
                     let obj: serde_json::Map<String, Value> = vec![(field.name.clone(), json_value)].into_iter().collect();
                     result.push(Value::Object(obj));
                 }
@@ -184,9 +187,17 @@ impl Deserializer {
 
 #[allow(dead_code)]
 impl Deserializer {
+    fn read_exact(&mut self, buf: &mut [u8]) -> Result<(), BinaryCodecError> {
+        if self.bytes.remaining() < buf.len() {
+            return Err(BinaryCodecError::InsufficientBytes("read_exact".into()));
+        }
+        self.bytes.copy_to_slice(buf);
+        Ok(())
+    }
+
     fn deserialize_account_id(&mut self) -> Result<AccountId, BinaryCodecError> {
         let mut bytes = [0u8; 20];
-        self.cursor.read_exact(&mut bytes).map_err(|e| BinaryCodecError::InsufficientBytes(e.to_string()))?;
+        self.read_exact(&mut bytes)?;
         Ok(AccountId(bytes))
     }
 
@@ -195,50 +206,50 @@ impl Deserializer {
     }
 
     fn deserialize_blob(&mut self, len: usize) -> Result<Blob, BinaryCodecError> {
-        let mut bytes = vec![0u8; len]; 
-        self.cursor.read_exact(&mut bytes).map_err(|e| BinaryCodecError::InsufficientBytes(e.to_string()))?;
+        let mut bytes = vec![0u8; len];
+        self.read_exact(&mut bytes)?;
         Ok(Blob(bytes))
     }
 
     fn deserialize_hash128(&mut self) -> Result<Hash128, BinaryCodecError> {
         let mut bytes = [0u8; 16];
-        self.cursor.read_exact(&mut bytes).map_err(|e| BinaryCodecError::InsufficientBytes(e.to_string()))?;
+        self.read_exact(&mut bytes)?;
         Ok(Hash128(bytes))
     }
 
     fn deserialize_hash160(&mut self) -> Result<Hash160, BinaryCodecError> {
         let mut bytes = [0u8; 20];
-        self.cursor.read_exact(&mut bytes).map_err(|e| BinaryCodecError::InsufficientBytes(e.to_string()))?;
+        self.read_exact(&mut bytes)?;
         Ok(Hash160(bytes))
     }
 
     fn deserialize_hash256(&mut self) -> Result<Hash256, BinaryCodecError> {
         let mut bytes = [0u8; 32];
-        self.cursor.read_exact(&mut bytes).map_err(|e| BinaryCodecError::InsufficientBytes(e.to_string()))?;
+        self.read_exact(&mut bytes)?;
         Ok(Hash256(bytes))
     }
 
     fn deserialize_uint8(&mut self) -> Result<UInt8, BinaryCodecError> {
         let mut bytes = [0u8; 1];
-        self.cursor.read_exact(&mut bytes).map_err(|e| BinaryCodecError::InsufficientBytes(e.to_string()))?;
+        self.read_exact(&mut bytes)?;
         Ok(UInt8::from_be_bytes(bytes))
     }
 
     fn deserialize_uint16(&mut self) -> Result<UInt16, BinaryCodecError> {
         let mut bytes = [0u8; 2];
-        self.cursor.read_exact(&mut bytes).map_err(|e| BinaryCodecError::InsufficientBytes(e.to_string()))?;
+        self.read_exact(&mut bytes)?;
         Ok(UInt16::from_be_bytes(bytes))
     }
 
     fn deserialize_uint32(&mut self) -> Result<UInt32, BinaryCodecError> {
         let mut bytes = [0u8; 4];
-        self.cursor.read_exact(&mut bytes).map_err(|e| BinaryCodecError::InsufficientBytes(e.to_string()))?;
+        self.read_exact(&mut bytes)?;
         Ok(UInt32::from_be_bytes(bytes))
     }
 
     fn deserialize_uint64(&mut self) -> Result<Uint64, BinaryCodecError> {
         let mut bytes = [0u8; 8];
-        self.cursor.read_exact(&mut bytes).map_err(|e| BinaryCodecError::InsufficientBytes(e.to_string()))?;
+        self.read_exact(&mut bytes)?;
         Ok(Uint64::from_be_bytes(bytes))
     }
 
@@ -409,7 +420,6 @@ fn encode_variable_length(length: usize) -> Result<Vec<u8>, BinaryCodecError> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use serde_json::from_str;
     use crate::serializer::field_info::field_info_lookup;
 
     #[test]
@@ -423,6 +433,7 @@ mod tests {
         assert_eq!(encoded_account_id, hex_val);
     }
 
+    #[cfg(feature = "json")]
     #[test]
     fn test_decode_account_txn_id_obj() {
         let encoded_account_id_obj = "5916969036626990000000000000000000F236FD752B5E4C84810AB3D41A3C2580";
@@ -437,7 +448,7 @@ mod tests {
         let expected_val = r#"{
             "AccountTxnID": "16969036626990000000000000000000F236FD752B5E4C84810AB3D41A3C2580"
         }"#;
-        assert_eq!(from_str::<Value>(expected_val).unwrap(), json_val);
+        assert_eq!(serde_json::from_str::<Value>(expected_val).unwrap(), json_val);
     }
 
     #[test]
@@ -451,6 +462,7 @@ mod tests {
         assert_eq!(want_acc_id, account_id.to_address());
     }
 
+    #[cfg(feature = "json")]
     #[test]
     fn test_decode_account_id_obj() {
         let encoded_account_id_obj = "811424A53BB5CAAD40A961836FEF648E8424846EC75A";
@@ -465,7 +477,7 @@ mod tests {
         let expected_val = r#"{
             "Account": "rhLmGWkHr59h9ffYgPEAqZnqiQZMGb71yo"
         }"#;
-        assert_eq!(from_str::<Value>(expected_val).unwrap(), json_val);
+        assert_eq!(serde_json::from_str::<Value>(expected_val).unwrap(), json_val);
     }
 
     #[test]
@@ -479,6 +491,7 @@ mod tests {
         assert_eq!(encoded_tx_sig, hex_val);
     }
 
+    #[cfg(feature = "json")]
     #[test]
     fn test_decode_txn_signature_obj() {
         let encoded_tx_sig_obj = "74473045022100FB7583772B8F348F4789620C5571146B6517887AC231B38E29D7688D73F9D2510220615DC87698A2BA64DF2CA83BD9A214002F74C2D615CA20E328AC4AB5E4CDE8BC";
@@ -493,7 +506,7 @@ mod tests {
         let expected_val = r#"{
             "TxnSignature": "3045022100FB7583772B8F348F4789620C5571146B6517887AC231B38E29D7688D73F9D2510220615DC87698A2BA64DF2CA83BD9A214002F74C2D615CA20E328AC4AB5E4CDE8BC"
         }"#;
-        assert_eq!(from_str::<Value>(expected_val).unwrap(), json_val);
+        assert_eq!(serde_json::from_str::<Value>(expected_val).unwrap(), json_val);
     }
 
     #[test]
@@ -506,6 +519,7 @@ mod tests {
         assert_eq!(encoded_tx_memos_arr, hex_val);
     }
 
+    #[cfg(feature = "json")]
     #[test]
     fn test_decode_memos_txn_obj() {
         let encoded_tx_obj = "F9EA7C1F687474703A2F2F6578616D706C652E636F6D2F6D656D6F2F67656E657269637D0472656E74E1F1";
@@ -527,24 +541,11 @@ mod tests {
                 }
             ]
         }"#;
-        assert_eq!(from_str::<Value>(expected_val).unwrap(), json_val);
+        assert_eq!(serde_json::from_str::<Value>(expected_val).unwrap(), json_val);
         // assert!(false, "✅ testing failure; this is successful!");
     }
 
-    #[test]
-    fn test_custom_tx() {
-        let encoded_obj = "EA7D0472656E74E1";
-
-        let deserializer = &mut Deserializer::new(hex::decode(encoded_obj).unwrap(), field_info_lookup());
-        let json_val = deserializer.to_json(&TypeCode::Object, &hex::decode(encoded_obj).unwrap()).unwrap();
-        let expected_val = r#"{
-            "Memo": {
-                "MemoData": "72656E74"
-            }
-        }"#;
-        assert_eq!(from_str::<Value>(expected_val).unwrap(), json_val);
-    }
-
+    #[cfg(feature = "json")]
     #[test]
     fn test_decode_txn_obj() {
         let encoded_tx_obj = "5916969036626990000000000000000000F236FD752B5E4C84810AB3D41A3C2580732102A6934E87988466B98B51F2EB09E5BC4C09E46EB5F1FE08723DF8AD23D5BB9C6A74473045022100FB7583772B8F348F4789620C5571146B6517887AC231B38E29D7688D73F9D2510220615DC87698A2BA64DF2CA83BD9A214002F74C2D615CA20E328AC4AB5E4CDE8BC811424A53BB5CAAD40A961836FEF648E8424846EC75AF9EA7C1F687474703A2F2F6578616D706C652E636F6D2F6D656D6F2F67656E657269637D0472656E74E1F1";
@@ -570,6 +571,6 @@ mod tests {
                 }
             ]
         }"#;
-        assert_eq!(from_str::<Value>(expected_val).unwrap(), json_val);
+        assert_eq!(serde_json::from_str::<Value>(expected_val).unwrap(), json_val);
     }
 }
