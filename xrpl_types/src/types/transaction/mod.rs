@@ -1,5 +1,5 @@
-mod common;
-mod variants;
+pub mod common;
+pub mod variants;
 
 use crate::serialize::Serialize;
 pub use common::*;
