@@ -1,7 +1,7 @@
 use crate::alloc::{format, string::ToString};
 use crate::Error;
-use core::{fmt, fmt::{Debug, Display, Formatter}, str::FromStr};
 use ascii::{AsciiChar, AsciiStr, AsciiString};
+use core::{fmt, fmt::{Debug, Display, Formatter}, str::FromStr};
 
 /// Currency code <https://xrpl.org/currency-formats.html#currency-codes>
 #[derive(Debug, Eq, PartialEq, Clone, Copy)]
