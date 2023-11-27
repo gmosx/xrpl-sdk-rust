@@ -10,7 +10,7 @@ pub struct Memo {
 }
 
 /// A ledger transaction <https://xrpl.org/transaction-formats.html>
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct TransactionCommon {
     pub account: AccountId,
     pub fee: Option<DropsAmount>,
