@@ -2,7 +2,7 @@ use crate::alloc::{format, string::{String, ToString}, vec::Vec};
 use crate::Error;
 use core::{fmt, fmt::{Debug, Formatter}};
 
-#[derive(Clone, Copy, Eq, PartialEq, Hash)]
+#[derive(Clone, Copy, Default, Eq, PartialEq, Hash)]
 pub struct AccountId(pub [u8; 20]);
 
 impl AccountId {
