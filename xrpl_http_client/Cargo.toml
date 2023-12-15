@@ -22,5 +22,7 @@ xrpl_api = { path = "../xrpl_api", version = "0.15" }
 xrpl_binary_codec = { path = "../xrpl_binary_codec", version = "0.15" }
 
 [features]
-reqwest-rustls = ["reqwest/rustls-tls"]
+default = ["std"]
+std = ["reqwest/default-tls"]
 reqwest-default-tls = ["reqwest/default-tls"]
+reqwest-rustls = ["reqwest/rustls-tls"]
