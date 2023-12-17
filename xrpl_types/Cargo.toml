@@ -9,18 +9,16 @@ authors = ["Georgios Moschovitis <george.moschovitis@gmail.com>"]
 edition = "2021"
 
 [dependencies]
-serde = { version = "1", default-features = false, features = ["derive"] }
-serde_json = { version = "1", default-features = false }
-thiserror = "1.0.44"
-bs58 = { version = "0.5.0", features = ["check"] }
-ascii = "1.1.0"
-hex = { version = "0.4.3", default-features = false }
-enumflags2 = { version = "0.7.7" }
+serde = { version = "1", default-features = false, features = ["derive", "alloc"] }
+serde_json = { version = "1", default-features = false, features = ["alloc"] }
+bs58 = { version = "0.5.0", default-features = false, features = ["alloc", "check"] }
+ascii = { version = "1.1.0", default-features = false, features = ["alloc"] }
+hex = { version = "0.4.3", default-features = false, features = ["alloc"] }
+enumflags2 = { version = "0.7.7", default-features = false }
 
 [features]
 default = ["std"]
-std = ["serde_json/std", "hex/std"]
-wasm32 = ["serde_json/alloc", "hex/alloc"]
+std = ["serde_json/std", "hex/std", "ascii/std"]
 
 [dev-dependencies]
 assert_matches = "1.5.0"

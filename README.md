@@ -54,6 +54,13 @@ if let Some(msg) = client.messages.next().await {
 }
 ```
 
+## `no_std` support
+
+The following crates have `no_std` support:
+
+- [xrpl_types](xrpl_types/)
+- [xrpl_binary_codec](xrpl_binary_codec/)
+
 ## Links
 
 - [XRP Ledger SDK](https://github.com/gmosx/xrpl-sdk-rust)

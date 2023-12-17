@@ -16,6 +16,14 @@ More information about this crate can be found in the [crate documentation][docs
 
 This work is under active development and the API is expected to change.
 
+## `no_std` support
+
+This crate is `no_std` compatible when disabling the default `std` feature.
+
+```toml
+xrpl_binary_codec = { version = "0.15.0", default-features = false }
+```
+
 ## Contributing
 
 Pull requests, issues and comments are welcome! Make sure to add tests for new features and bug fixes.

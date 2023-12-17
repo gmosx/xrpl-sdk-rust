@@ -1,4 +1,6 @@
+use crate::alloc::{format, string::ToString};
 use crate::{AccountId, CurrencyCode, Error};
+use core::fmt::Debug;
 
 /// Amount of XRP or issued token. See <https://xrpl.org/currency-formats.html#specifying-currency-amounts>
 /// and <https://xrpl.org/serialization.html#amount-fields>

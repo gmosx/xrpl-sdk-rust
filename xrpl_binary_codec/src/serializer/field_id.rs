@@ -1,6 +1,6 @@
-use std::fmt;
-
+use crate::serializer::Vec;
 use super::field_info::FieldInfo;
+use core::fmt;
 
 /// Field data type codes <https://xrpl.org/serialization.html#type-list>
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Ord, PartialOrd)]
