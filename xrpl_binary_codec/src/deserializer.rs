@@ -5,15 +5,14 @@ use crate::serializer::{
     field_info::FieldInfo,
 };
 use xrpl_types::{
-    AccountId, Amount, Blob, Hash128, Hash160, Hash256,
-    UInt16, UInt32, UInt8, Uint64
+    AccountId, Amount, Blob, Hash128, Hash160, Hash256, UInt16, UInt32, UInt8, Uint64,
 };
 
 use bytes::{Buf, Bytes};
-#[cfg(feature = "std")]
-use std::collections::HashMap;
 #[cfg(not(feature = "std"))]
 use hashbrown::HashMap;
+#[cfg(feature = "std")]
+use std::collections::HashMap;
 
 #[cfg(feature = "json")]
 use serde_json::Value;
@@ -86,7 +85,9 @@ impl Deserializer {
             let b3 = self.read_u8()? as usize;
             Ok(12481 + (b1 - 241) * 65536 + b2 * 256 + b3)
         } else {
-            Err(BinaryCodecError::InvalidLength("Invalid variable length indicator".into()))
+            Err(BinaryCodecError::InvalidLength(
+                "Invalid variable length indicator".into(),
+            ))
         }
     }
 
@@ -97,13 +98,17 @@ impl Deserializer {
         if type_code == 0 {
             type_code = self.read_u8()? as u32;
             if type_code == 0 || type_code < 16 {
-                return Err(BinaryCodecError::OutOfRange("FieldOrdinal, type_code out of range".into()));
+                return Err(BinaryCodecError::OutOfRange(
+                    "FieldOrdinal, type_code out of range".into(),
+                ));
             }
         }
         if nth == 0 {
             nth = self.read_u8()? as u32;
             if nth == 0 || nth < 16 {
-                return Err(BinaryCodecError::OutOfRange("FieldOrdinal, type_code out of range".into()));
+                return Err(BinaryCodecError::OutOfRange(
+                    "FieldOrdinal, type_code out of range".into(),
+                ));
             }
         }
         Ok((type_code << 16) | nth)
@@ -127,9 +132,10 @@ impl Deserializer {
             TypeCode::Hash256 => self.deserialize_hash256()?.0.to_vec(),
             TypeCode::AccountId => self.deserialize_account_id()?.0.to_vec(),
             TypeCode::Blob => {
-                let hint = size_hint.ok_or(BinaryCodecError::FieldNotFound("missing hint".into()))?;
+                let hint =
+                    size_hint.ok_or(BinaryCodecError::FieldNotFound("missing hint".into()))?;
                 self.deserialize_blob(hint)?.0.to_vec()
-            },
+            }
             TypeCode::Object => self.deserialize_object()?,
             TypeCode::Array => self.deserialize_array()?,
             _ => vec![], // TODO: default other types to Blob for now
@@ -142,13 +148,18 @@ impl Deserializer {
     }
 
     #[cfg(feature = "json")]
-    pub fn to_json(&mut self, type_code: &TypeCode, data: &[u8]) -> Result<Value, BinaryCodecError> {
+    pub fn to_json(
+        &mut self,
+        type_code: &TypeCode,
+        data: &[u8],
+    ) -> Result<Value, BinaryCodecError> {
         match type_code {
             TypeCode::Hash256 => Ok(Value::String(hex::encode_upper(&data))),
             TypeCode::AccountId => {
-                let account_bytes: [u8; 20] = data.try_into().map_err(|_| BinaryCodecError::Overflow)?;
+                let account_bytes: [u8; 20] =
+                    data.try_into().map_err(|_| BinaryCodecError::Overflow)?;
                 Ok(Value::String(AccountId(account_bytes).to_address()))
-            },
+            }
             TypeCode::Blob => Ok(Value::String(hex::encode_upper(&data))),
             TypeCode::Object => {
                 let mut accumulator: HashMap<String, Value> = HashMap::new();
@@ -163,7 +174,7 @@ impl Deserializer {
                     accumulator.insert(field.name, json_value);
                 }
                 Ok(Value::Object(accumulator.into_iter().collect()))
-            },
+            }
             TypeCode::Array => {
                 let mut result = Vec::new();
                 self.bytes = Bytes::from(data.to_vec());
@@ -174,12 +185,13 @@ impl Deserializer {
                     }
                     let data_read = self.read_field_value(&field.info)?;
                     let json_value = self.to_json(&field.info.field_type, &data_read)?;
-    
-                    let obj: serde_json::Map<String, Value> = vec![(field.name.clone(), json_value)].into_iter().collect();
+
+                    let obj: serde_json::Map<String, Value> =
+                        vec![(field.name.clone(), json_value)].into_iter().collect();
                     result.push(Value::Object(obj));
                 }
                 Ok(Value::Array(result))
-            },
+            }
             _ => Ok(Value::String(hex::encode_upper(&data))), // TODO: default other types to Blob for now
         }
     }
@@ -294,7 +306,7 @@ impl Deserializer {
 }
 
 fn encode_variable_length(length: usize) -> Result<Vec<u8>, BinaryCodecError> {
-    let mut len_bytes = vec![0u8; 3];
+    let mut len_bytes = [0u8; 3];
     if length <= 192 {
         len_bytes[0] = length as u8;
         Ok(len_bytes[0..1].to_vec())
@@ -324,18 +336,25 @@ mod tests {
         // AccountTxnID encoded
         let encoded_account_id = "5916969036626990000000000000000000F236FD752B5E4C84810AB3D41A3C25";
 
-        let deserializer = &mut Deserializer::new(hex::decode(encoded_account_id).unwrap(), field_info_lookup());
+        let deserializer = &mut Deserializer::new(
+            hex::decode(encoded_account_id).unwrap(),
+            field_info_lookup(),
+        );
         let data = deserializer.deserialize_hash256().unwrap();
-        let hex_val = hex::encode_upper(&data.0);
+        let hex_val = hex::encode_upper(data.0);
         assert_eq!(encoded_account_id, hex_val);
     }
 
     #[cfg(feature = "json")]
     #[test]
     fn test_decode_account_txn_id_obj() {
-        let encoded_account_id_obj = "5916969036626990000000000000000000F236FD752B5E4C84810AB3D41A3C2580";
+        let encoded_account_id_obj =
+            "5916969036626990000000000000000000F236FD752B5E4C84810AB3D41A3C2580";
 
-        let deserializer = &mut Deserializer::new(hex::decode(encoded_account_id_obj).unwrap(), field_info_lookup());
+        let deserializer = &mut Deserializer::new(
+            hex::decode(encoded_account_id_obj).unwrap(),
+            field_info_lookup(),
+        );
         let data = deserializer.deserialize_object().unwrap();
         let hex_val = hex::encode_upper(&data);
         assert_eq!(encoded_account_id_obj, hex_val);
@@ -345,7 +364,10 @@ mod tests {
         let expected_val = r#"{
             "AccountTxnID": "16969036626990000000000000000000F236FD752B5E4C84810AB3D41A3C2580"
         }"#;
-        assert_eq!(serde_json::from_str::<Value>(expected_val).unwrap(), json_val);
+        assert_eq!(
+            serde_json::from_str::<Value>(expected_val).unwrap(),
+            json_val
+        );
     }
 
     #[test]
@@ -353,7 +375,10 @@ mod tests {
         // AccountID encoded
         let encoded_account_id = "811424A53BB5CAAD40A961836FEF648E8424846E";
 
-        let deserializer = &mut Deserializer::new(hex::decode(encoded_account_id).unwrap(), field_info_lookup());
+        let deserializer = &mut Deserializer::new(
+            hex::decode(encoded_account_id).unwrap(),
+            field_info_lookup(),
+        );
         let account_id = deserializer.deserialize_account_id().unwrap();
         let want_acc_id = "rUmWJKM2b87GsKeTzSw14NeuubPQc8meTL";
         assert_eq!(want_acc_id, account_id.to_address());
@@ -364,17 +389,26 @@ mod tests {
     fn test_decode_account_id_obj() {
         let encoded_account_id_obj = "811424A53BB5CAAD40A961836FEF648E8424846EC75A";
 
-        let deserializer = &mut Deserializer::new(hex::decode(encoded_account_id_obj).unwrap(), field_info_lookup());
+        let deserializer = &mut Deserializer::new(
+            hex::decode(encoded_account_id_obj).unwrap(),
+            field_info_lookup(),
+        );
         let data = deserializer.deserialize_object().unwrap();
         let hex_val = hex::encode_upper(&data);
         assert_eq!(encoded_account_id_obj, hex_val);
 
-        let deserializer = &mut Deserializer::new(hex::decode(encoded_account_id_obj).unwrap(), field_info_lookup());
+        let deserializer = &mut Deserializer::new(
+            hex::decode(encoded_account_id_obj).unwrap(),
+            field_info_lookup(),
+        );
         let json_val = deserializer.to_json(&TypeCode::Object, &data).unwrap();
         let expected_val = r#"{
             "Account": "rhLmGWkHr59h9ffYgPEAqZnqiQZMGb71yo"
         }"#;
-        assert_eq!(serde_json::from_str::<Value>(expected_val).unwrap(), json_val);
+        assert_eq!(
+            serde_json::from_str::<Value>(expected_val).unwrap(),
+            json_val
+        );
     }
 
     #[test]
@@ -382,9 +416,12 @@ mod tests {
         // TxnSignature encoded
         let encoded_tx_sig = "74473045022100FB7583772B8F348F4789620C5571146B6517887AC231B38E29D7688D73F9D2510220615DC87698A2BA64DF2CA83BD9A214002F74C2D615CA20E328AC4AB5E4CD";
 
-        let deserializer = &mut Deserializer::new(hex::decode(encoded_tx_sig).unwrap(), field_info_lookup());
-        let blob = deserializer.deserialize_blob(encoded_tx_sig.len() / 2).unwrap();
-        let hex_val = hex::encode_upper(&blob.0);
+        let deserializer =
+            &mut Deserializer::new(hex::decode(encoded_tx_sig).unwrap(), field_info_lookup());
+        let blob = deserializer
+            .deserialize_blob(encoded_tx_sig.len() / 2)
+            .unwrap();
+        let hex_val = hex::encode_upper(blob.0);
         assert_eq!(encoded_tx_sig, hex_val);
     }
 
@@ -393,26 +430,38 @@ mod tests {
     fn test_decode_txn_signature_obj() {
         let encoded_tx_sig_obj = "74473045022100FB7583772B8F348F4789620C5571146B6517887AC231B38E29D7688D73F9D2510220615DC87698A2BA64DF2CA83BD9A214002F74C2D615CA20E328AC4AB5E4CDE8BC";
 
-        let deserializer = &mut Deserializer::new(hex::decode(encoded_tx_sig_obj).unwrap(), field_info_lookup());
+        let deserializer = &mut Deserializer::new(
+            hex::decode(encoded_tx_sig_obj).unwrap(),
+            field_info_lookup(),
+        );
         let data = deserializer.deserialize_object().unwrap();
         let str_val = hex::encode_upper(&data);
         assert_eq!(encoded_tx_sig_obj, str_val);
 
-        let deserializer = &mut Deserializer::new(hex::decode(encoded_tx_sig_obj).unwrap(), field_info_lookup());
+        let deserializer = &mut Deserializer::new(
+            hex::decode(encoded_tx_sig_obj).unwrap(),
+            field_info_lookup(),
+        );
         let json_val = deserializer.to_json(&TypeCode::Object, &data).unwrap();
         let expected_val = r#"{
             "TxnSignature": "3045022100FB7583772B8F348F4789620C5571146B6517887AC231B38E29D7688D73F9D2510220615DC87698A2BA64DF2CA83BD9A214002F74C2D615CA20E328AC4AB5E4CDE8BC"
         }"#;
-        assert_eq!(serde_json::from_str::<Value>(expected_val).unwrap(), json_val);
+        assert_eq!(
+            serde_json::from_str::<Value>(expected_val).unwrap(),
+            json_val
+        );
     }
 
     #[test]
     fn test_decode_memos_array() {
         let encoded_tx_memos_arr = "7C1F687474703A2F2F6578616D706C652E636F6D2F6D656D6F2F67656E657269637D0472656E74F1E1F1F1E1F1";
 
-        let deserializer = &mut Deserializer::new(hex::decode(encoded_tx_memos_arr).unwrap(), field_info_lookup());
+        let deserializer = &mut Deserializer::new(
+            hex::decode(encoded_tx_memos_arr).unwrap(),
+            field_info_lookup(),
+        );
         let data = deserializer.deserialize_object().unwrap();
-        let hex_val = hex::encode_upper(&data);
+        let hex_val = hex::encode_upper(data);
         assert_eq!(encoded_tx_memos_arr, hex_val);
     }
 
@@ -421,12 +470,14 @@ mod tests {
     fn test_decode_memos_txn_obj() {
         let encoded_tx_obj = "F9EA7C1F687474703A2F2F6578616D706C652E636F6D2F6D656D6F2F67656E657269637D0472656E74E1F1";
 
-        let deserializer = &mut Deserializer::new(hex::decode(encoded_tx_obj).unwrap(), field_info_lookup());
+        let deserializer =
+            &mut Deserializer::new(hex::decode(encoded_tx_obj).unwrap(), field_info_lookup());
         let data = deserializer.deserialize_object().unwrap();
         let hex_val = hex::encode_upper(&data);
         assert_eq!(encoded_tx_obj, hex_val);
 
-        let deserializer = &mut Deserializer::new(hex::decode(encoded_tx_obj).unwrap(), field_info_lookup());
+        let deserializer =
+            &mut Deserializer::new(hex::decode(encoded_tx_obj).unwrap(), field_info_lookup());
         let json_val = deserializer.to_json(&TypeCode::Object, &data).unwrap();
         let expected_val = r#"{
             "Memos": [
@@ -438,7 +489,10 @@ mod tests {
                 }
             ]
         }"#;
-        assert_eq!(serde_json::from_str::<Value>(expected_val).unwrap(), json_val);
+        assert_eq!(
+            serde_json::from_str::<Value>(expected_val).unwrap(),
+            json_val
+        );
         // assert!(false, "✅ testing failure; this is successful!");
     }
 
@@ -446,13 +500,15 @@ mod tests {
     #[test]
     fn test_decode_txn_obj() {
         let encoded_tx_obj = "5916969036626990000000000000000000F236FD752B5E4C84810AB3D41A3C2580732102A6934E87988466B98B51F2EB09E5BC4C09E46EB5F1FE08723DF8AD23D5BB9C6A74473045022100FB7583772B8F348F4789620C5571146B6517887AC231B38E29D7688D73F9D2510220615DC87698A2BA64DF2CA83BD9A214002F74C2D615CA20E328AC4AB5E4CDE8BC811424A53BB5CAAD40A961836FEF648E8424846EC75AF9EA7C1F687474703A2F2F6578616D706C652E636F6D2F6D656D6F2F67656E657269637D0472656E74E1F1";
-        
-        let deserializer = &mut Deserializer::new(hex::decode(encoded_tx_obj).unwrap(), field_info_lookup());
+
+        let deserializer =
+            &mut Deserializer::new(hex::decode(encoded_tx_obj).unwrap(), field_info_lookup());
         let data = deserializer.deserialize_object().unwrap();
         let str_val = hex::encode_upper(&data);
         assert_eq!(encoded_tx_obj, str_val);
 
-        let deserializer = &mut Deserializer::new(hex::decode(encoded_tx_obj).unwrap(), field_info_lookup());
+        let deserializer =
+            &mut Deserializer::new(hex::decode(encoded_tx_obj).unwrap(), field_info_lookup());
         let json_val = deserializer.to_json(&TypeCode::Object, &data).unwrap();
         let expected_val = r#"{
             "AccountTxnID": "16969036626990000000000000000000F236FD752B5E4C84810AB3D41A3C2580",
@@ -468,6 +524,9 @@ mod tests {
                 }
             ]
         }"#;
-        assert_eq!(serde_json::from_str::<Value>(expected_val).unwrap(), json_val);
+        assert_eq!(
+            serde_json::from_str::<Value>(expected_val).unwrap(),
+            json_val
+        );
     }
 }

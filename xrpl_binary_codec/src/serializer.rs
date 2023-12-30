@@ -2,9 +2,9 @@ use crate::alloc::{format, string::ToString, vec::Vec};
 use crate::error::BinaryCodecError;
 use crate::serializer::field_id::{FieldCode, FieldId, TypeCode};
 use xrpl_types::{
+    serialize::{Serialize, SerializeArray},
     AccountId, Amount, Blob, CurrencyCode, DropsAmount, Hash128, Hash160, Hash256, IssuedValue,
     UInt16, UInt32, UInt8, Uint64,
-    serialize::{Serialize, SerializeArray},
 };
 
 pub mod field_id;
@@ -303,9 +303,8 @@ impl Serializer {
     /// Push field id <https://xrpl.org/serialization.html#field-ids>
     fn push_field_id(&mut self, field_id: FieldId) -> Result<(), BinaryCodecError> {
         // rippled implementation: https://github.com/seelabs/rippled/blob/cecc0ad75849a1d50cc573188ad301ca65519a5b/src/ripple/protocol/impl/Serializer.cpp#L117-L148
-
         let header: Vec<u8> = field_id.into();
-        Ok(self.push_slice(&header)?)
+        self.push_slice(&header)
     }
 
     /// Push length prefix according to <https://xrpl.org/serialization.html#length-prefixing>

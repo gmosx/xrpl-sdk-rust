@@ -172,8 +172,6 @@ impl Client {
     ///
     /// <https://xrpl.org/reliable-transaction-submission.html>
     pub async fn prepare_transaction(&self, tx: &mut TransactionCommon) -> Result<()> {
-        let tx = tx;
-
         if tx.sequence.is_none() {
             let resp = self
                 .call(AccountInfoRequest::new(&tx.account.to_address()))
