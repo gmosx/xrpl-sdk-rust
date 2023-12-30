@@ -39,6 +39,14 @@ impl Amount {
             Currency::Xrp => Self::xrp(value),
         }
     }
+
+    // #todo temp hack
+    pub fn size(&self) -> f64 {
+        match self {
+            Amount::Issued(IssuedAmount { value, .. }) => value.parse().unwrap_or_default(),
+            Amount::Drops(value) => value.parse().unwrap_or_default(),
+        }
+    }
 }
 
 /// Amount of issued token. See <https://xrpl.org/currency-formats.html#token-amounts>
