@@ -1,4 +1,6 @@
-use crate::serialize::Serializer;
+mod serializer;
+
+pub use serializer::*;
 
 /// Serializes XRPL objects to a [`Serializer`]
 pub trait Serialize {

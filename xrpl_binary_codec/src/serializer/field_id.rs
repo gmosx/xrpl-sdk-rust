@@ -1,5 +1,5 @@
-use crate::serializer::Vec;
 use super::field_info::FieldInfo;
+use crate::serializer::Vec;
 use core::fmt;
 
 /// Field data type codes <https://xrpl.org/serialization.html#type-list>
@@ -66,6 +66,8 @@ impl From<FieldInfo> for FieldId {
     }
 }
 
+// #todo temporarily disabled the following clippy warning, implement From instead of Into.
+#[allow(clippy::from_over_into)]
 // rippled implementation: https://github.com/seelabs/rippled/blob/cecc0ad75849a1d50cc573188ad301ca65519a5b/src/ripple/protocol/impl/Serializer.cpp#L117-L148
 impl Into<Vec<u8>> for FieldId {
     fn into(self) -> Vec<u8> {
