@@ -123,6 +123,7 @@ impl Client {
             .post(&self.base_url)
             .body(body)
             .header(reqwest::header::USER_AGENT, &self.user_agent)
+            .header(reqwest::header::CONTENT_TYPE, "application/json")
             .send()
             .await?;
 
