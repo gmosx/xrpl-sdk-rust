@@ -14,7 +14,7 @@ pub trait Transaction: Serialize {
 #[repr(u16)]
 #[derive(Clone, Copy, PartialEq, Eq, Debug, serde::Serialize, serde::Deserialize)]
 pub enum TransactionType {
-    // Discriminant values can be found at https://github.com/XRPLF/xrpl.js/blob/main/packages/ripple-binary-codec/src/enums/definitions.json
+   // Discriminant values can be found at https://github.com/XRPLF/xrpl.js/blob/main/packages/ripple-binary-codec/src/enums/definitions.json        
     Payment = 0,
     EscrowCreate = 1,
     EscrowFinish = 2,
@@ -43,6 +43,23 @@ pub enum TransactionType {
     NFTokenCreateOffer = 27,
     NFTokenCancelOffer = 28,
     NFTokenAcceptOffer = 29,
+    Clawback = 30,
+    AMMCreate = 35,
+    AMMDeposit = 36,
+    AMMWithdraw = 37,
+    AMMVote = 38,
+    AMMBid = 39,
+    AMMDelete = 40,
+    XChainCreateClaimID = 41,
+    XChainCommit = 42,
+    XChainClaim = 43,
+    XChainAccountCreateCommit = 44,
+    XChainAddClaimAttestation = 45,
+    XChainAddAccountCreateAttestation = 46,
+    XChainModifyBridge = 47,
+    XChainCreateBridge = 48,
+    DIDSet = 49,
+    DIDDelete = 50,
     EnableAmendment = 100,
     SetFee = 101,
     UNLModify = 102,
