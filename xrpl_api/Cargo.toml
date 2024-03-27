@@ -12,7 +12,7 @@ keywords = ["xrpl", "ledger", "api", "protocol"]
 serde = { workspace = true, features = ["derive"] }
 serde_json.workspace = true
 enumflags2 = { workspace = true, features = ["serde"] }
-xrpl_types = { path = "../xrpl_types" }
+xrpl_types = { path = "../xrpl_types", version = "0.16.2" }
 
 [dev-dependencies]
 assert_matches.workspace = true
