@@ -20,10 +20,10 @@ hex.workspace = true
 libsecp256k1.workspace = true
 prettytable-rs = "0.10"
 rust_decimal = "1.32.0"
-xrpl_binary_codec = { path = "../xrpl_binary_codec", version = "0.16.2" }
-xrpl_types = { path = "../xrpl_types", version = "0.16.2" }
-xrpl_api = { path = "../xrpl_api", version = "0.16.2" }
-xrpl_http_client = { path = "../xrpl_http_client", version = "0.16.2" }
+xrpl_binary_codec = { path = "../xrpl_binary_codec", version = "0.16.3" }
+xrpl_types = { path = "../xrpl_types", version = "0.16.3" }
+xrpl_api = { path = "../xrpl_api", version = "0.16.3" }
+xrpl_http_client = { path = "../xrpl_http_client", version = "0.16.3" }
 
 [dev-dependencies]
 assert_matches.workspace = true

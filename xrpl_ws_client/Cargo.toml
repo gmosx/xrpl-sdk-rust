@@ -20,6 +20,6 @@ tokio-tungstenite = { version = "0.20", features = ["rustls-tls-webpki-roots"] }
 async-stream = "0.3"
 tracing.workspace = true
 uuid = { version = "1", features = ["v4", "fast-rng"] }
-xrpl_types = { path = "../xrpl_types", version = "0.16.2" }
-xrpl_api = { path = "../xrpl_api", version = "0.16.2" }
-xrpl_binary_codec = { path = "../xrpl_binary_codec", version = "0.16.2" }
+xrpl_types = { path = "../xrpl_types", version = "0.16.3" }
+xrpl_api = { path = "../xrpl_api", version = "0.16.3" }
+xrpl_binary_codec = { path = "../xrpl_binary_codec", version = "0.16.3" }

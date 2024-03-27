@@ -4,11 +4,12 @@ description = "Binary serialization for XRPL Protocol objects"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
+license = "Apache-2.0"
 repository = "https://github.com/gmosx/xrpl-sdk-rust/tree/main/xrpl_binary_codec"
 keywords = ["xrpl", "ledger", "api", "protocol"]
 
 [dependencies]
-xrpl_types = { path = "../xrpl_types", version = "0.16.2", default-features = false }
+xrpl_types = { path = "../xrpl_types", version = "0.16.3", default-features = false }
 serde_json = { workspace = true, default-features = false, features = [
     "alloc",
 ] }
