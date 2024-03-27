@@ -1,11 +1,11 @@
 [package]
 name = "xrpl_address_codec"
 description = "Binary serialization for XRPL Protocol addresses"
-version = "0.16.0"
-edition = "2021"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
 license = "Apache-2.0"
 repository = "https://github.com/gmosx/xrpl-sdk-rust/tree/main/xrpl_address_codec"
 keywords = ["xrpl", "ledger", "api", "protocol"]
-authors = ["Georgios Moschovitis <george.moschovitis@gmail.com>"]
 
 [dependencies]

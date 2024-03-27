@@ -154,13 +154,13 @@ impl Deserializer {
         data: &[u8],
     ) -> Result<Value, BinaryCodecError> {
         match type_code {
-            TypeCode::Hash256 => Ok(Value::String(hex::encode_upper(&data))),
+            TypeCode::Hash256 => Ok(Value::String(hex::encode_upper(data))),
             TypeCode::AccountId => {
                 let account_bytes: [u8; 20] =
                     data.try_into().map_err(|_| BinaryCodecError::Overflow)?;
                 Ok(Value::String(AccountId(account_bytes).to_address()))
             }
-            TypeCode::Blob => Ok(Value::String(hex::encode_upper(&data))),
+            TypeCode::Blob => Ok(Value::String(hex::encode_upper(data))),
             TypeCode::Object => {
                 let mut accumulator: HashMap<String, Value> = HashMap::new();
                 self.bytes = Bytes::from(data.to_vec());
@@ -192,7 +192,7 @@ impl Deserializer {
                 }
                 Ok(Value::Array(result))
             }
-            _ => Ok(Value::String(hex::encode_upper(&data))), // TODO: default other types to Blob for now
+            _ => Ok(Value::String(hex::encode_upper(data))), // TODO: default other types to Blob for now
         }
     }
 }
