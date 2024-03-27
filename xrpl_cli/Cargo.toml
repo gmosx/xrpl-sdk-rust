@@ -1,23 +1,23 @@
 [package]
 name = "xrpl_cli"
 description = "A CLI for the XRP Ledger"
-version = "0.16.0"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
 license = "Apache-2.0"
 repository = "https://github.com/gmosx/xrpl-sdk-rust/tree/main/xrpl_http_client"
 keywords = ["xrpl", "ledger", "cli"]
-authors = ["Georgios Moschovitis <george.moschovitis@gmail.com>"]
-edition = "2021"
 
 [dependencies]
 anyhow = "1"
 clap = { version = "4", features = ["derive"] }
-tokio = { version = "1", features = ["full"] }
-serde = { version = "1", features = ["derive"] }
-serde_json = "1"
-tracing = "0.1"
+tokio = { workspace = true, features = ["full"] }
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+tracing.workspace = true
 tracing-subscriber = "0.3"
-hex = "0.4"
-libsecp256k1 = "0.7.1"
+hex.workspace = true
+libsecp256k1.workspace = true
 prettytable-rs = "0.10"
 rust_decimal = "1.32.0"
 xrpl_binary_codec = { path = "../xrpl_binary_codec" }
@@ -26,7 +26,7 @@ xrpl_api = { path = "../xrpl_api" }
 xrpl_http_client = { path = "../xrpl_http_client" }
 
 [dev-dependencies]
-assert_matches = "1.5.0"
+assert_matches.workspace = true
 
 [[bin]]
 name = "xrpl"

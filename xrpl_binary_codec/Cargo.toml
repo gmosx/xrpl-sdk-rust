@@ -1,19 +1,18 @@
 [package]
 name = "xrpl_binary_codec"
 description = "Binary serialization for XRPL Protocol objects"
-version = "0.16.0"
-license = "Apache-2.0"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
 repository = "https://github.com/gmosx/xrpl-sdk-rust/tree/main/xrpl_binary_codec"
 keywords = ["xrpl", "ledger", "api", "protocol"]
-authors = ["Georgios Moschovitis <george.moschovitis@gmail.com>"]
-edition = "2021"
 
 [dependencies]
 xrpl_types = { path = "../xrpl_types", default-features = false }
-serde_json = { version = "1", default-features = false, features = ["alloc"] }
-hex = { version = "0.4", default-features = false, features = ["alloc"] }
-sha2 = { version = "0.10.7", default-features = false }
-libsecp256k1 = { version = "0.7.1", default-features = false, features = [
+serde_json = { workspace = true, default-features = false, features = ["alloc"] }
+hex = { workspace = true, default-features = false, features = ["alloc"] }
+sha2 = { workspace = true, default-features = false }
+libsecp256k1 = { workspace = true, default-features = false, features = [
     "static-context",
     "hmac",
 ] }
@@ -32,10 +31,10 @@ std = ["hex/std", "serde_json/std"]
 json = []
 
 [dev-dependencies]
-ascii = "1.1.0"
-assert_matches = "1.5.0"
-enumflags2 = { version = "0.7.7" }
-serde = { version = "1", default-features = false, features = [
+ascii.workspace = true
+assert_matches.workspace = true
+enumflags2.workspace = true
+serde = { workspace = true, default-features = false, features = [
     "derive",
     "alloc",
 ] }
