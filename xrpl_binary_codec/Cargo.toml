@@ -1,7 +1,7 @@
 [package]
 name = "xrpl_binary_codec"
 description = "Binary serialization for XRPL Protocol objects"
-version = "0.15.0"
+version = "0.16.0"
 license = "Apache-2.0"
 repository = "https://github.com/gmosx/xrpl-sdk-rust/tree/main/xrpl_binary_codec"
 keywords = ["xrpl", "ledger", "api", "protocol"]
@@ -13,12 +13,17 @@ xrpl_types = { path = "../xrpl_types", version = "0.15", default-features = fals
 serde_json = { version = "1", default-features = false, features = ["alloc"] }
 hex = { version = "0.4", default-features = false, features = ["alloc"] }
 sha2 = { version = "0.10.7", default-features = false }
-libsecp256k1 = { version = "0.7.1", default-features = false, features = ["static-context", "hmac"] }
+libsecp256k1 = { version = "0.7.1", default-features = false, features = [
+    "static-context",
+    "hmac",
+] }
 bytes = { version = "1.5.0", default-features = false }
 
 # The following dependencies are only used when compiling for `no_std`.
 [target.'cfg(not(target_feature = "std"))'.dependencies]
-hashbrown = { version = "0.14.2", default-features = false, features = ["ahash"] }
+hashbrown = { version = "0.14.2", default-features = false, features = [
+    "ahash",
+] }
 spin = { version = "0.9.8", default-features = false, features = ["once"] }
 
 [features]
@@ -30,4 +35,7 @@ json = []
 ascii = "1.1.0"
 assert_matches = "1.5.0"
 enumflags2 = { version = "0.7.7" }
-serde = { version = "1", default-features = false, features = ["derive", "alloc"] }
+serde = { version = "1", default-features = false, features = [
+    "derive",
+    "alloc",
+] }

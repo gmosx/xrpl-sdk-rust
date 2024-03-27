@@ -21,7 +21,7 @@ This work is under active development and the API is expected to change.
 This crate is `no_std` compatible when disabling the default `std` feature.
 
 ```toml
-xrpl_binary_codec = { version = "0.15.0", default-features = false }
+xrpl_binary_codec = { version = "0.16.0", default-features = false }
 ```
 
 ## Contributing
