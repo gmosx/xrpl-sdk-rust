@@ -1,24 +1,43 @@
 [package]
 name = "xrpl_binary_codec"
 description = "Binary serialization for XRPL Protocol objects"
-version = "0.15.0"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
 license = "Apache-2.0"
 repository = "https://github.com/gmosx/xrpl-sdk-rust/tree/main/xrpl_binary_codec"
 keywords = ["xrpl", "ledger", "api", "protocol"]
-authors = ["Georgios Moschovitis <george.moschovitis@gmail.com>"]
-edition = "2021"
 
 [dependencies]
-serde = { version = "1", features = ["derive"] }
-serde_json = "1"
-hex = "0.4"
-bs58 = { version = "0.5.0", features = ["check"] }
-sha2 = "0.10.7"
-libsecp256k1 = "0.7.1"
-xrpl_types = { path = "../xrpl_types", version = "0.15" }
-thiserror = "1.0.44"
-ascii = "1.1.0"
-enumflags2 = { version = "0.7.7" }
+xrpl_types = { path = "../xrpl_types", version = "0.16.3", default-features = false }
+serde_json = { workspace = true, default-features = false, features = [
+    "alloc",
+] }
+hex = { workspace = true, default-features = false, features = ["alloc"] }
+sha2 = { workspace = true, default-features = false }
+libsecp256k1 = { workspace = true, default-features = false, features = [
+    "static-context",
+    "hmac",
+] }
+bytes = { version = "1.5.0", default-features = false }
+
+# The following dependencies are only used when compiling for `no_std`.
+[target.'cfg(not(target_feature = "std"))'.dependencies]
+hashbrown = { version = "0.14.2", default-features = false, features = [
+    "ahash",
+] }
+spin = { version = "0.9.8", default-features = false, features = ["once"] }
+
+[features]
+default = ["std"]
+std = ["hex/std", "serde_json/std"]
+json = []
 
 [dev-dependencies]
-assert_matches = "1.5.0"
+ascii.workspace = true
+assert_matches.workspace = true
+enumflags2.workspace = true
+serde = { workspace = true, default-features = false, features = [
+    "derive",
+    "alloc",
+] }

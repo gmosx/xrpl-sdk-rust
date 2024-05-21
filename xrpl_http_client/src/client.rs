@@ -123,6 +123,7 @@ impl Client {
             .post(&self.base_url)
             .body(body)
             .header(reqwest::header::USER_AGENT, &self.user_agent)
+            .header(reqwest::header::CONTENT_TYPE, "application/json")
             .send()
             .await?;
 
@@ -172,8 +173,6 @@ impl Client {
     ///
     /// <https://xrpl.org/reliable-transaction-submission.html>
     pub async fn prepare_transaction(&self, tx: &mut TransactionCommon) -> Result<()> {
-        let tx = tx;
-
         if tx.sequence.is_none() {
             let resp = self
                 .call(AccountInfoRequest::new(&tx.account.to_address()))

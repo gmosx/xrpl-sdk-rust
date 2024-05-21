@@ -1,3 +1,4 @@
+use crate::alloc::vec::Vec;
 use crate::serialize::{Serialize, SerializeArray, Serializer};
 use crate::{AccountId, Amount, Blob, DropsAmount, Hash256, UInt32};
 
@@ -9,7 +10,7 @@ pub struct Memo {
 }
 
 /// A ledger transaction <https://xrpl.org/transaction-formats.html>
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct TransactionCommon {
     pub account: AccountId,
     pub fee: Option<DropsAmount>,

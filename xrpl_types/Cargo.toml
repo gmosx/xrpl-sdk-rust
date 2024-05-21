@@ -1,22 +1,30 @@
 [package]
 name = "xrpl_types"
 description = "Core types and related functions for the XRP Ledger"
-version = "0.15.0"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
 license = "Apache-2.0"
 repository = "https://github.com/gmosx/xrpl-sdk-rust/tree/main/xrpl_types"
 keywords = ["xrpl", "ledger", "api"]
-authors = ["Georgios Moschovitis <george.moschovitis@gmail.com>"]
-edition = "2021"
 
 [dependencies]
-serde = { version = "1", features = ["derive"] }
-serde_json = "1"
-thiserror = "1.0.44"
-bs58 = { version = "0.5.0", features = ["check"] }
-ascii = "1.1.0"
-hex = "0.4.3"
-enumflags2 = { version = "0.7.7" }
+serde = { workspace = true, default-features = false, features = [
+    "derive",
+    "alloc",
+] }
+serde_json = { workspace = true, default-features = false, features = ["alloc"] }
+bs58 = { version = "0.5.0", default-features = false, features = [
+    "alloc",
+    "check",
+] }
+ascii = { workspace = true, default-features = false, features = ["alloc"] }
+hex = { workspace = true, default-features = false, features = ["alloc"] }
+enumflags2 = { workspace = true, default-features = false }
+
+[features]
+default = ["std"]
+std = ["serde_json/std", "hex/std", "ascii/std"]
 
 [dev-dependencies]
-assert_matches = "1.5.0"
-hex = "0.4.3"
+assert_matches.workspace = true

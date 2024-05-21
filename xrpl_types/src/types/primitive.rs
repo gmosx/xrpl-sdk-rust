@@ -1,7 +1,8 @@
+use crate::alloc::{format, string::{String, ToString}, vec::Vec};
 use crate::Error;
-use std::fmt::{Debug, Formatter};
+use core::{fmt, fmt::{Debug, Formatter}};
 
-#[derive(Clone, Copy, Eq, PartialEq, Hash)]
+#[derive(Clone, Copy, Default, Eq, PartialEq, Hash)]
 pub struct AccountId(pub [u8; 20]);
 
 impl AccountId {
@@ -114,7 +115,7 @@ impl Blob {
 }
 
 impl Debug for Hash128 {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         if f.alternate() {
             write!(f, "0x")?;
         }
@@ -126,7 +127,7 @@ impl Debug for Hash128 {
 }
 
 impl Debug for Hash160 {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         if f.alternate() {
             write!(f, "0x")?;
         }
@@ -138,7 +139,7 @@ impl Debug for Hash160 {
 }
 
 impl Debug for Hash256 {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         if f.alternate() {
             write!(f, "0x")?;
         }
@@ -150,7 +151,7 @@ impl Debug for Hash256 {
 }
 
 impl Debug for Blob {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         if f.alternate() {
             write!(f, "0x")?;
         }
@@ -162,7 +163,7 @@ impl Debug for Blob {
 }
 
 impl Debug for AccountId {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         if f.alternate() {
             write!(f, "0x")?;
         }
@@ -176,6 +177,7 @@ impl Debug for AccountId {
 #[cfg(test)]
 mod test {
     use super::*;
+    use alloc::vec;
     use assert_matches::assert_matches;
 
     #[test]

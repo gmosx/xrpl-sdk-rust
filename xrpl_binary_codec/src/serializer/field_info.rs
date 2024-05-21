@@ -1,20 +1,43 @@
+use crate::alloc::string::{String, ToString};
 use crate::serializer::field_id::{FieldCode, TypeCode};
-use std::collections::HashMap;
-use std::sync::OnceLock;
 
-#[derive(Debug)]
+#[cfg(feature = "std")]
+use std::collections::HashMap;
+#[cfg(not(feature = "std"))]
+use hashbrown::HashMap;
+
+#[derive(Debug, Clone)]
 pub struct FieldInfo {
     pub field_type: TypeCode,
     pub field_code: FieldCode,
+    pub is_vl_encoded: bool,
+}
+
+impl FieldInfo {
+    pub fn ordinal(&self) -> u32 {
+        ((self.field_type as u32) << 16) | (self.field_code.0 as u32)
+    }
+}
+
+#[cfg(feature = "std")]
+static FIELD_INFO: std::sync::OnceLock<HashMap<String, FieldInfo>> = std::sync::OnceLock::new();
+
+#[cfg(feature = "std")]
+pub fn field_info_lookup() -> &'static HashMap<String, FieldInfo> {
+    FIELD_INFO.get_or_init(create_field_info_map)
+}
+
+#[cfg(not(feature = "std"))]
+static FIELD_INFO: spin::Once<HashMap<String, FieldInfo>> = spin::Once::new();
+
+#[cfg(not(feature = "std"))]
+pub fn field_info_lookup() -> &'static HashMap<String, FieldInfo> {
+    FIELD_INFO.call_once(|| create_field_info_map())
 }
 
 pub fn field_info(field_name: &str) -> Option<&'static FieldInfo> {
-    FIELD_INFO
-        .get_or_init(create_field_info_map)
-        .get(field_name)
+    field_info_lookup().get(field_name)
 }
-
-static FIELD_INFO: OnceLock<HashMap<String, FieldInfo>> = OnceLock::new();
 
 macro_rules! insert_field_info {
     ($map:ident, $field_name:literal, $field_code:literal, $field_type:ident) => {
@@ -24,6 +47,10 @@ macro_rules! insert_field_info {
                 FieldInfo {
                     field_type: TypeCode::$field_type,
                     field_code: FieldCode($field_code),
+                    is_vl_encoded: match TypeCode::$field_type {
+                        TypeCode::AccountId | TypeCode::Blob => true,
+                        _ => false,
+                    },
                 },
             )
             .is_some()
@@ -217,6 +244,7 @@ fn create_field_info_map() -> HashMap<String, FieldInfo> {
     insert_field_info!(map, "HookDefinition", 22, Object);
     insert_field_info!(map, "HookParameter", 23, Object);
     insert_field_info!(map, "HookGrant", 24, Object);
+    insert_field_info!(map, "ObjectEndMarker", 1, Object);
     insert_field_info!(map, "Signers", 3, Array);
     insert_field_info!(map, "SignerEntries", 4, Array);
     insert_field_info!(map, "Template", 5, Array);
@@ -231,5 +259,6 @@ fn create_field_info_map() -> HashMap<String, FieldInfo> {
     insert_field_info!(map, "HookExecutions", 18, Array);
     insert_field_info!(map, "HookParameters", 19, Array);
     insert_field_info!(map, "HookGrants", 20, Array);
+    insert_field_info!(map, "ArrayEndMarker", 1, Array);
     map
 }

@@ -24,6 +24,7 @@ pub const DEFAULT_WS_URL: &str = XRPL_CLUSTER_MAINNET_WS_URL;
 
 // #TODO extract Connection
 
+#[allow(clippy::large_enum_variant)]
 #[derive(Deserialize, Debug)]
 pub enum TypedMessage {
     AccountInfo(AccountInfoResponse),
