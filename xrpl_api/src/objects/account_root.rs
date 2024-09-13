@@ -63,6 +63,7 @@ pub struct AccountRoot {
 #[repr(u32)]
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum AccountRootFlags {
+    AllowTrustLineClawback = 0x80000000,
     DefaultRipple = 0x00800000,
     DepositAuth = 0x01000000,
     DisableMaster = 0x00100000,

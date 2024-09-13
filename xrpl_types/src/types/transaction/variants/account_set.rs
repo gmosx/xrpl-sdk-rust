@@ -56,6 +56,7 @@ impl Transaction for AccountSetTransaction {
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum AccountSetFlag {
     AccountTxnID = 5,
+    AllowTrustLineClawback = 16,
     AuthorizedNFTokenMinter = 10,
     DefaultRipple = 8,
     DepositAuth = 9,
