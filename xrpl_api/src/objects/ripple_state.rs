@@ -68,6 +68,7 @@ pub enum RippleStateFlags {
     HighNoRipple = 0x00200000,
     LowFreeze = 0x00400000,
     HighFreeze = 0x00800000,
+    AMMNode = 0x01000000,
 }
 
 #[cfg(test)]

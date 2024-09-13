@@ -27,6 +27,8 @@ pub struct AccountRoot {
     pub account: String,
     #[serde(rename = "AccountTxnID")]
     pub account_txn_id: Option<String>,
+    #[serde(rename = "AMMID")]
+    pub amm_id: Option<String>,
     pub balance: Option<String>,
     #[serde(rename = "BurnedNFTokens")]
     pub burned_nf_tokens: Option<u32>,
