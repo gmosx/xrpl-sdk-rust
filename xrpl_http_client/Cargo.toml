@@ -17,9 +17,9 @@ reqwest = { version = "0.11.15", features = ["json"], default-features = false }
 sha2.workspace = true
 libsecp256k1.workspace = true
 tracing.workspace = true
-xrpl_types = { path = "../xrpl_types", version = "0.16.4" }
-xrpl_api = { path = "../xrpl_api", version = "0.16.4" }
-xrpl_binary_codec = { path = "../xrpl_binary_codec", version = "0.16.4" }
+xrpl_types = { path = "../xrpl_types", version = "0.16.5" }
+xrpl_api = { path = "../xrpl_api", version = "0.16.5" }
+xrpl_binary_codec = { path = "../xrpl_binary_codec", version = "0.16.5" }
 
 [features]
 default = ["std"]
