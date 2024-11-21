@@ -1,7 +1,7 @@
 use crate::{Meta, ReturnLedgerSpec, Transaction, TransactionResult};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct TransactionEvent {
     pub engine_result: TransactionResult,
     pub engine_result_code: i32,
