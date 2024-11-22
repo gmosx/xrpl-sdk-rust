@@ -44,7 +44,7 @@ pub struct RetrieveLedgerSpec {
 }
 
 /// Ledger specification in returned data
-#[derive(Default, Debug, Clone, Deserialize)]
+#[derive(Default, Debug, Clone, Serialize, Deserialize)]
 pub struct ReturnLedgerSpec {
     pub ledger_hash: Option<String>,
     pub ledger_index: Option<u32>,

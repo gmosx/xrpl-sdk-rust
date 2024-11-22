@@ -1,7 +1,7 @@
 mod common;
 mod variants;
 
-use serde::Deserialize;
+use serde::{Serialize, Deserialize};
 
 pub use common::*;
 
@@ -13,7 +13,7 @@ pub use variants::payment::*;
 pub use variants::trust_set::*;
 
 /// Ledger transaction. See <https://xrpl.org/transaction-formats.html>
-#[derive(Debug, Clone, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(tag = "TransactionType")]
 pub enum Transaction {
     AccountDelete(AccountDeleteTransaction),
