@@ -45,13 +45,9 @@ pub fn format_offer(offer: &AccountOffer) -> String {
 pub fn amount_from_str(s: impl AsRef<str>) -> Option<xrpl_types::Amount> {
     let mut parts = s.as_ref().split_whitespace();
 
-    let Some(value) = parts.next() else {
-            return None;
-        };
+    let value = parts.next()?;
 
-    let Some(currency) = parts.next() else {
-            return None;
-        };
+    let currency = parts.next()?;
 
     if currency.to_uppercase() == "XRP" {
         return xrpl_types::Amount::drops((f64::from_str(value).ok()? * 1_000_000.0) as u64).ok();
@@ -59,13 +55,9 @@ pub fn amount_from_str(s: impl AsRef<str>) -> Option<xrpl_types::Amount> {
 
     let mut currency_parts = currency.split('.');
 
-    let Some(currency) = currency_parts.next() else {
-            return None;
-        };
+    let currency = currency_parts.next()?;
 
-    let Some(issuer) = currency_parts.next() else {
-            return None;
-        };
+    let issuer = currency_parts.next()?;
 
     let value = Decimal::from_str(value).ok()?;
     let issued_value = IssuedValue::from_mantissa_exponent(
