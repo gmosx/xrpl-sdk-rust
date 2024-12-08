@@ -9,18 +9,15 @@ repository = "https://github.com/gmosx/xrpl-sdk-rust/tree/main/xrpl_types"
 keywords = ["xrpl", "ledger", "api"]
 
 [dependencies]
-serde = { workspace = true, default-features = false, features = [
-    "derive",
-    "alloc",
-] }
-serde_json = { workspace = true, default-features = false, features = ["alloc"] }
+serde = { workspace = true }
+serde_json = { workspace = true }
 bs58 = { version = "0.5.0", default-features = false, features = [
     "alloc",
     "check",
 ] }
-ascii = { workspace = true, default-features = false, features = ["alloc"] }
-hex = { workspace = true, default-features = false, features = ["alloc"] }
-enumflags2 = { workspace = true, default-features = false }
+ascii = { workspace = true }
+hex = { workspace = true }
+enumflags2 = { workspace = true }
 
 [features]
 default = ["std"]

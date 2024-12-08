@@ -142,7 +142,7 @@ pub struct ArraySerializer<'a> {
     start_index: SerializeFieldStartIndex,
 }
 
-impl<'a> SerializeArray for ArraySerializer<'a> {
+impl SerializeArray for ArraySerializer<'_> {
     type Error = BinaryCodecError;
 
     fn serialize_object<T: Serialize>(
