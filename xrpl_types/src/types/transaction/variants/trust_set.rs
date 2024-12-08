@@ -2,7 +2,7 @@ use crate::serialize::{Serialize, Serializer};
 use crate::{
     AccountId, Amount, IssuedAmount, Transaction, TransactionCommon, TransactionType, UInt32,
 };
-use enumflags2::{bitflags, BitFlags};
+use enumflags2::{bitflags, make_bitflags, BitFlags};
 
 /// A `TrustSet` transaction <https://xrpl.org/trustset.html>
 #[derive(Debug, Clone)]
@@ -15,10 +15,22 @@ pub struct TrustSetTransaction {
 }
 
 impl TrustSetTransaction {
+    // #insight You really need to set the NoRipple flag!
     pub fn new(account_id: AccountId, limit_amount: IssuedAmount) -> Self {
         Self {
             common: TransactionCommon::new(account_id),
             flags: Default::default(),
+            limit_amount,
+            quality_in: None,
+            quality_out: None,
+        }
+    }
+
+    // #hint Prefer this constructor over the `new` constructor.
+    pub fn new_no_ripple(account_id: AccountId, limit_amount: IssuedAmount) -> Self {
+        Self {
+            common: TransactionCommon::new(account_id),
+            flags: make_bitflags!(TrustSetFlags::{SetNoRipple}),
             limit_amount,
             quality_in: None,
             quality_out: None,
