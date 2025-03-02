@@ -3,6 +3,8 @@
 Core types and related functions for the XRP Ledger. Reused between Web and
 WebSocket clients and potentially for server-side code.
 
+The types in this crate are used when sending requests to the API.
+
 [![Crates.io](https://img.shields.io/crates/v/xrpl_types)](https://crates.io/crates/xrpl_types)
 [![Documentation](https://docs.rs/xrpl_types/badge.svg)](https://docs.rs/xrpl_types)
 
