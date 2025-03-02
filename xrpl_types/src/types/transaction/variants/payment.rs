@@ -28,6 +28,31 @@ impl PaymentTransaction {
             deliver_min: None,
         }
     }
+
+    pub fn new_with_destination_tag(
+        account_id: AccountId,
+        amount: Amount,
+        destination: AccountId,
+        destination_tag: UInt32,
+    ) -> Self {
+        Self {
+            common: TransactionCommon::new(account_id),
+            flags: Default::default(),
+            amount,
+            destination,
+            destination_tag: Some(destination_tag),
+            invoice_id: None,
+            send_max: None,
+            deliver_min: None,
+        }
+    }
+
+    pub fn destination_tag(self, tag: UInt32) -> Self {
+        Self {
+            destination_tag: Some(tag),
+            ..self
+        }
+    }
 }
 
 impl Transaction for PaymentTransaction {
