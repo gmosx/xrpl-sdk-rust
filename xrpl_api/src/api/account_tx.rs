@@ -78,3 +78,40 @@ impl WithResponsePagination for AccountTxResponse {
         &self.pagination
     }
 }
+
+// BASELINE: test that AccountTxResponse fails when any transaction has unknown type — see issue #41
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_account_tx_response_fails_on_unknown_transaction_type() {
+        // A response with one known and one unknown transaction type.
+        // Currently FAILS — the Vec<AccountTransaction> cannot deserialize
+        // when any element contains an unknown TransactionType.
+        let json = r#"{
+            "account": "rf1BiGeXwwQoi8Z2ueFYTEXSwuJYfV2Jpn",
+            "ledger_index_min": 1,
+            "ledger_index_max": 100,
+            "validated": true,
+            "transactions": [
+                {
+                    "meta": {
+                        "AffectedNodes": [],
+                        "TransactionIndex": 0,
+                        "TransactionResult": "tesSUCCESS"
+                    },
+                    "validated": true,
+                    "tx": {
+                        "TransactionType": "OracleSet",
+                        "Account": "rf1BiGeXwwQoi8Z2ueFYTEXSwuJYfV2Jpn",
+                        "Fee": "12",
+                        "Sequence": 1
+                    }
+                }
+            ]
+        }"#;
+        // After fix: this should succeed — OracleSet deserializes as Transaction::OracleSet(...)
+        let _: AccountTxResponse = serde_json::from_str(json).unwrap();
+    }
+}

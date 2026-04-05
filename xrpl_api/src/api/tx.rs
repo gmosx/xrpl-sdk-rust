@@ -173,4 +173,19 @@ mod test {
 
         let _tx_response: TxResponse = serde_json::from_str(json).unwrap();
     }
+
+    // BASELINE: test that TxResponse fails when transaction has unknown type — see issue #41
+    #[test]
+    fn test_tx_response_fails_on_unknown_transaction_type() {
+        // Currently FAILS — TxResponse cannot deserialize unknown TransactionType
+        let json = r#"{
+            "validated": true,
+            "TransactionType": "AMMCreate",
+            "Account": "rf1BiGeXwwQoi8Z2ueFYTEXSwuJYfV2Jpn",
+            "Fee": "12",
+            "Sequence": 1
+        }"#;
+        // After fix: should deserialize as Transaction::AMMCreate(...)
+        let _: TxResponse = serde_json::from_str(json).unwrap();
+    }
 }
