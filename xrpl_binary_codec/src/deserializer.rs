@@ -217,7 +217,15 @@ impl Deserializer {
         unimplemented!()
     }
 
-    fn deserialize_blob(&mut self, len: usize) -> Result<Blob, BinaryCodecError> {
+    /// Reads the next `len` bytes of the input and returns them as a [`Blob`].
+    ///
+    /// No field header or length prefix is read: `len` is the number of bytes to take,
+    /// for example a length the caller has already decoded.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`BinaryCodecError::InsufficientBytes`] if fewer than `len` bytes remain.
+    pub fn deserialize_blob(&mut self, len: usize) -> Result<Blob, BinaryCodecError> {
         let mut bytes = vec![0u8; len];
         self.read_exact(&mut bytes)?;
         Ok(Blob(bytes))
@@ -282,7 +290,26 @@ impl Deserializer {
         Ok(bytes)
     }
 
-    fn deserialize_object(&mut self) -> Result<Vec<u8>, BinaryCodecError> {
+    /// Reads serialized fields until the input ends or an `ObjectEndMarker` (`0xE1`)
+    /// is reached, and returns the bytes of the fields read.
+    ///
+    /// Fields are looked up in the field map given to [`Deserializer::new`]. For each
+    /// field, the returned bytes contain its field ID, its length prefix (for
+    /// length-prefixed fields) and its value. The end marker is consumed but not
+    /// returned. With the `json` feature enabled, the result can be passed to
+    /// `to_json` with [`TypeCode::Object`].
+    ///
+    /// Only fields of type [`TypeCode::Hash256`], [`TypeCode::AccountId`],
+    /// [`TypeCode::Blob`], [`TypeCode::Object`] and [`TypeCode::Array`] are decoded
+    /// so far. The value bytes of other field types are not read, so input that
+    /// contains such fields gives an error or wrong output.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`BinaryCodecError::FieldNotFound`] if a field is not in the field map,
+    /// [`BinaryCodecError::InsufficientBytes`] if the input ends inside a field, or
+    /// another [`BinaryCodecError`] if the input is malformed.
+    pub fn deserialize_object(&mut self) -> Result<Vec<u8>, BinaryCodecError> {
         let mut sink: Vec<Vec<u8>> = Vec::new();
         while !self.end() {
             let field = self.read_field()?;
